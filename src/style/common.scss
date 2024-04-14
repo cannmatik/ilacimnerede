@@ -1,0 +1,34 @@
+@import './colors.scss';
+
+@for $i from 10 through 30 {
+  .f-#{$i} {
+    font-size: 1px * $i;
+  }
+}
+$colors: (
+  'white': $white,
+  'dark': $dark,
+  'blue': $blue,
+  'green': $green,
+  'orange': $orange,
+  'pink': $pink,
+  'yellow': $yellow,
+  'purple': $purple,
+  'gray': $gray,
+  'brown': $brown,
+  'red': $red,
+);
+@each $name, $color in $colors {
+  .f-#{$name} {
+    color: $color;
+    &:before {
+      color: $color !important;
+    }
+  }
+  .bg-#{$name} {
+    background-color: $color;
+    &:before {
+      color: $color !important;
+    }
+  }
+}

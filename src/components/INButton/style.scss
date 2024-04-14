@@ -1,0 +1,11 @@
+.heartBeatAnim {
+  animation: beat 0.5s infinite alternate;
+}
+
+/* Heart beat animation */
+@keyframes beat {
+  to {
+    transform: scale(1.25);
+    background-color: var(--primary-green);
+  }
+}

@@ -1,0 +1,36 @@
+.ant-modal-confirm-body-wrapper {
+  // padding: 15px 0px;
+  padding: 0px;
+  .ant-modal-confirm-btns {
+    padding: 16px;
+    .ant-btn-default {
+      &:hover {
+        color: var(--secondary-green);
+        border: 1.5px solid var(--secondary-green);
+      }
+    }
+    .ant-btn-primary {
+      &:hover {
+        background-color: var(--secondary-green);
+      }
+    }
+  }
+}
+
+.ant-modal-confirm-body {
+  .anticon-exclamation-circle {
+    display: none;
+  }
+}
+
+.ant-modal-confirm {
+  width: 315px !important;
+  .ant-modal-body {
+    border: none;
+    padding: 0px !important;
+  }
+}
+.ant-modal-confirm-content {
+  color: var(--primary-text-color) !important;
+  width: 315px;
+}

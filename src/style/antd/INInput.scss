@@ -1,0 +1,45 @@
+.ant-input {
+  border-radius: 8px;
+  background-color: var(--primary-filled-color);
+  color: var(--primary-text-color);
+
+  // border: none;
+  // border: 1px solid red;
+  font-size: 13px;
+  height: 35px;
+
+  border: none;
+  box-shadow: none;
+
+  &::placeholder {
+    color: var(--custom-form-color);
+    font-size: 13px;
+  }
+
+  &:hover {
+    border: none;
+    box-shadow: none;
+  }
+
+  &:focus {
+    border: none;
+    box-shadow: none;
+  }
+
+  &:is(.ant-input-disabled) {
+    background-color: var(--primary-filled-color);
+    &::placeholder {
+      color: var(--primary-disabled-color);
+      font-size: 13px;
+    }
+  }
+}
+
+.ant-input-affix-wrapper:not(.ant-input-password) {
+  padding-top: 0px;
+  padding-bottom: 0px;
+  border-radius: 8px;
+  min-height: 35px;
+  border: none;
+  box-shadow: none;
+}

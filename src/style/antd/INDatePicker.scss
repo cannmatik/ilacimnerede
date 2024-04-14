@@ -1,0 +1,104 @@
+.ant-picker {
+  background-color: var(--primary-filled-color);
+  border: none;
+  height: 35px;
+  width: 100%;
+
+  &:hover {
+    border: none;
+  }
+  .ant-picker-input {
+    input {
+      color: var(--primary-text-color);
+      &::placeholder {
+        font-size: 12px;
+        color: var(--custom-form-color);
+      }
+    }
+    .ant-picker-suffix {
+      color: var(--custom-form-color);
+    }
+  }
+
+  &:is(.ant-picker-disabled) {
+    background-color: var(--primary-filled-color);
+    .ant-picker-input {
+      input {
+        &::placeholder {
+          color: var(--primary-disabled-color);
+        }
+      }
+      .ant-picker-suffix {
+        color: var(--primary-disabled-color);
+      }
+    }
+  }
+}
+
+.ant-picker-now-btn {
+  color: var(--secondary-green);
+  &:hover {
+    color: var(--secondary-green);
+  }
+}
+
+.ant-picker-clear {
+  background-color: var(--primary-filled-color) !important;
+  color: var(--primary-text-color) !important;
+}
+
+.ant-picker-focused {
+  box-shadow: none !important;
+}
+
+.ant-picker-panel-container {
+  background-color: var(--primary-background) !important;
+  color: white !important;
+}
+
+.ant-picker-panel-container .ant-picker-content thead tr th {
+  color: var(--primary-text-color);
+}
+
+.ant-picker-panel-container .ant-picker-content tbody tr td {
+  color: var(--custom-form-color);
+}
+
+.ant-picker-header {
+  color: var(--primary-text-color) !important;
+}
+
+.ant-picker-super-prev-icon {
+  color: var(--primary-text-color);
+}
+.ant-picker-prev-icon {
+  color: var(--primary-text-color);
+}
+.ant-picker-super-next-icon {
+  color: var(--primary-text-color);
+}
+.ant-picker-next-icon {
+  color: var(--primary-text-color);
+}
+
+.ant-picker-panel-container
+  .ant-picker-content
+  tbody
+  tr
+  td:is(.ant-picker-cell-in-view) {
+  color: var(--primary-text-color);
+}
+
+.ant-picker-time-panel-cell-inner {
+  color: var(--primary-text-color) !important;
+}
+
+.ant-picker-time-panel-cell-selected .ant-picker-time-panel-cell-inner {
+  background-color: var(--primary-green) !important;
+}
+
+.ant-picker-ok button:disabled {
+  background-color: transparent !important;
+  border: 1.5px solid var(--primary-disabled-color);
+  color: var(--primary-disabled-color);
+}

@@ -1,0 +1,38 @@
+// .ant-switch-checked {
+//   // background-color: var(--primary-background) !important;
+//   background-color: transparent !important;
+// }
+
+.ant-switch {
+  background-color: transparent !important;
+  outline: var(--primary-light-red) solid 1px;
+
+  min-width: 39px;
+  height: 20px;
+}
+
+.ant-switch:is(.ant-switch-checked) {
+  outline: var(--primary-green) solid 1px;
+}
+
+.ant-switch-handle {
+  top: 3px !important;
+  width: 14px !important;
+  height: 14px !important;
+
+  &:before {
+    background-color: var(--primary-light-red) !important;
+  }
+}
+
+.ant-switch-checked {
+  .ant-switch-handle {
+    inset-inline-start: calc(100% - 16px) !important;
+  }
+
+  .ant-switch-handle {
+    &:before {
+      background-color: var(--primary-green) !important;
+    }
+  }
+}

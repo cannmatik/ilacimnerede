@@ -1,0 +1,49 @@
+.ant-input-number {
+  border-radius: 8px;
+  background-color: var(--primary-filled-color);
+  color: var(--primary-text-color);
+
+  // border: none;
+  // border: 1px solid red;
+  font-size: 13px;
+  height: 35px;
+
+  border: none;
+  box-shadow: none;
+  width: 100%;
+  padding: 3.5px 0px;
+
+  .ant-input-number-input {
+    &::placeholder {
+      color: var(--custom-form-color);
+      font-size: 13px;
+    }
+  }
+
+  &:hover {
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  &:focus {
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  &:is(.ant-input-number-disabled) {
+    background-color: var(--primary-filled-color);
+    &::placeholder {
+      color: var(--primary-disabled-color);
+      font-size: 13px;
+    }
+  }
+}
+
+.ant-input-affix-wrapper:not(.ant-input-password) {
+  padding-top: 0px;
+  padding-bottom: 0px;
+  border-radius: 8px;
+  min-height: 35px;
+  border: none;
+  box-shadow: none;
+}

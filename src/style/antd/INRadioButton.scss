@@ -1,0 +1,18 @@
+.ant-radio-inner {
+  border-color: var(--primary-border-color);
+  &::after {
+    background-color: var(--primary-green);
+  }
+}
+
+.ant-radio-wrapper {
+  color: var(--primary-text-color);
+  span {
+    font-size: 12px;
+  }
+  .ant-radio-disabled {
+    .ant-radio-inner {
+      background-color: var(--primary-gray);
+    }
+  }
+}

@@ -1,0 +1,24 @@
+.confirm-custom {
+  display: flex;
+  flex-direction: column;
+  .header {
+    font-weight: 500;
+    font-size: 14px;
+    padding: 10px 16px;
+    border-bottom: 1px solid #dfdfe2;
+    display: flex;
+    justify-content: space-between;
+    button {
+      background-color: transparent;
+      border: none;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--primary-text-color);
+    }
+  }
+  .actual-content {
+    padding: 16px !important;
+    font-size: 13px;
+  }
+}

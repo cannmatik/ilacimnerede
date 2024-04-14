@@ -1,0 +1,20 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box !important;
+  font-family: "Poppins", cursive !important;
+  margin: 0;
+  padding: 0;
+}
+
+::selection {
+  background-color: var(--secondary-green);
+}
+
+@import "./style/style.scss";
+body {
+  // all: unset;
+  // font-family: 'Poppins', cursive;
+  background-color: #f3f3f3;
+  color: var(--primary-text-color);
+}

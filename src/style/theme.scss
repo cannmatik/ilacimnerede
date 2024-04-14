@@ -1,0 +1,60 @@
+//Theme Constants
+:root {
+  --primary-green: #03ea76;
+
+  --secondary-green: #0bcc6b;
+
+  --third-green: #3fbd61;
+
+  --primary-orange: #ee9500;
+
+  --primary-light-red: #ec4d2c;
+
+  --primary-purple: #7e56d1;
+
+  --primary-gray: #999999;
+
+  --error-color: #e56449;
+
+  --custom-form-color: #7d7f8c;
+  --fourth-green: #eaf7ee;
+
+  --secondary-orange: #fef7ea;
+
+  --secondary-light-red: #fdf1f0;
+
+  --secondary-purple: #f2eefa;
+
+  --secondary-gray: #efefef;
+  // ********************
+
+  --main-background: #e1e1e1;
+
+  --primary-text-color: #27293f;
+
+  --primary-background: #ffffff;
+
+  --primary-background-navbar: #25b597;
+
+  --border-color: #27293f;
+
+  --primary-filled-color: #f9f9f9;
+
+  --primary-disabled-color: #e5e5e5;
+
+  // #27293f color for icons
+  --icon-color: brightness(0) saturate(100%) invert(13%) sepia(8%)
+    saturate(2951%) hue-rotate(197deg) brightness(100%) contrast(91%);
+
+  /* #0BCC6B */
+  --icon-hover: brightness(0) saturate(100%) invert(66%) sepia(38%)
+    saturate(6642%) hue-rotate(112deg) brightness(104%) contrast(91%);
+
+  // #e5e5e5
+  --icon-disabled: brightness(0) saturate(100%) invert(99%) sepia(17%)
+    saturate(177%) hue-rotate(86deg) brightness(112%) contrast(80%);
+}
+
+html[data-theme="light"] {
+  //  ****************
+}

@@ -1,0 +1,14 @@
+.ant-tooltip-inner {
+  box-shadow: 0px 4px 10px rgba(39, 41, 63, 0.15);
+  border-radius: 15px !important;
+  padding: 10px 10px !important;
+  background-color: var(--primary-background) !important;
+  color: var(--primary-text-color) !important;
+  font-size: 13px;
+}
+
+.ant-tooltip-arrow {
+  &::before {
+    background-color: var(--primary-background) !important;
+  }
+}

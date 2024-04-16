@@ -4,8 +4,10 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { INButton } from "@components";
+import { Row } from "react-grid-system";
+import "./style.scss";
 
-const Success = () => {
+const Home = () => {
   const [user, setUser] = useState({});
   const [countries, setCountries] = useState([]);
   const navigate = useNavigate();
@@ -40,23 +42,43 @@ const Success = () => {
     debugger;
   }
   return (
-    <div className="App">
-      <header></header>
-      <h1>Successz</h1>
-      <ul>
+    <>
+      <h1>Home Page</h1>
+      <div className="home-container">
+        {/* <ul>
         {countries.map((country) => (
           <li key={country.name}>{country.name}</li>
         ))}
-      </ul>
-      <INButton
-        type="lined-button"
-        text="save"
-        onClick={() => navigate("/")}
-      ></INButton>
-      {/* {SupabaseAuthClient.auth?.signOut()} */}
-      {/* <button onClick={signOutUser}>Sign out</button> */}
-    </div>
+      </ul> */}
+        <Row style={{ justifyContent: "center" }}>
+          <INButton
+            type="lined-button"
+            text="Açık Talepler"
+            flex={true}
+            onClick={() => navigate("/")}
+          ></INButton>
+        </Row>
+        <Row style={{ justifyContent: "center", padding: "20px" }}>
+          <INButton
+            type="lined-button"
+            text="Cevaplanan Talepler"
+            flex={true}
+            onClick={() => navigate("/")}
+          ></INButton>
+        </Row>
+        <Row style={{ justifyContent: "center", padding: "0px 40px " }}>
+          <INButton
+            type="lined-button"
+            text="Kapanan Talepler"
+            flex={true}
+            onClick={() => navigate("/")}
+          ></INButton>
+        </Row>
+        {/* {SupabaseAuthClient.auth?.signOut()} */}
+        {/* <button onClick={signOutUser}>Sign out</button> */}
+      </div>
+    </>
   );
 };
 
-export default Success;
+export default Home;

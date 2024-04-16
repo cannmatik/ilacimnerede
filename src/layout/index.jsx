@@ -4,7 +4,6 @@ import React from "react";
 import { useSelector } from "react-redux";
 
 import "./style.scss";
-import Success from "../Pages/Success";
 import Main from "./Main";
 import { useLocation } from "react-router-dom";
 import Header from "./Header";

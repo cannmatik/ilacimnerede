@@ -33,7 +33,7 @@ function Login() {
       dispatch(setSession(session));
       dispatch(setUser(session.user));
       // TODO: daha iyi yöntem
-      location.replace("/success");
+      location.replace("/home");
     } else {
       // dispatch(setUser(null));
       localStorage.clear();

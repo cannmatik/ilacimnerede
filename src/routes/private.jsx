@@ -2,16 +2,15 @@ import React, { Suspense, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 
-// const Success = React.lazy(() => import("./Pages"));
 const Request = React.lazy(() => import("./Request"));
-const Success = React.lazy(() => import("../Pages"));
+const Home = React.lazy(() => import("./HomePage"));
 
 const privateRoutes = [
   {
-    path: "/success",
-    element: Success,
-    title: "Success",
-    pageName: "Success",
+    path: "/home",
+    element: Home,
+    title: "Home Page",
+    pageName: "Home",
     checkRole: true,
   },
   {
@@ -52,7 +51,7 @@ function RenderRoutes() {
   )?.path;
 
   const navigateToDefault = () => {
-    navigate("/success", {
+    navigate("/home", {
       state: {
         navigated: true,
       },

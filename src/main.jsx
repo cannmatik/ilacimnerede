@@ -1,7 +1,6 @@
 import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.scss";
-import Login from "./routes/Login/login.jsx";
 import {
   Routes,
   Route,
@@ -10,8 +9,6 @@ import {
   BrowserRouter as Router,
   BrowserRouter,
 } from "react-router-dom";
-import Success from "./Pages/Success.jsx";
-import Layout from "./layout";
 import { persistor, store } from "@store/index.js";
 import { PersistGate } from "redux-persist/integration/react";
 import { ConfigProvider } from "antd";

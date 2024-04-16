@@ -27,7 +27,7 @@ function Header() {
       <div
         className="header-logo-container"
         style={{ cursor: "pointer" }}
-        onClick={() => navigate("/success")}
+        onClick={() => navigate("/home")}
       >
         <img src={ilacimNeredeLogo} alt="logo" />
       </div>

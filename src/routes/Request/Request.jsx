@@ -5,14 +5,61 @@ import { supabase } from "@routes/Login/useCreateClient";
 import "./style.scss";
 import { before, next } from "@assets";
 import { useGetRequest, useGetRequestDetails } from "./queries";
+import { columns_requestDetail, columns } from "./constants/requestColumns";
 
 function Request() {
-  const [requestDetailData, setRequestDetailData] = useState([]);
+  const [isPrevDisabled, setIsPrevDisabled] = useState(true);
+  const [isNextDisabled, setIsNextDisabled] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState();
   const { data: requests } = useGetRequest();
   const { data: requestDetail } = useGetRequestDetails(selectedRequest?.id);
 
   console.log(requests, "requests;");
+
+  const openPrevRequest = () => {
+    console.log(requests.findIndex((item) => item.id === selectedRequest?.id));
+
+    if (requests?.findIndex((item) => item.id === selectedRequest?.id) > 0) {
+      setSelectedRequest(
+        requests[
+          requests?.findIndex((item) => item.id === selectedRequest?.id) - 1
+        ]
+      );
+    } else {
+      setIsPrevDisabled(true);
+    }
+  };
+
+  const openNextRequest = () => {
+    if (
+      requests?.findIndex((item) => item.id === selectedRequest?.id) <
+      requests?.length - 1
+    ) {
+      setSelectedRequest(
+        requests[
+          requests?.findIndex((item) => item.id === selectedRequest?.id) + 1
+        ]
+      );
+    } else {
+      setIsNextDisabled(true);
+    }
+  };
+
+  useEffect(() => {
+    if (requests?.findIndex((item) => item.id === selectedRequest?.id) > 0) {
+      setIsPrevDisabled(false);
+    } else {
+      setIsPrevDisabled(true);
+    }
+    if (
+      requests?.findIndex((item) => item.id === selectedRequest?.id) <
+      requests?.length - 1
+    ) {
+      setIsNextDisabled(false);
+    } else {
+      setIsNextDisabled(true);
+    }
+  }, [selectedRequest]);
 
   // async function getRequests() {
   //   const { data, error } = await supabase.from("user_request").select();
@@ -46,30 +93,7 @@ function Request() {
   //   });
   // }, []);
   console.log(selectedRequest, "requestData");
-  const columns = [
-    {
-      header: "Request Id",
-      accessor: "id",
-    },
-    {
-      header: "Create Date",
-      accessor: "create_date",
-    },
-  ];
-  const columns_requestDetail = [
-    {
-      header: "Medicine Id",
-      accessor: "medicine_id",
-    },
-    {
-      header: "Medicine Quantity",
-      accessor: "medicine_qty",
-    },
-    {
-      header: "Prescription Number",
-      accessor: "prescript_no",
-    },
-  ];
+
   return (
     <>
       <Row style={{ marginLeft: "25px" }}>Açık Talepler</Row>
@@ -97,16 +121,27 @@ function Request() {
             columns={columns_requestDetail || []}
             rowHoverStyle={{ border: true }}
             onRowClick={(row) => {}}
+            checkboxed={true}
           />
           <div className="request-accept-footer">
             <img
               src={before}
-              style={{ width: "30px", height: "30px", padding: "5px" }}
+              className={`prev-or-next ${
+                !isPrevDisabled ? "enabled" : "disabled"
+              }`}
+              onClick={() => {
+                openPrevRequest();
+              }}
             ></img>
             <INButton flex={true} onClick={{}} text="Onayla"></INButton>
             <img
               src={next}
-              style={{ width: "30px", height: "30px", padding: "5px" }}
+              className={`prev-or-next ${
+                !isNextDisabled ? "enabled" : "disabled"
+              }`}
+              onClick={() => {
+                openNextRequest();
+              }}
             ></img>
           </div>
         </Col>

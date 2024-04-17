@@ -7,8 +7,26 @@
   .request-accept-footer {
     display: flex;
     justify-content: center;
+
+    .prev-or-next {
+      &:is(.enabled) {
+        opacity: 1;
+        width: 30px;
+        height: 30px;
+        padding: 5px;
+        cursor: pointer;
+      }
+      &:is(.disabled) {
+        width: 30px;
+        height: 30px;
+        padding: 5px;
+        transition: opacity 0.3s ease;
+        opacity: 0.5;
+      }
+    }
   }
 }
+
 .request-info {
   display: flex;
   flex-direction: column;

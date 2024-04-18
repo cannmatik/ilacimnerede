@@ -21,7 +21,7 @@ async function getRequestDetails({ queryKey }) {
   const id = queryKey[2];
   const { data, error } = await supabase
     .from("request_item")
-    .select()
+    .select("medicine_id, medicine_qty, medicine (name)")
     .eq("request_id", id);
   if (error) {
     console.log("error");
@@ -31,6 +31,7 @@ async function getRequestDetails({ queryKey }) {
     return data;
   }
 }
+
 const useGetRequest = (onSuccess) => {
   return useQuery(REQUEST_KEYS.ALL, getRequest, {
     onSuccess,

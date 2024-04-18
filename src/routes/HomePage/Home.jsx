@@ -50,30 +50,7 @@ const Home = () => {
           <li key={country.name}>{country.name}</li>
         ))}
       </ul> */}
-        <Row style={{ justifyContent: "center" }}>
-          <INButton
-            type="lined-button"
-            text="Açık Talepler"
-            flex={true}
-            onClick={() => navigate("/")}
-          ></INButton>
-        </Row>
-        <Row style={{ justifyContent: "center", padding: "20px" }}>
-          <INButton
-            type="lined-button"
-            text="Cevaplanan Talepler"
-            flex={true}
-            onClick={() => navigate("/")}
-          ></INButton>
-        </Row>
-        <Row style={{ justifyContent: "center", padding: "0px 40px " }}>
-          <INButton
-            type="lined-button"
-            text="Kapanan Talepler"
-            flex={true}
-            onClick={() => navigate("/")}
-          ></INButton>
-        </Row>
+
         {/* {SupabaseAuthClient.auth?.signOut()} */}
         {/* <button onClick={signOutUser}>Sign out</button> */}
       </div>

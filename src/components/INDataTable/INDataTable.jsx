@@ -68,6 +68,7 @@ function INDataTable({
   const checkedRows = JSON.stringify(
     getSelectedRowModel().rows.map((item) => item.original)
   );
+  console.log(getHeaderGroups(), "getHeaderGroups");
 
   useEffect(() => {
     const $checkedRows = JSON.parse(checkedRows);
@@ -83,17 +84,8 @@ function INDataTable({
 
   return (
     <div className="ilacimNerede-data-table-container">
-      {isAnyRowSelected && (
-        <div className="ilacimNerede-table-action-bar">
-          <Checkbox
-            checked={table.getIsAllRowsSelected()}
-            onChange={table.getToggleAllRowsSelectedHandler()}
-          />
-          {checkedActionsBar}
-        </div>
-      )}
       <table>
-        {!isAnyRowSelected && (
+        {
           <thead>
             {getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
@@ -119,7 +111,7 @@ function INDataTable({
               </tr>
             ))}
           </thead>
-        )}
+        }
         <tbody>
           {getRowModel().rows.map((row) => (
             <tr

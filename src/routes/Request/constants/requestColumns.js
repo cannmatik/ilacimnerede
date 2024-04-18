@@ -18,8 +18,8 @@ const columns_requestDetail = [
     accessor: "medicine_qty",
   },
   {
-    header: "Prescription Number",
-    accessor: "prescript_no",
+    header: "Medicine Name",
+    accessor: "medicine.name",
   },
 ];
 

@@ -4,6 +4,7 @@ import { INButton, INDataTable } from "@components";
 import { supabase } from "@routes/Login/useCreateClient";
 import "./style.scss";
 import { before, next } from "@assets";
+import { Checkbox } from "antd";
 import { useGetRequest, useGetRequestDetails } from "./queries";
 import { columns_requestDetail, columns } from "./constants/requestColumns";
 
@@ -60,6 +61,20 @@ function Request() {
       setIsNextDisabled(true);
     }
   }, [selectedRequest]);
+
+  const checkboxObj = [
+    {
+      accessor: "checkbox",
+      header: "Var",
+      cell: ({ row }) => (
+        <Checkbox
+          onClick={(e) => e.stopPropagation()}
+          checked={row.getIsSelected()}
+          onChange={row.getToggleSelectedHandler()}
+        />
+      ),
+    },
+  ];
 
   // async function getRequests() {
   //   const { data, error } = await supabase.from("user_request").select();
@@ -118,10 +133,10 @@ function Request() {
           </div>
           <INDataTable
             data={requestDetail || []}
-            columns={columns_requestDetail || []}
+            columns={[...columns_requestDetail, ...checkboxObj] || []}
             rowHoverStyle={{ border: true }}
             onRowClick={(row) => {}}
-            checkboxed={true}
+            // checkboxed={true}
           />
           <div className="request-accept-footer">
             <img

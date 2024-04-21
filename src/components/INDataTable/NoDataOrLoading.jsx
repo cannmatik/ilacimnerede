@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 
-import { INDataTableNoData } from "@assets";
+import { ilacimNerede } from "@assets";
 import { Spin } from "antd";
 
 function NoDataOrLoading({ isLoading, data }) {
@@ -10,7 +10,7 @@ function NoDataOrLoading({ isLoading, data }) {
       {isLoading && <Spin />}
       {!isLoading && data.length === 0 && (
         <>
-          <img src={INDataTableNoData} alt="no data" height={350} width={400} />
+          <img src={ilacimNerede} alt="no data" height={350} width={400} />
           <h4>No Data To Display</h4>
         </>
       )}

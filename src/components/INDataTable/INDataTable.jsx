@@ -20,12 +20,8 @@ const columnHelper = createColumnHelper();
 const checkboxObj = [
   {
     accessor: "checkbox",
-    header: ({ table }) => (
-      <Checkbox
-        checked={table.getIsAllRowsSelected()}
-        onChange={table.getToggleAllRowsSelectedHandler()}
-      />
-    ),
+    header: "Var",
+
     cell: ({ row }) => (
       <Checkbox
         onClick={(e) => e.stopPropagation()}
@@ -43,12 +39,14 @@ function INDataTable({
   setSelectedRows,
   unSelectAllOnClick,
   unSelectAllOnTabChange,
-  checkedActionsBar,
+  selectedRequest,
   onRowClick,
   rowHoverStyle,
   isLoading,
 }) {
-  const $columns = checkboxed ? [...checkboxObj, ...columns] : columns;
+  const $columns = checkboxed ? [...columns, ...checkboxObj] : columns;
+
+  console.log($columns);
 
   const table = useReactTable({
     data,
@@ -65,20 +63,23 @@ function INDataTable({
     toggleAllPageRowsSelected,
   } = table;
 
+  // console.log(getSelectedRowModel().rows, "getSelectedRowModel");
+
   const checkedRows = JSON.stringify(
     getSelectedRowModel().rows.map((item) => item.original)
   );
-  console.log(getHeaderGroups(), "getHeaderGroups");
+  // console.log(getHeaderGroups(), "getHeaderGroups");
 
   useEffect(() => {
     const $checkedRows = JSON.parse(checkedRows);
+    console.log($checkedRows, "checkedRows");
     setSelectedRows($checkedRows);
   }, [checkedRows]);
 
   // Setting all checkboxes to unchecked state
   useEffect(() => {
     toggleAllPageRowsSelected(false);
-  }, [unSelectAllOnClick, unSelectAllOnTabChange]);
+  }, [unSelectAllOnTabChange]);
 
   const isAnyRowSelected = getSelectedRowModel().rows.length > 0;
 

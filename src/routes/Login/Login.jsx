@@ -16,14 +16,7 @@ function Login() {
 
   // const { handleSubmit } = useForm({});
 
-  // const onSuccess = ({ user }) => {
-  //   debugger;
-  //   dispatch(setUser(user));
-  // };
-  // const { mutate } = useLogin(onSuccess);
-  // const onSubmit = (form) => {
-  //   mutate(form);
-  // };
+  // todo: get pharmacy id
 
   const {
     data: { subscription },

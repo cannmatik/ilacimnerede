@@ -16,16 +16,23 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { useSelector } from "react-redux";
+import { selectUserPharmacyId } from "@store/selectors";
 
 function Request() {
   const [isPrevDisabled, setIsPrevDisabled] = useState(true);
   const [isNextDisabled, setIsNextDisabled] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState();
   const [selectedRows, setSelectedRows] = useState([]);
+  const pharmacyId = useSelector(selectUserPharmacyId);
 
   const { data: requests, isLoading } = useGetRequest();
+  // console.log(selectedRequest, "selectedRequest");
   const { data: requestDetail } = useGetRequestDetails(selectedRequest?.id);
-  // Inside your component or function where you want to use responseRequest
+
+  // console.log(requests, "requests");
+  // console.log(requestDetail, "requestDetail");
+
   const { mutate: responseRequestMutation } = useResponseRequest();
 
   // console.log(getCoreRowModel, "getCoreRowModel;");
@@ -35,7 +42,7 @@ function Request() {
   // );
 
   const openPrevRequest = () => {
-    console.log(requests.findIndex((item) => item.id === selectedRequest?.id));
+    // console.log(requests.findIndex((item) => item.id === selectedRequest?.id));
 
     if (requests?.findIndex((item) => item.id === selectedRequest?.id) > 0) {
       setSelectedRequest(
@@ -79,98 +86,34 @@ function Request() {
     }
   }, [selectedRequest]);
 
-  const confirmRequest = async () => {
-    if (!selectedRequest || !selectedRows || !requestDetail) {
-      console.log("One of the required parameters is missing.");
-      return;
-    }
+  const handleConfirmRequest = async () => {
+    debugger;
+    const selectedRowsIds = selectedRows.map(({ id }) => id);
+    const checkedRequestDetails = selectedRows.map(({ id }) => ({
+      request_item_id: id,
+      status: true,
+    }));
 
-    const checkedRequestDetails = selectedRows.map((item) => {
-      return {
-        id: item.request_id,
-        position_no: item.position_no,
-        medicine_id: item.medicine_id,
-        medicine_qty: item.medicine_qty,
-        status: true,
-      };
-    });
+    const uncheckedRequestDetails = requestDetail
+      .filter(({ id }) => !selectedRowsIds.includes(id))
+      .map(({ id }) => ({
+        request_item_id: id,
+        status: false,
+      }));
 
-    const unCheckedRequestDetails = requestDetail
-      .filter((item) => {
-        return !selectedRows.some(
-          (selectedRow) =>
-            selectedRow.request_id === item.request_id &&
-            selectedRow.position_no === item.position_no &&
-            selectedRow.medicine_id === item.medicine_id
-        );
-      })
-      .map((item) => {
-        return {
-          id: item.request_id,
-          position_no: item.position_no,
-          medicine_id: item.medicine_id,
-          medicine_qty: item.medicine_qty,
-          status: false,
-        };
-      });
-    const finalData = [...checkedRequestDetails, ...unCheckedRequestDetails];
-    const finalData2 = finalData.map((item) => {
-      return {
-        response_id: item.id,
-        position_no: item.position_no,
-        pharmacy_id: "34000418",
-        status: item.status,
-      };
-    });
-    console.log(finalData2, "finalData");
-    console.log(checkedRequestDetails, "checkedRequestDetails");
-    console.log(unCheckedRequestDetails, "unCheckedRequestDetails");
-    responseRequestMutation(finalData2);
+    const response = {
+      request_id: selectedRequest?.id,
+      pharmacy_id: pharmacyId,
+      create_date: Date.now,
+    };
+    const finalData = [...checkedRequestDetails, ...uncheckedRequestDetails];
 
-    // const { error } = await supabase
-    //   .from("user_request")
-    //   .update({ is_confirmed: true })
-    //   .eq("id", selectedRequest.id);
-    // if (error) {
-    //   console.log("error");
-    // }
+    responseRequestMutation({ finalData, response });
   };
 
-  // async function getRequests() {
-  //   const { data, error } = await supabase.from("user_request").select();
-  //   if (error) {
-  //     console.log("error");
-  //   }
-  //   if (data) {
-  //     setRequestData(data);
-  //   }
-  //   debugger;
-  // }
-  // async function getRequestDetails(rowData) {
-  //   setSelectedRequest(rowData);
-  //   console.log(selectedRequest, "selectedRequest");
-  //   const { data, error } = await supabase
-  //     .from("request_item")
-  //     .select()
-  //     .eq("request_id", rowData?.id);
-  //   if (error) {
-  //     console.log("error");
-  //   }
-  //   if (data) {
-  //     setRequestDetailData(data);
-  //   }
-  //   debugger;
-  // }
-  // useEffect(() => {
-  //   getRequests();
-  //   requestData?.map((item) => {
-  //     console.log(item, "item");
-  //   });
-  // }, []);
+  // console.log(selectedRequest, "selectedRequest;");
 
-  console.log(selectedRequest, "selectedRequest;");
-
-  console.log(selectedRows, "selectedRows;");
+  // console.log(selectedRows, "selectedRows;");
 
   return (
     <>
@@ -217,7 +160,7 @@ function Request() {
             ></img>
             <INButton
               flex={true}
-              onClick={confirmRequest}
+              onClick={handleConfirmRequest}
               text="Onayla"
             ></INButton>
             <img

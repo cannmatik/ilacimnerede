@@ -18,13 +18,36 @@ function Login() {
 
   // todo: get pharmacy id
 
+  const getPharmacyId = async (id) => {
+    debugger;
+    const { data, error } = await supabase
+      .from("pharmacy_user")
+      .select("uuid,id, pharmacy (name,city_id,district_id,neighbourhood_id)")
+      .eq("uuid", id);
+    if (error) {
+      // console.log("error");
+    }
+    if (data) {
+      return data;
+    }
+  };
+
   const {
     data: { subscription },
   } = supabase?.auth.onAuthStateChange(async (event, session) => {
     if (event === "SIGNED_IN") {
-      console.log("/success in login");
+      // console.log("/success in login");
       dispatch(setSession(session));
-      dispatch(setUser(session.user));
+      const pharmacyInfo = await getPharmacyId(session.user.id);
+      const $session_pharmacy_user = {
+        ...session.user,
+        pharmacyId: pharmacyInfo[0].id,
+        pharmacyCityId: pharmacyInfo[0].pharmacy.city_id,
+        pharmacyDistrictId: pharmacyInfo[0].pharmacy.district_id,
+        pharmacyNeighbourhoodId: pharmacyInfo[0].pharmacy.neighbourhood_id,
+      };
+      debugger;
+      dispatch(setUser($session_pharmacy_user));
       // TODO: daha iyi yöntem
       location.replace("/home");
     } else {
@@ -33,7 +56,6 @@ function Login() {
       setTimeout(() => {
         dispatch({ type: "CLEAR_STORE" });
       }, 2);
-      console.log("/");
     }
   });
 

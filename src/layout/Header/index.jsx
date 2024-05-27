@@ -18,7 +18,7 @@ function Header() {
     }, 1);
     debugger;
     if (error) {
-      console.log(error);
+      // console.log(error);
     }
     navigate("/login");
   }
@@ -36,10 +36,10 @@ function Header() {
         <NavLink to="/request" style={{ fontWeight: 500 }}>
           Açık Talepler
         </NavLink>
-        <NavLink to="#" style={{ fontWeight: 500 }}>
+        <NavLink to="/answered-request" style={{ fontWeight: 500 }}>
           Cevaplanan Talepler
         </NavLink>
-        <NavLink to="#" style={{ fontWeight: 500 }}>
+        <NavLink to="/finished-request" style={{ fontWeight: 500 }}>
           Kapanan Talepler
         </NavLink>
       </nav>

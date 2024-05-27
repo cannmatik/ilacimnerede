@@ -1,29 +1,29 @@
 // 3rd Party
 import { createClient } from "@supabase/supabase-js";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { supabase } from "./useCreateClient";
 import { useDispatch } from "react-redux";
 
-// const dispatch = useDispatch();
+const LOGIN_INFO = {
+  PHARMACY_ID: (id) => ["Request", "requests", id],
+};
 
-// const login = () =>
-//   supabase?.auth.onAuthStateChange(async (event, session) => {
-//     if (event === "SIGNED_IN") {
-//       console.log("/success in queries");
-//       dispatch(setUser(session.user));
-//     } else {
-//       // dispatch(setUser(null));
-//       localStorage.clear();
-//       setTimeout(() => {
-//         dispatch({ type: "CLEAR_STORE" });
-//       }, 2);
-//       console.log("/");
-//     }
-//   });
+const login = async ({ queryKey }) => {
+  const userId = queryKey[2];
+  const { data, error } = await supabase
+    .from("pharmacy_user")
+    .select("uuid,id, pharmacy (name,city_id,district_id,neighbourhood_id)")
+    .eq("id", id);
+  if (error) {
+    // console.log("error");
+  }
+  if (data) {
+    return data;
+  }
+};
 
-const useLogin = (onSuccess) =>
-  useMutation(login, {
-    onSuccess,
-  });
+const useLogin = (id) => {
+  return useQuery(LOGIN_INFO.PHARMACY_ID(id), login);
+};
 
 export default useLogin;

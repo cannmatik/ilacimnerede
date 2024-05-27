@@ -3,6 +3,8 @@ import { useSelector } from "react-redux";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 
 const Request = React.lazy(() => import("./Request"));
+const AnsweredResponse = React.lazy(() => import("./AnsweredResponse"));
+const FinishedResponse = React.lazy(() => import("./FinishedResponse"));
 const Home = React.lazy(() => import("./HomePage"));
 
 const privateRoutes = [
@@ -18,6 +20,20 @@ const privateRoutes = [
     element: Request,
     title: "Request",
     pageName: "Request",
+    checkRole: true,
+  },
+  {
+    path: "/answered-request",
+    element: AnsweredResponse,
+    title: "Cevaplanan Talepler",
+    pageName: "AnsweredResponse",
+    checkRole: true,
+  },
+  {
+    path: "/finished-request",
+    element: FinishedResponse,
+    title: "Tamamlanan Talepler",
+    pageName: "AnsweredResponse",
     checkRole: true,
   },
 ];
@@ -44,7 +60,6 @@ function RenderRoutes() {
   const navigate = useNavigate();
 
   const navigated = location?.state?.navigated;
-  console.log(location);
 
   const redirectPath = privateRoutes.find(
     (item) => item.path === localStorage.getItem("redirectPath")
@@ -59,9 +74,9 @@ function RenderRoutes() {
   };
 
   useEffect(() => {
-    console.log(location);
+    // console.log(location);
     if (isAllowed) {
-      console.log("bu yüzden", isAllowed);
+      // console.log("yönlendir", isAllowed);
       navigate(isAllowed.path);
     }
     if (!isAllowed) {

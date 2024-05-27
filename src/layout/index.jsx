@@ -12,10 +12,9 @@ const Public = React.lazy(() => import("../routes/public.jsx"));
 
 function Layout() {
   const userLoggedIn = useSelector((state) => {
-    console.log(state);
+    // console.log(state);
     return state.user.isLoggedIn;
   });
-  console.log(userLoggedIn, "Logged in?");
 
   return (
     <React.Suspense fallback={<div>Loading dialog box...</div>}>

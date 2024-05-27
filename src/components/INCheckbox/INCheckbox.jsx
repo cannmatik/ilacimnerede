@@ -4,7 +4,6 @@ import "./style.scss";
 // 3rd Party
 import { Checkbox, Form } from "antd";
 import { Controller } from "react-hook-form";
-import { getValueFromObjectByStringPath } from "@utils";
 import { useEffect } from "react";
 
 const { Item } = Form;
@@ -19,13 +18,6 @@ function INCheckbox({
   onChange,
   formVerticalSpace,
 }) {
-  const isUndefined =
-    control._formValues[name] === undefined &&
-    getValueFromObjectByStringPath(control._formValues, name) === undefined;
-
-  useEffect(() => {
-    if (isUndefined) setValue(name, "N");
-  }, []);
 
   return (
     <Controller

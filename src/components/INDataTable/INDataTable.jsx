@@ -46,7 +46,7 @@ function INDataTable({
 }) {
   const $columns = checkboxed ? [...columns, ...checkboxObj] : columns;
 
-  console.log($columns);
+  // console.log($columns);
 
   const table = useReactTable({
     data,
@@ -72,7 +72,7 @@ function INDataTable({
 
   useEffect(() => {
     const $checkedRows = JSON.parse(checkedRows);
-    console.log($checkedRows, "checkedRows");
+    // console.log($checkedRows, "checkedRows");
     setSelectedRows($checkedRows);
   }, [checkedRows]);
 
@@ -82,6 +82,11 @@ function INDataTable({
   }, [unSelectAllOnTabChange]);
 
   const isAnyRowSelected = getSelectedRowModel().rows.length > 0;
+
+  // console.log(
+  //   getRowModel().rows.map((item) => item.original),
+  //   "columns"
+  // );
 
   return (
     <div className="ilacimNerede-data-table-container">

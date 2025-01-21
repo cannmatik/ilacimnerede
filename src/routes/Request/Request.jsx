@@ -135,7 +135,7 @@ function Request() {
         <Col xs={6} className="request-table">
           <div className="request-info">
             <span>Request Number {selectedRequest?.id}</span>
-            <span>REÇETE NO: {selectedRequest?.prescript_no}</span>
+            <span>Mesaj: {selectedRequest?.prescript_no}</span>
             <span>TC NO: {selectedRequest?.tc_no}</span>
           </div>
           <INDataTable

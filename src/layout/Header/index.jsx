@@ -9,18 +9,22 @@ import "./style.module.scss";
 function Header() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   async function signOutUser() {
-    debugger;
-    localStorage.clear();
-    const { error } = await supabase.auth.signOut();
-    setTimeout(() => {
-      dispatch({ type: "CLEAR_STORE" });
-    }, 1);
-    debugger;
-    if (error) {
-      // console.log(error);
+    try {
+      localStorage.clear();
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Çıkış sırasında hata:", error);
+      } else {
+        // Çıkış işlemi başarılıysa store'u temizle
+        dispatch({ type: "CLEAR_STORE" });
+        // Çıkış sonrası yönlendirme işlemini en son yap
+        navigate("/login");
+      }
+    } catch (err) {
+      console.error("Çıkış yaparken bir hata oluştu", err);
     }
-    navigate("/login");
   }
 
   // Aktif link için stil objesi
@@ -48,25 +52,19 @@ function Header() {
       <nav>
         <NavLink
           to="/request"
-          style={({ isActive }) =>
-            isActive ? activeStyle : inactiveStyle
-          }
+          style={({ isActive }) => (isActive ? activeStyle : inactiveStyle)}
         >
           Açık Talepler
         </NavLink>
         <NavLink
           to="/answered-request"
-          style={({ isActive }) =>
-            isActive ? activeStyle : inactiveStyle
-          }
+          style={({ isActive }) => (isActive ? activeStyle : inactiveStyle)}
         >
           Cevaplanan Talepler
         </NavLink>
         <NavLink
           to="/finished-request"
-          style={({ isActive }) =>
-            isActive ? activeStyle : inactiveStyle
-          }
+          style={({ isActive }) => (isActive ? activeStyle : inactiveStyle)}
         >
           Kapanan Talepler
         </NavLink>

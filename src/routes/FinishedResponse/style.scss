@@ -1,3 +1,4 @@
+//Önceki stiller aynı kalabilir
 .request-table {
   width: 100%;
   overflow: auto;
@@ -49,7 +50,7 @@
   width: 16px; /* Adjust size as needed */
   height: 16px;
   left: 17px;
-  top:5px;
+  top: 5px;
 }
 
 .tick-icon::before {
@@ -85,3 +86,46 @@
   top: 2px; /* Adjust position as needed */
   left: 7px; /* Adjust position as needed */
 }
+
+// Eklenen yeni sınıflar:
+.spin-container,
+.center-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width:100%;
+  min-height: 200px;
+}
+
+.fade-in {
+  animation: fadeInAnimation ease 0.6s;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+}
+
+.pulse {
+  animation: pulseAnimation ease 1.5s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes fadeInAnimation {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes pulseAnimation {
+    0% {
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 0.3;
+    }
+    100% {
+      opacity: 0.8;
+    }
+  }

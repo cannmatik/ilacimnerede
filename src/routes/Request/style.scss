@@ -4,9 +4,11 @@
   background-color: #fafafa;
   border-radius: 40px;
   max-height: 60vh;
+
   .request-accept-footer {
     display: flex;
     justify-content: center;
+    margin-top: 10px; // Butonlar ve tablo arasına biraz boşluk ekledim
 
     .prev-or-next {
       &:is(.enabled) {
@@ -15,13 +17,20 @@
         height: 30px;
         padding: 5px;
         cursor: pointer;
+        transition: all 0.2s ease; // Geçiş efekti ekledim
+
+        &:hover {
+          transform: scale(1.1); // Hafif bir büyütme efekti
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); // Hafif bir gölge efekti
+        }
       }
+
       &:is(.disabled) {
         width: 30px;
         height: 30px;
         padding: 5px;
-        transition: opacity 0.3s ease;
         opacity: 0.5;
+        pointer-events: none; // Tıklamayı engeller
       }
     }
   }
@@ -34,4 +43,77 @@
   background-color: #fafafa;
   border-radius: 40px;
   max-height: 60vh;
+  margin-bottom: 10px; // Bilgi ve tablo arasına biraz boşluk ekledim
+
+  span {
+    margin-bottom: 5px; // Satırlar arasına boşluk ekledim
+  }
+}
+
+// İsteğe bağlı: Spin komponenti için stil özelleştirmesi
+.ant-spin-nested-loading > div > .ant-spin {
+  .ant-spin-dot-item {
+    background-color: #0bcc6b; // Dönen noktaların rengini değiştirdim
+  }
+
+  & .ant-spin-text {
+    color: #0bcc6b;
+    font-weight: 500; // Yazıyı kalınlaştırdım
+  }
+}
+
+.table-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.center-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+
+  .ant-empty-description {
+    color: #77857d;
+  }
+}
+
+.spin-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+}
+
+/* Animasyonlar */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 1s ease-in-out;
+}
+
+.pulse {
+  animation: pulse 1.5s ease-in-out infinite;
 }

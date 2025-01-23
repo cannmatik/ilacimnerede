@@ -1,0 +1,118 @@
+table:not(.ant-picker-content) {
+  width: 100%;
+  border-spacing: 0px 10px;
+
+  thead tr th {
+    background-color: var(--primary-background);
+    height: 50px;
+    text-align: left;
+    padding: 0px 15px;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    &:not(.right-corner) {
+      border-right: 1px solid var(--primary-disabled-color);
+    }
+  }
+
+  tbody tr td {
+    background-color: var(--primary-background);
+    padding: 15px;
+    vertical-align: top;
+    height: 50px;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+    white-space: pre-line;
+    font-size: 13px;
+    border-spacing: initial;
+    &:not(.right-corner) {
+      border-right: 1px solid var(--primary-disabled-color);
+    }
+  }
+
+  tbody {
+    tr:not(.no-hover-border) {
+      &:hover {
+        td {
+          border-top: 1px solid var(--primary-green);
+          border-bottom: 1px solid var(--primary-green);
+        }
+        .right-corner {
+          border-right: 1px solid var(--primary-green);
+        }
+        .left-corner {
+          border-left: 1px solid var(--primary-green);
+        }
+      }
+    }
+    tr:not(.no-hover-bg) {
+      &:hover {
+        background-color: var(--fourth-green);
+        td {
+          background-color: transparent;
+        }
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      cursor: pointer;
+      &:hover {
+        .show-on-hover {
+          * {
+            visibility: visible;
+          }
+        }
+      }
+    }
+  }
+
+  .left-corner {
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+    border-left: 1px solid transparent;
+  }
+
+  .right-corner {
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    border-right: 1px solid transparent;
+  }
+
+  .show-on-hover {
+    * {
+      visibility: hidden;
+    }
+  }
+}
+
+.ilacimNerede-data-table-container {
+  overflow-x: auto;
+  // TODO:Data yoksa loading gösterilecek
+  .no-data-or-loading-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--primary-background);
+    border-radius: 15px;
+    min-height: 400px;
+    h4 {
+      position: absolute;
+      margin-top: 230px;
+    }
+  }
+}
+
+.ilacimNerede-table-action-bar {
+  display: flex;
+  align-items: center;
+  background-color: var(--primary-background);
+  height: 70px;
+  border-radius: 15px;
+  padding-left: 15px;
+  margin-top: 10px;
+}

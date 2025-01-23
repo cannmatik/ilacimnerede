@@ -7,31 +7,21 @@ import { useSelector } from "react-redux";
 import { selectUserPharmacyId } from "@store/selectors";
 import { before, next } from "@assets";
 import "./style.scss";
+import { Spin, Empty } from "antd";
 
 function FinishedResponse() {
   const pharmacyId = useSelector(selectUserPharmacyId);
   const [isPrevDisabled, setIsPrevDisabled] = useState(true);
   const [isNextDisabled, setIsNextDisabled] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState();
-  const { data: answeredRequests, isLoading } =
-    useGetFinishedRequests(pharmacyId);
-  const { data: answeredRequestDetails } = useGetRequestDetails(
+  const { data: answeredRequests, isLoading } = useGetFinishedRequests(pharmacyId);
+  const { data: answeredRequestDetails, isLoading: isLoadingDetails } = useGetRequestDetails(
     selectedRequest?.request_id,
     selectedRequest?.id,
     pharmacyId
   );
 
-  // console.log(answeredRequests, "answeredRequests");
-  // console.log(selectedRequest, "selectedRequest");
-  // console.log(answeredRequestDetails, "answeredRequestDetails");
-
   const openPrevRequest = () => {
-    // console.log(
-    //   answeredRequests.findIndex(
-    //     (item) => item.request_id === selectedRequest?.request_id
-    //   )
-    // );
-
     if (
       answeredRequests?.findIndex(
         (item) => item.request_id === selectedRequest?.request_id
@@ -88,57 +78,89 @@ function FinishedResponse() {
     } else {
       setIsNextDisabled(true);
     }
-  }, [selectedRequest]);
+  }, [selectedRequest, answeredRequests]);
+
   return (
     <>
-      <Row style={{ marginLeft: "25px" }}>Cevaplanan Talepler</Row>
       <br></br>
       <Row>
-        <Col xs={6}>
-          <INDataTable
-            data={answeredRequests || []}
-            columns={columns || []}
-            rowHoverStyle={{ border: true }}
-            onRowClick={(row) => {
-              setSelectedRequest(row.original);
-            }}
-            isLoading={isLoading}
-          />
+        <Col xs={12} md={6}>
+          {isLoading ? (
+            <div className="spin-container center-content pulse">
+              <Spin size="large" />
+            </div>
+          ) : answeredRequests && answeredRequests.length > 0 ? (
+            <div className="fade-in" style={{ width: "100%" }}>
+              <INDataTable
+                data={answeredRequests}
+                columns={columns}
+                rowHoverStyle={{ border: true }}
+                onRowClick={(row) => {
+                  setSelectedRequest(row.original);
+                }}
+                isLoading={isLoading}
+              />
+            </div>
+          ) : (
+            <div className="center-content fade-in pulse">
+              <Empty description="Şu an kapatılan talebiniz yok." />
+            </div>
+          )}
         </Col>
-        <Col xs={6} className="request-table">
-          <div className="request-info">
-            <span>Request Number: {selectedRequest?.request_id}</span>
-            <span>Mesaj: {selectedRequest?.prescript_no}</span>
-            <span>TC NO: {selectedRequest?.tc_no}</span>
-          </div>
-          <INDataTable
-            data={answeredRequestDetails || []}
-            columns={columns_requestDetail || []}
-            rowHoverStyle={{ border: true }}
-            onRowClick={(row) => {
-              // console.log(row.orgininal);
-            }}
-          />
-          <div className="request-accept-footer">
-            <img
-              src={before}
-              className={`prev-or-next ${
-                !isPrevDisabled ? "enabled" : "disabled"
-              }`}
-              onClick={() => {
-                openPrevRequest();
-              }}
-            ></img>
-            <img
-              src={next}
-              className={`prev-or-next ${
-                !isNextDisabled ? "enabled" : "disabled"
-              }`}
-              onClick={() => {
-                openNextRequest();
-              }}
-            ></img>
-          </div>
+        <Col xs={12} md={6} className="request-table">
+          {/* Koşullu renderlama - Talep seçili ise göster */}
+          {selectedRequest && (
+            <div className="request-info">
+              <span>Talep Numarası: {selectedRequest?.request_id}</span>
+              <span>Mesaj: {selectedRequest?.prescript_no}</span>
+            </div>
+          )}
+          {/* Sağ taraf için koşullu renderlama */}
+          {selectedRequest &&
+            (isLoadingDetails ? (
+              <div className="spin-container center-content pulse">
+                <Spin size="large" />
+              </div>
+            ) : answeredRequestDetails && answeredRequestDetails.length > 0 ? (
+              <div className="fade-in" style={{ width: "100%" }}>
+                <INDataTable
+                  data={answeredRequestDetails}
+                  columns={columns_requestDetail}
+                  rowHoverStyle={{ border: true }}
+                  onRowClick={(row) => {
+                    // console.log(row.orgininal);
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="center-content fade-in pulse">
+                <Empty description="Talep detayı bulunamadı." />
+              </div>
+            ))}
+
+          {/* Butonları da koşullu olarak göster - Talep seçili ise göster */}
+          {selectedRequest && (
+            <div className="request-accept-footer">
+              <img
+                src={before}
+                className={`prev-or-next ${
+                  !isPrevDisabled ? "enabled" : "disabled"
+                }`}
+                onClick={() => {
+                  openPrevRequest();
+                }}
+              ></img>
+              <img
+                src={next}
+                className={`prev-or-next ${
+                  !isNextDisabled ? "enabled" : "disabled"
+                }`}
+                onClick={() => {
+                  openNextRequest();
+                }}
+              ></img>
+            </div>
+          )}
         </Col>
       </Row>
     </>

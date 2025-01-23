@@ -1,3 +1,14 @@
 .home-container {
   padding: 100px 0px;
+  display: flex;
+  flex-direction: column; // Elemanları dikey olarak sırala
+  align-items: center;    // Elemanları yatay olarak ortala
+  justify-content: center; // Elemanları dikey olarak ortala (gerekirse)
+  text-align: center;     // Metni ortala (<h1> için)
+  min-height: 100vh;      // Sayfanın minimum yüksekliğini ekran yüksekliği yap
+  box-sizing: border-box; // Padding'in eleman boyutuna dahil olmasını sağlar
+}
+
+h1 {
+  margin-bottom: 20px; // Başlık ve diğer elemanlar arasında boşluk
 }

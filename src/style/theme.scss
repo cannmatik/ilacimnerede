@@ -1,46 +1,47 @@
 //Theme Constants
 :root {
-  --primary-green: #03ea76;
-
+  // Mevcut Renkler (Korunanlar)
+  --primary-green: #000000;
   --secondary-green: #0bcc6b;
-
   --third-green: #3fbd61;
-
   --primary-orange: #ee9500;
-
   --primary-light-red: #ec4d2c;
-
   --primary-purple: #7e56d1;
-
   --primary-gray: #999999;
-
   --error-color: #e56449;
-
   --custom-form-color: #7d7f8c;
   --fourth-green: #eaf7ee;
-
   --secondary-orange: #fef7ea;
-
   --secondary-light-red: #fdf1f0;
-
   --secondary-purple: #f2eefa;
-
   --secondary-gray: #efefef;
-  // ********************
-
   --main-background: #e1e1e1;
-
-  --primary-text-color: #27293f;
-
+  --primary-text-color: #030303;
   --primary-background: #ffffff;
-
   --primary-background-navbar: #25b597;
-
   --border-color: #27293f;
-
   --primary-filled-color: #f9f9f9;
-
   --primary-disabled-color: #e5e5e5;
+
+  // Yeni Eklenen Renkler (Önceki yanıttan)
+  // Yumuşatılmış Yeşil Tonları
+  --soft-green: #85e0b3; // Daha açık ve yumuşak bir yeşil
+  --pastel-green: #c2f0d9; // Pastel tonlarda bir yeşil
+
+  // Genişletilmiş Gri Skalası
+  --light-gray: #f5f5f5; // Çok açık gri (arka plan için)
+  --medium-gray: #d3d3d3; // Orta gri (ayıraçlar, kenarlıklar için)
+  --dark-gray: #666666; // Koyu gri (metin rengi alternatifi)
+
+  // Anlamlı Renkler
+  --success-color: #4caf50; // Başarı için yeşil (onay mesajları vb.)
+  --warning-color: #ff9800; // Uyarı için turuncu (dikkat edilmesi gerekenler)
+  --info-color: #2196f3; // Bilgi için mavi (bilgilendirme mesajları)
+
+  // Diğer Renkler
+  --light-blue: #e3f2fd; // Açık mavi (hafif vurgular için)
+
+  // ********************
 
   // #27293f color for icons
   --icon-color: brightness(0) saturate(100%) invert(13%) sepia(8%)
@@ -56,5 +57,5 @@
 }
 
 html[data-theme="light"] {
-  //  ****************
+  // Light tema için özel renkler eklenebilir (isteğe bağlı)
 }

@@ -1,60 +1,58 @@
 import { supabase } from "@routes/Login/useCreateClient";
-import { SupabaseAuthClient } from "@supabase/supabase-js/dist/module/lib/SupabaseAuthClient";
 import React, { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { INButton } from "@components";
-import { Row } from "react-grid-system";
 import "./style.scss";
+import dayjs from 'dayjs'; // dayjs'i import et
+import 'dayjs/locale/tr'; // Türkçe yerelleştirme
 
 const Home = () => {
-  const [user, setUser] = useState({});
   const [countries, setCountries] = useState([]);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+
+  // Gün ve saat bilgisini tutmak için state
+  const [currentDateTime, setCurrentDateTime] = useState(dayjs().locale('tr')); // Türkçe yerelleştirme
 
   useEffect(() => {
+    // Konsola user bilgilerini yazdırarak doğrulama yapıyoruz
+    console.log('User Data:', user);
+
+    // Eğer user verisi eksikse, login sayfasına yönlendirme yapılabilir
+    if (!user) {
+      navigate('/login');  // Giriş yapılmamışsa, login sayfasına yönlendir
+    }
+
     getCountries();
-  }, []);
 
-  // useEffect(() => {
-  //   async function getUserData() {
-  //     await supabase.auth?.getUser().then((value) => {
-  //       if (value.data?.user) {
-  //         console.log(value.data.user, user);
-  //         setUser(value.data.user);
-  //       }
-  //     });
-  //   }
-  //   getUserData();
-  // }, []);
+    // Her saniye gün ve saat bilgisini güncelle
+    const interval = setInterval(() => {
+      setCurrentDateTime(dayjs().locale('tr')); // Türkçe yerelleştirme her saniyede uygulanır
+    }, 1000);
 
-  // TODO: Header içinde olacak
+    // Component unmount olduğunda interval'i temizle
+    return () => clearInterval(interval);
+  }, [user, navigate]);
 
   async function getCountries() {
-    const { data, error } = await supabase.from("city").select();
-    if (error) {
-      console.log("error");
-    }
-    if (data) {
+    try {
+      const { data, error } = await supabase.from("city").select();
+      if (error) {
+        throw new Error("Veri alınırken hata oluştu");
+      }
+      console.log("Countries Data:", data); // Data'yı kontrol etmek için konsola yazdır
       setCountries(data);
+    } catch (error) {
+      console.error("Hata:", error.message); // Hata durumunda konsola yazdır
     }
-    debugger;
   }
-  return (
-    <>
-      <h1>Home Page</h1>
-      <div className="home-container">
-        {/* <ul>
-        {countries.map((country) => (
-          <li key={country.name}>{country.name}</li>
-        ))}
-      </ul> */}
 
-        {/* {SupabaseAuthClient.auth?.signOut()} */}
-        {/* <button onClick={signOutUser}>Sign out</button> */}
-      </div>
-    </>
+  return (
+    <div className="home-container">
+      <h1>Hoş Geldiniz, {user?.pharmacyName || 'Kullanıcı Adı Bulunamadı'}</h1>
+      <h2>Bugün {currentDateTime.format('dddd, D MMMM YYYY')}</h2> {/* Türkçe formatlama */}
+      <h2>Saat: {currentDateTime.format('HH:mm:ss')}</h2>
+    </div>
   );
 };
 

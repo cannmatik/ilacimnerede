@@ -90,7 +90,7 @@ function AnsweredResponse() {
   }, [selectedRequest]);
   return (
     <>
-      <Row style={{ marginLeft: "25px" }}>Cevaplanan Talepler</Row>
+  
       <br></br>
       <Row>
         <Col xs={6}>
@@ -106,9 +106,8 @@ function AnsweredResponse() {
         </Col>
         <Col xs={6} className="request-table">
           <div className="request-info">
-            <span>Request Number: {selectedRequest?.request_id}</span>
+            <span>Talep Numarası : {selectedRequest?.request_id}</span>
             <span>Mesaj: {selectedRequest?.prescript_no}</span>
-            <span>TC NO: {selectedRequest?.tc_no}</span>
           </div>
           <INDataTable
             data={answeredRequestDetails || []}

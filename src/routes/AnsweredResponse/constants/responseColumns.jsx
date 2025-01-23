@@ -3,26 +3,26 @@ import "../style.scss";
 
 const columns = [
   {
-    header: "Request Id",
+    header: "Talep No",
     accessor: "request_id",
   },
   {
-    header: "Create Date",
+    header: "Oluşturulma Tarihi",
     accessor: "create_date",
   },
 ];
 
 const columns_requestDetail = [
   {
-    header: "Medicine Id",
+    header: "Barkod No",
     accessor: "medicine_id",
   },
   {
-    header: "Medicine Quantity",
+    header: "Adet",
     accessor: "medicine_qty",
   },
   {
-    header: "Medicine Name",
+    header: "İlaç İsmi",
     accessor: "medicine.name",
   },
   {

@@ -11,21 +11,21 @@ const privateRoutes = [
   {
     path: "/home",
     element: Home,
-    title: "Home Page",
+    title: "Ana Sayfa",
     pageName: "Home",
     checkRole: true,
   },
   {
     path: "/request",
     element: Request,
-    title: "Request",
+    title: "Talep Oluştur",
     pageName: "Request",
     checkRole: true,
   },
   {
     path: "/answered-request",
     element: AnsweredResponse,
-    title: "Cevaplanan Talepler",
+    title: "Yanıtlanan Talepler",
     pageName: "AnsweredResponse",
     checkRole: true,
   },
@@ -33,31 +33,19 @@ const privateRoutes = [
     path: "/finished-request",
     element: FinishedResponse,
     title: "Tamamlanan Talepler",
-    pageName: "AnsweredResponse",
+    pageName: "FinishedResponse", // Burası da güncellendi
     checkRole: true,
   },
 ];
-
-const isAllowed = privateRoutes.find(
-  (route) => route.path === location.pathname
-);
-
-// const PageSpin = (
-//   <Spin
-//     size="large"
-//     style={{
-//       position: "absolute",
-//       top: "50%",
-//       left: "50%",
-//       transform: "translate(-50%, -50%)",
-//     }}
-//   />
-// );
 
 function RenderRoutes() {
   const user = useSelector((state) => state.user);
   const location = useLocation();
   const navigate = useNavigate();
+
+  const isAllowed = privateRoutes.find(
+    (route) => route.path === location.pathname
+  );
 
   const navigated = location?.state?.navigated;
 
@@ -74,9 +62,7 @@ function RenderRoutes() {
   };
 
   useEffect(() => {
-    // console.log(location);
     if (isAllowed) {
-      // console.log("yönlendir", isAllowed);
       navigate(isAllowed.path);
     }
     if (!isAllowed) {

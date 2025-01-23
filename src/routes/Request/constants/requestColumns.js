@@ -1,24 +1,30 @@
+import moment from 'moment';
+import 'moment/locale/tr';
+
 const columns = [
   {
-    header: "Request Id",
+    header: "Talep No",
     accessor: "id",
   },
   {
-    header: "Create Date",
+    header: "Oluşturulma Tarihi",
     accessor: "create_date",
+    Cell: ({ value }) => {
+      return moment(value).locale('tr').format('DD.MM.YYYY HH:mm');
+    }
   },
 ];
 const columns_requestDetail = [
   {
-    header: "Medicine Id",
+    header: "İlaç No",
     accessor: "medicine_id",
   },
   {
-    header: "Medicine Quantity",
+    header: "İlaç Adedi",
     accessor: "medicine_qty",
   },
   {
-    header: "Medicine Name",
+    header: "İlaç İsmi",
     accessor: "medicine.name",
   },
 ];

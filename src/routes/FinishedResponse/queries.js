@@ -32,7 +32,7 @@ const fetchFinishedRequests = async ({ pharmacy_id }) => {
 
   const { data: userInfo, error: userInfoError } = await supabase
     .from("user_request")
-    .select("id, tc_no, prescript_no")
+    .select("id, tc_no  , prescript_no")
     .in("id", requestIds)
     .eq("status", 2);
 

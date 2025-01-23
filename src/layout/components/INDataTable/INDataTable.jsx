@@ -1,21 +1,27 @@
 import { useEffect } from "react";
+
 import PropTypes from "prop-types";
 import "./style.scss";
+
 import {
   useReactTable,
   createColumnHelper,
   getCoreRowModel,
   flexRender,
 } from "@tanstack/react-table";
+
 import { Checkbox } from "antd";
+
 import classNames from "classnames";
+// import NoDataOrLoading from "./NoDataOrLoading";
 
 const columnHelper = createColumnHelper();
 
 const checkboxObj = [
   {
     accessor: "checkbox",
-    header: "",
+    header: "Var",
+
     cell: ({ row }) => (
       <Checkbox
         onClick={(e) => e.stopPropagation()}
@@ -40,6 +46,8 @@ function INDataTable({
 }) {
   const $columns = checkboxed ? [...columns, ...checkboxObj] : columns;
 
+  // console.log($columns);
+
   const table = useReactTable({
     data,
     columns: $columns.map((column) =>
@@ -55,50 +63,61 @@ function INDataTable({
     toggleAllPageRowsSelected,
   } = table;
 
+  // console.log(getSelectedRowModel().rows, "getSelectedRowModel");
+
   const checkedRows = JSON.stringify(
     getSelectedRowModel().rows.map((item) => item.original)
   );
+  // console.log(getHeaderGroups(), "getHeaderGroups");
 
   useEffect(() => {
     const $checkedRows = JSON.parse(checkedRows);
+    // console.log($checkedRows, "checkedRows");
     setSelectedRows($checkedRows);
   }, [checkedRows]);
 
+  // Setting all checkboxes to unchecked state
   useEffect(() => {
     toggleAllPageRowsSelected(false);
   }, [unSelectAllOnTabChange]);
 
   const isAnyRowSelected = getSelectedRowModel().rows.length > 0;
 
+  // console.log(
+  //   getRowModel().rows.map((item) => item.original),
+  //   "columns"
+  // );
+
   return (
     <div className="ilacimNerede-data-table-container">
       <table>
-        <thead>
-          {getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header, index) => (
-                <th
-                  key={header.id}
-                  className={classNames({
-                    "left-corner": index === 0,
-                    "right-corner": index === headerGroup.headers.length - 1,
-                    [header.column.columnDef.headerClassName]:
-                      header.column.columnDef.headerClassName !== undefined,
-                  })}
-                  style={header.column.columnDef.headerStyle}
-                >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-
+        {
+          <thead>
+            {getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header, index) => (
+                  <th
+                    key={header.id}
+                    className={classNames({
+                      "left-corner": index === 0,
+                      "right-corner": index === headerGroup.headers.length - 1,
+                      [header.column.columnDef.headerClassName]:
+                        header.column.columnDef.headerClassName !== undefined,
+                    })}
+                    style={header.column.columnDef.headerStyle}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+        }
         <tbody>
           {getRowModel().rows.map((row) => (
             <tr
@@ -108,7 +127,6 @@ function INDataTable({
                 "no-hover-border": !rowHoverStyle.border,
               })}
               onClick={() => onRowClick(row)}
-              onDoubleClick={() => row.toggleSelected()} // Çift tıklama işleyicisi
             >
               {row.getVisibleCells().map((cell, index) => (
                 <td
@@ -135,6 +153,7 @@ function INDataTable({
           ))}
         </tbody>
       </table>
+      {/* <NoDataOrLoading isLoading={isLoading} data={data} /> */}
     </div>
   );
 }

@@ -13,25 +13,26 @@ function Layout() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // Simulate auth check delay
-    const authCheckTimeout = setTimeout(() => {
-      setIsAuthChecked(true);
-    }, 500); // Adjust this to your real auth check duration
+    // Asenkron auth kontrolü yapılması gerekebilir
+    const checkAuth = async () => {
+      // Burada gerçek auth kontrolünü yapın
+      const authCheckResult = await checkUserAuth(); // Auth kontrol fonksiyonu
 
-    return () => clearTimeout(authCheckTimeout);
+      setIsAuthChecked(true);
+    };
+
+    checkAuth();
   }, []);
 
   useEffect(() => {
     if (isAuthChecked) {
-      // Simulate loading progress
       const progressInterval = setInterval(() => {
         setProgress((prevProgress) => {
           if (prevProgress >= 100) {
             clearInterval(progressInterval);
             return 100;
           }
-          const diff = Math.random() * 10;
-          return Math.min(prevProgress + diff, 100);
+          return Math.min(prevProgress + Math.random() * 10, 100);
         });
       }, 300);
 
@@ -39,7 +40,6 @@ function Layout() {
     }
   }, [isAuthChecked]);
 
-  // Eğer auth kontrolü tamamlanmadıysa veya yükleme devam ediyorsa
   if (!isAuthChecked || progress < 100) {
     return (
       <div className="loading-container">
@@ -54,7 +54,6 @@ function Layout() {
     );
   }
 
-  // Eğer auth kontrolü tamamlandıysa ve progress %100 olduysa:
   return (
     <React.Suspense fallback={<div>Yükleniyor...</div>}>
       {userLoggedIn ? (

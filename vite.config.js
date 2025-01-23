@@ -1,8 +1,8 @@
+// vite.config.js
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -20,7 +20,6 @@ export default defineConfig({
       "@validations": path.resolve(__dirname, "./src/validations"),
     },
   },
-  // Todo:
   css: {
     preprocessorOptions: {
       scss: {
@@ -29,4 +28,7 @@ export default defineConfig({
     },
   },
   envPrefix: "IlacimNerede_",
+  server: {
+    historyApiFallback: true,  // Bu satırı ekleyin
+  },
 });

@@ -39,7 +39,7 @@ function Layout() {
           }
           return Math.min(prevProgress + Math.random() * 10, 100);
         });
-      }, 300);
+      }, 200);
 
       return () => clearInterval(progressInterval);
     }

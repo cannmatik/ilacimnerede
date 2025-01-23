@@ -1,10 +1,10 @@
-// vite.config.js
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 
 export default defineConfig({
   plugins: [react()],
+  base: '/',  // Eğer uygulamanızın kök dizine dağıtılmasını istiyorsanız, doğru base path'i belirtin.
   resolve: {
     alias: {
       "@api": path.resolve(__dirname, "./src/api/index.js"),
@@ -29,6 +29,8 @@ export default defineConfig({
   },
   envPrefix: "IlacimNerede_",
   server: {
-    historyApiFallback: true,  // Bu satırı ekleyin
+    historyApiFallback: {
+      index: '/index.html',  // History API fallback için index.html'e yönlendirilecek
+    },
   },
 });

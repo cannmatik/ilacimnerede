@@ -4,7 +4,7 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
-  base: '/',  // Eğer uygulamanızın kök dizine dağıtılmasını istiyorsanız, doğru base path'i belirtin.
+  base: '/',  // Eğer başka bir base url kullanıyorsanız, onu belirtin
   resolve: {
     alias: {
       "@api": path.resolve(__dirname, "./src/api/index.js"),
@@ -30,7 +30,7 @@ export default defineConfig({
   envPrefix: "IlacimNerede_",
   server: {
     historyApiFallback: {
-      index: '/index.html',  // History API fallback için index.html'e yönlendirilecek
+      index: '/index.html',  // Sayfa yenilendiğinde yönlendirme yapılacak dosya
     },
   },
 });

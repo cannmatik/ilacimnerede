@@ -12,6 +12,7 @@ function Layout() {
   const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [progress, setProgress] = useState(0);
 
+  // Kullanıcı doğrulama işlemi
   useEffect(() => {
     // Asenkron auth kontrolü yapılması gerekebilir
     const checkAuth = async () => {
@@ -24,6 +25,7 @@ function Layout() {
     checkAuth();
   }, []);
 
+  // Yükleme ilerlemesi
   useEffect(() => {
     if (isAuthChecked) {
       const progressInterval = setInterval(() => {
@@ -40,6 +42,7 @@ function Layout() {
     }
   }, [isAuthChecked]);
 
+  // Eğer auth kontrolü tamamlanmadıysa veya yükleme devam ediyorsa
   if (!isAuthChecked || progress < 100) {
     return (
       <div className="loading-container">
@@ -54,6 +57,7 @@ function Layout() {
     );
   }
 
+  // Eğer auth kontrolü tamamlandıysa ve progress %100 olduysa:
   return (
     <React.Suspense fallback={<div>Yükleniyor...</div>}>
       {userLoggedIn ? (
@@ -69,3 +73,10 @@ function Layout() {
 }
 
 export default Layout;
+
+// Kullanıcı doğrulama işlemi örneği
+const checkUserAuth = async () => {
+  // Burada gerçek auth kontrolünü yapın. Örnek olarak localStorage'dan auth token alınıyor
+  const token = localStorage.getItem("authToken");
+  return token !== null;
+};

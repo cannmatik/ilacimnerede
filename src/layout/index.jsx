@@ -14,12 +14,15 @@ function Layout() {
 
   // Kullanıcı doğrulama işlemi
   useEffect(() => {
-    // Asenkron auth kontrolü yapılması gerekebilir
     const checkAuth = async () => {
-      // Burada gerçek auth kontrolünü yapın
-      const authCheckResult = await checkUserAuth(); // Auth kontrol fonksiyonu
+      // Gerçek auth kontrolü
+      const authCheckResult = await checkUserAuth();
 
       setIsAuthChecked(true);
+      if (authCheckResult) {
+        // Eğer kullanıcı giriş yapmışsa, yönlendirme yapılabilir.
+        window.location.href = "/home"; // Ana sayfaya yönlendirme
+      }
     };
 
     checkAuth();
@@ -76,7 +79,25 @@ export default Layout;
 
 // Kullanıcı doğrulama işlemi örneği
 const checkUserAuth = async () => {
-  // Burada gerçek auth kontrolünü yapın. Örnek olarak localStorage'dan auth token alınıyor
   const token = localStorage.getItem("authToken");
-  return token !== null;
+  if (token) {
+    try {
+      const response = await fetch("/api/validate-token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Token doğrulama hatası:", error);
+      return false;
+    }
+  }
+  return false;
 };

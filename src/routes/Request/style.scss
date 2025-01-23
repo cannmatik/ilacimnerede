@@ -63,10 +63,13 @@
 }
 
 .table-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: sticky;
+  top: 0; /* Sol panelin kaymasını engellemek için yukarıya sabitle */
+  height: 100vh; /* Sol panelin yüksekliğini sabit tut */
+  overflow-y: auto; /* Yüksekliği sabit tutarken, içerik taşarsa kaydırılmasını sağla */
+  width: 100%; /* Genişliği sabitle */
 }
+
 
 .center-content {
   display: flex;

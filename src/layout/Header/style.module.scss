@@ -3,43 +3,71 @@ header {
   justify-content: space-between;
   align-items: center;
   background-color: var(--primary-background-navbar);
-  padding: 0 15px; /* Padding ayarı */
+  padding: 0px 30px;
   box-shadow: 0px 0px 5px 0px gray;
   z-index: 9;
 }
 
-header img {
-  width: 40px; /* Logo boyutu */
-  height: 40px;
+header div {
+  padding-right: 40px;
 }
+
+header img {
+  width: 50px;
+  height: 50px;
+}
+
+h3 {
+  color: var(--primary-text-color);
+}
+
 
 nav {
   display: flex;
   align-items: center;
-  flex-wrap: wrap; /* Wrap özelliği */
-  justify-content: center; /* Butonları merkezde konumlandır */
-  width: 100%;
+  height: 70px;
+  flex-wrap: wrap; /* Flex elemanları sarmasına izin ver */
+  justify-content: space-between; /* Menüyü sola ve sağa hizalar */
+  width: 100%; /* Menü genişliğini ayarla */
 }
 
 nav a {
   position: relative;
   color: var(--primary-text-color);
-  margin: 5px; /* Butonlar arası boşluk */
+  margin: 0px 20px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  padding: 8px 12px; /* Tıklama alanı için padding */
 }
 
 nav a:hover {
   color: var(--primary-green);
 }
 
-/* Dropdown stilleri */
+nav a img {
+  filter: brightness();
+  width: 100px;
+  height: 100px;
+}
+
+nav .disable-link {
+  pointer-events: none;
+  color: var(--primary-disabled-color);
+}
+
+.page-indicator {
+  position: absolute;
+  background-color: #b4cabf;
+  width: 100%;
+  height: 4px;
+  top: -25px;
+}
+
 .dropdown {
   position: relative;
   display: flex;
   align-items: center;
+  height: 70px;
 }
 
 .dropdown:hover .menu-content {
@@ -52,70 +80,71 @@ nav a:hover {
   position: absolute;
   top: 70px;
   background-color: var(--primary-background);
+  min-width: 160px;
   z-index: 1;
-  width: 100%; /* Dropdown genişliği */
-  border-radius: 0 0 15px 15px;
-  box-shadow: 0 4px 10px rgba(39, 41, 63, 0.15);
-  padding: 10px 0;
+  width: 177px;
+  border-radius: 0px 0px 15px 15px;
+  box-shadow: 0px 4px 10px rgba(39, 41, 63, 0.15);
+  padding: 10px 0px;
 }
 
 .menu-content a {
   font-weight: 400;
   display: block;
   font-size: 12px;
-  margin: 5px 20px; /* Dropdown içindeki boşluk */
+  margin: 5px 0px 5px 20px;
 }
 
-/* Mobil ayarlar */
+/* Mobil için düzenleme */
 @media screen and (max-width: 958px) {
   header {
-    padding: 0 10px; /* Mobilde daha dar bir padding */
+    padding: 0px 20px;
+  }
+
+  .header-logo-container {
+    display: none;
   }
 
   nav {
-    flex-direction: column; /* Dikey düzen */
-    align-items: stretch; /* Tüm genişliği kapla */
-    padding-top: 5px; /* Üstten boşluk */
-    width: 100%; /* Tüm genişlikte olmasını sağla */
+    flex-direction: column; /* Yataydan dikey düzene geçiş */
+    align-items: flex-start; /* Sol hizalama */
+    width: 100%;
+    padding-top: 10px;
   }
 
   nav a {
-    margin: 5px 0; /* Dikeyde uygun boşluk */
-    padding: 10px; /* Butonların tıklama alanını korumak için padding */
-    font-size: 16px; /* Mobilde font boyutunu artırdık */
-    width: 100%; /* Mobilde butonlar tam genişlikte */
-    text-align: center; /* Metin ortalanır */
+    margin: 10px 0px;
+    font-size: 16px; /* Mobilde font boyutunu büyüt */
+    width: 100%; /* Bağlantılar genişleyecek */
   }
 
   .dropdown {
-    width: 100%; /* Dropdown'un tam genişlikte olmasını sağla */
+    width: 100%;
   }
 
   .menu-content {
-    width: 100%; /* Dropdown içeriği tam genişlikte olacak şekilde ayarlandı */
+    position: absolute;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    min-width: unset;
+    padding: 10px;
   }
 
-  /* Çıkış yap butonu için özel stil */
-  .logout-button {
-    background-color: var(--primary-red); /* Dikkat çekici bir arka plan rengi */
-    color: white; /* Beyaz metin rengi */
-    border: none; /* Kenar çizgisini kaldır */
-    border-radius: 5px; /* Hafif yuvarlak köşeler */
-    padding: 10px; /* Padding ayarı */
-    margin-top: 10px; /* Üstte biraz boşluk */
-    width: 100%; /* Tam genişlikte */
-    text-align: center; /* Metin ortalı */
+  nav a img {
+    width: 50px;
+    height: 50px;
   }
 }
 
-/* Çok daha küçük ekranlar için */
+/* Daha küçük ekranlar için daha fazla düzenleme */
 @media screen and (max-width: 768px) {
-  header img {
-    width: 30px; /* Logo boyutu */
-    height: 30px;
+  nav a img {
+    width: 50px; /* Mobilde simgeler daha küçük */
+    height: 50px;
   }
 
-  nav a {
-    font-size: 14px; /* Daha küçük font boyutu */
+  .dropdown .menu-content a {
+    font-size: 14px; /* Menüdeki metin boyutunu artır */
   }
 }

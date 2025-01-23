@@ -82,54 +82,70 @@ function Request() {
 
     const interval = setInterval(() => {
       setProgress((prevProgress) => {
-        if (prevProgress >= 90) {
+        if (prevProgress >= 100) {
           clearInterval(interval);
           return prevProgress;
         }
-        return prevProgress + 10;
+        return prevProgress + 5; // Yükleme çubuğu hızını yavaşlattık
       });
-    }, 100);
+    }, 500); // 500ms aralık
 
     try {
       await responseRequestMutation({ finalData, response });
       setProgress(100);
+      
+      // Talep yanıtlandıktan sonra bir sonraki talebe geç
+      const currentIndex = requests?.findIndex(
+        (item) => item.id === selectedRequest?.id
+      );
+      if (currentIndex < requests?.length - 1) {
+        setSelectedRequest(requests[currentIndex + 1]);
+      } else {
+        setSelectedRequest(null); // Eğer bir sonraki talep yoksa, null yaparak "Şu an bekleyen talep yok" mesajını göster
+      }
     } catch (error) {
       console.error("Error responding to request:", error);
       setProgress(-1);
     } finally {
       clearInterval(interval);
       setTimeout(() => {
-        setProgress(-1);
+        setProgress(-1); // Yükleme barını 2 saniye sonra sıfırla
       }, 2000);
     }
   };
+
+  useEffect(() => {
+    if (!selectedRequest) {
+      setSelectedRows([]); // Talep yoksa, seçilen satırları sıfırlayalım
+    }
+  }, [selectedRequest]);
 
   return (
     <>
       <br />
       <Row>
-      <Col xs={12} md={6} className="table-container">
-  {isLoading ? (
-    <div className="spin-container center-content pulse">
-      <Spin size="large" />
-    </div>
-  ) : requests && requests.length > 0 ? (
-    <div className="fade-in" style={{ width: "100%" }}>
-      <INDataTable
-        data={requests}
-        columns={columns}
-        rowHoverStyle={{ border: true }}
-        setSelectedRows={setSelectedRows}
-        onRowClick={(row) => setSelectedRequest(row.original)}
-      />
-    </div>
-  ) : (
-    <div className="center-content fade-in pulse">
-      <Empty description="Şu an bekleyen talep yok." />
-    </div>
-  )}
-</Col>
-        {requests && requests.length > 0 && (
+        <Col xs={12} md={6} className="table-container">
+          {isLoading ? (
+            <div className="spin-container center-content pulse">
+              <Spin size="large" />
+            </div>
+          ) : requests && requests.length > 0 ? (
+            <div className="fade-in" style={{ width: "100%" }}>
+              <INDataTable
+                data={requests}
+                columns={columns}
+                rowHoverStyle={{ border: true }}
+                setSelectedRows={setSelectedRows}
+                onRowClick={(row) => setSelectedRequest(row.original)}
+              />
+            </div>
+          ) : (
+            <div className="center-content fade-in pulse">
+              <Empty description="Şu an bekleyen talep yok." />
+            </div>
+          )}
+        </Col>
+        {selectedRequest && (
           <Col xs={12} md={6} className="request-table">
             <div className="request-info">
               <span>Talep Numarası: {selectedRequest?.id}</span>
@@ -156,7 +172,7 @@ function Request() {
                 flex={true}
                 onClick={handleConfirmRequest}
                 text="Talebi Yanıtla"
-                disabled={progress > -1 && progress < 100}
+                disabled={!selectedRequest || (progress > -1 && progress < 100)}
               />
               <img
                 src={next}
@@ -172,11 +188,13 @@ function Request() {
       </Row>
 
       {progress > -1 && (
-        <Progress
-          percent={progress}
-          status={progress === 100 ? "success" : "active"}
-          style={{ marginTop: "20px" }}
-        />
+        <div className="progress-container"> {/* Progress bar'ı üst kısma alıyoruz */}
+          <Progress
+            percent={progress}
+            status={progress === 100 ? "success" : "active"}
+            style={{ marginTop: "20px", height: "30px" }} // Yükleme çubuğu boyutunu büyüttük
+          />
+        </div>
       )}
     </>
   );

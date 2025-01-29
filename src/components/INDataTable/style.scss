@@ -11,7 +11,10 @@ table:not(.ant-picker-content) {
     border-bottom: 1px solid transparent;
     font-size: 14px;
     font-weight: 500;
-    white-space: nowrap;
+    white-space: nowrap; // Başlıklar tek satırda kalır
+    text-overflow: ellipsis;
+    overflow: hidden;
+
     &:not(.right-corner) {
       border-right: 1px solid var(--primary-disabled-color);
     }
@@ -22,11 +25,12 @@ table:not(.ant-picker-content) {
     padding: 15px;
     vertical-align: top;
     height: 50px;
-    border-top: 1px solid transparent;
-    border-bottom: 1px solid transparent;
-    white-space: pre-line;
+    white-space: nowrap; // Metin taşarsa tek satırda tutar
+    text-overflow: ellipsis; // Uzun metinler için üç nokta ekler
+    overflow: hidden;
     font-size: 13px;
     border-spacing: initial;
+
     &:not(.right-corner) {
       border-right: 1px solid var(--primary-disabled-color);
     }
@@ -55,9 +59,7 @@ table:not(.ant-picker-content) {
         }
       }
     }
-  }
 
-  tbody {
     tr {
       cursor: pointer;
       &:hover {
@@ -90,22 +92,57 @@ table:not(.ant-picker-content) {
 }
 
 .ilacimNerede-data-table-container {
-  overflow-x: auto;
-  // TODO:Data yoksa loading gösterilecek
-  .no-data-or-loading-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  width: 100%;
+  overflow-x: auto; /* Yatay kaydırma özelliği */
+  table {
+    width: 100%;
+    border-spacing: 0 10px;
+    table-layout: auto; /* İçeriğe göre genişlik ayarı */
+  }
+
+  thead tr th,
+  tbody tr td {
+    padding: 15px;
+    white-space: nowrap; /* İçeriğin taşmasını önler */
+    text-overflow: ellipsis; /* Taşan metni kısaltır */
+    overflow: hidden;
+    min-width: 120px; /* Minimum genişlik */
+  }
+
+  thead tr th {
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
     background-color: var(--primary-background);
-    border-radius: 15px;
-    min-height: 400px;
-    h4 {
-      position: absolute;
-      margin-top: 230px;
+    border-bottom: 1px solid var(--primary-disabled-color);
+  }
+
+  tbody tr td {
+    font-size: 13px;
+    background-color: var(--primary-background);
+    border-bottom: 1px solid var(--primary-disabled-color);
+  }
+
+  tbody tr {
+    &:hover {
+      td {
+        background-color: var(--fourth-green); /* Hover durumunda arka plan */
+      }
     }
   }
+
+  /* Kenar yuvarlama */
+  .left-corner {
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+  }
+
+  .right-corner {
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+  }
 }
+
 
 .ilacimNerede-table-action-bar {
   display: flex;
@@ -115,4 +152,5 @@ table:not(.ant-picker-content) {
   border-radius: 15px;
   padding-left: 15px;
   margin-top: 10px;
+  flex-wrap: wrap; // Aksiyon çubuğunu responsive yapmak için
 }

@@ -3,10 +3,19 @@ header {
   justify-content: space-between;
   align-items: center;
   background-color: var(--primary-background-navbar);
-  padding: 0px 30px;
+  padding: 0px 5%;
   box-shadow: 0px 0px 5px 0px gray;
   z-index: 9;
 }
+
+@media (max-width: 768px) {
+  header {
+    flex-direction: column; /* Dar alanlarda öğeler üst üste gelir */
+    align-items: flex-start; /* Başlangıç hizasına taşınır */
+    padding: 10px; /* Daha kompakt hale gelir */
+  }
+}
+
 
 header div {
   padding-right: 40px;
@@ -146,5 +155,78 @@ nav .disable-link {
 
   .dropdown .menu-content a {
     font-size: 14px; /* Menüdeki metin boyutunu artır */
+  }
+}
+
+/* Genel header düzeni */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--primary-background-navbar);
+  padding: 0px 5%;
+  box-shadow: 0px 0px 5px 0px gray;
+  z-index: 9;
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+}
+
+/* Hamburger menü simgesi */
+.hamburger-menu {
+  display: none; /* Masaüstünde gizli */
+  flex-direction: column;
+  justify-content: space-between;
+  height: 20px;
+  cursor: pointer;
+}
+
+.hamburger-menu span {
+  display: block;
+  width: 25px;
+  height: 3px;
+  background-color: var(--primary-text-color);
+  border-radius: 5px;
+  transition: 0.3s;
+}
+
+/* Mobilde nav gizleme */
+@media screen and (max-width: 768px) {
+  nav {
+    display: none; /* Başlangıçta gizli */
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    background-color: var(--primary-background-navbar);
+    width: 100%;
+    padding: 10px;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  nav.show {
+    display: flex; /* Açılır menüde görünür */
+  }
+
+  .hamburger-menu {
+    display: flex; /* Mobilde görünür */
+  }
+
+  .hamburger-menu.active span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+
+  .hamburger-menu.active span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .hamburger-menu.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
   }
 }

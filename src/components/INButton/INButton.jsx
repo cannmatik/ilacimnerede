@@ -50,8 +50,13 @@ function INButton({
       className={`${type} ${heartBeatAnim ? "heartBeatAnim" : ""}`}
       icon={icon ? btnIcon : null}
       style={{
-        width: flex ? "70%" : "unset",
+        width: flex ? "70%" : "unset", // Dinamik genişlik
         pointerEvents: isLoading ? "none" : "auto",
+        minWidth: "120px", // Minimum genişlik
+        maxWidth: "300px", // Maksimum genişlik
+        whiteSpace: "nowrap", // Yazıyı tek satıra indirir
+        overflow: "hidden", // Taşan yazıyı gizler
+        textOverflow: "ellipsis", // Taşan yazıyı '...' ile gösterir
       }}
     >
       {isLoading ? <Spin /> : text}

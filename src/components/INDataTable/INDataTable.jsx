@@ -72,69 +72,71 @@ function INDataTable({
 
   return (
     <div className="ilacimNerede-data-table-container">
-      <table>
-        <thead>
-          {getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header, index) => (
-                <th
-                  key={header.id}
-                  className={classNames({
-                    "left-corner": index === 0,
-                    "right-corner": index === headerGroup.headers.length - 1,
-                    [header.column.columnDef.headerClassName]:
-                      header.column.columnDef.headerClassName !== undefined,
-                  })}
-                  style={header.column.columnDef.headerStyle}
-                >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
+      <div className="table-wrapper">
+        <table>
+          <thead>
+            {getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header, index) => (
+                  <th
+                    key={header.id}
+                    className={classNames({
+                      "left-corner": index === 0,
+                      "right-corner": index === headerGroup.headers.length - 1,
+                      [header.column.columnDef.headerClassName]:
+                        header.column.columnDef.headerClassName !== undefined,
+                    })}
+                    style={header.column.columnDef.headerStyle}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
 
-        <tbody>
-          {getRowModel().rows.map((row) => (
-            <tr
-              key={row.id}
-              className={classNames({
-                "no-hover-bg": !rowHoverStyle.background,
-                "no-hover-border": !rowHoverStyle.border,
-              })}
-              onClick={() => onRowClick(row)}
-              onDoubleClick={() => row.toggleSelected()} // Çift tıklama işleyicisi
-            >
-              {row.getVisibleCells().map((cell, index) => (
-                <td
-                  key={cell.id}
-                  className={classNames({
-                    "left-corner": index === 0,
-                    "right-corner": index === row.getVisibleCells().length - 1,
-                    [typeof cell.column.columnDef.cellClassName === "function"
-                      ? cell.column.columnDef.cellClassName(cell.row.original)
-                      : cell.column.columnDef.cellClassName]:
-                      cell.column.columnDef.cellClassName !== undefined,
-                    "show-on-hover": cell.column.columnDef.showOnRowHover,
-                  })}
-                  style={
-                    typeof cell.column.columnDef.cellStyle === "function"
-                      ? cell.column.columnDef.cellStyle(cell.row.original)
-                      : cell.column.columnDef.cellStyle
-                  }
-                >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+          <tbody>
+            {getRowModel().rows.map((row) => (
+              <tr
+                key={row.id}
+                className={classNames({
+                  "no-hover-bg": !rowHoverStyle.background,
+                  "no-hover-border": !rowHoverStyle.border,
+                })}
+                onClick={() => onRowClick(row)}
+                onDoubleClick={() => row.toggleSelected()}
+              >
+                {row.getVisibleCells().map((cell, index) => (
+                  <td
+                    key={cell.id}
+                    className={classNames({
+                      "left-corner": index === 0,
+                      "right-corner": index === row.getVisibleCells().length - 1,
+                      [typeof cell.column.columnDef.cellClassName === "function"
+                        ? cell.column.columnDef.cellClassName(cell.row.original)
+                        : cell.column.columnDef.cellClassName]:
+                        cell.column.columnDef.cellClassName !== undefined,
+                      "show-on-hover": cell.column.columnDef.showOnRowHover,
+                    })}
+                    style={
+                      typeof cell.column.columnDef.cellStyle === "function"
+                        ? cell.column.columnDef.cellStyle(cell.row.original)
+                        : cell.column.columnDef.cellStyle
+                    }
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

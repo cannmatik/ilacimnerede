@@ -27,10 +27,6 @@ const columns_requestDetail = [
     header: "İlaç İsmi",
     accessor: "medicine.name",
   },
-  {
-    header: "Mevcut",
-    accessor: "status",
-  },
 ];
 
 export { columns, columns_requestDetail };

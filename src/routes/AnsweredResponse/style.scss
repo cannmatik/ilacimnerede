@@ -4,29 +4,30 @@
   background-color: #fafafa;
   border-radius: 40px;
   max-height: 60vh;
-  .request-accept-footer {
-    display: flex;
-    justify-content: center;
-    align-items: center; // Center the items vertically
-    margin-top: 20px;  // Optional: Add some space above
-  
-    .prev-or-next {
+.request-accept-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center; // Center the items vertically
+
+  .prev-or-next {
+    &:is(.enabled) {
+      opacity: 1;
       width: 30px;
       height: 30px;
       padding: 5px;
-      margin: 0 10px; // Add space between icons and button
-      
-      &.enabled {
-        opacity: 1;
-        cursor: pointer;
-      }
-  
-      &.disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
+      cursor: pointer;
+      margin: 0 10px; // Add margin to space out the icons from the button
+    }
+    &:is(.disabled) {
+      width: 30px;
+      height: 30px;
+      padding: 5px;
+      transition: opacity 0.3s ease;
+      opacity: 0.5;
+      margin: 0 10px; // Add margin for consistency
     }
   }
+}
 }
 
 .request-info {
@@ -103,8 +104,8 @@
   cursor: pointer;
   font-size: 16px;
   transition: background-color 0.3s ease;
-  margin: 0 10px; // Add horizontal spacing if needed
 }
+
 .delete-request-button:hover {
   background-color: #c0392b;
 }

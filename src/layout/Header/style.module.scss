@@ -19,7 +19,7 @@
       height: auto;
       transition: width 0.3s ease;
 
-      @media (max-width: 668px) {
+      @media (max-width: 768px) {
         width: 70px;
       }
     }
@@ -57,7 +57,7 @@
       }
     }
 
-    @media (max-width: 668px) {
+    @media (max-width: 768px) {
       display: flex;
     }
   }
@@ -80,7 +80,7 @@
       }
     }
 
-    @media (max-width: 668px) {
+    @media (max-width: 768px) {
       display: none;
       position: fixed;
       top: 70px;
@@ -103,7 +103,7 @@
   .mobileLogout {
     display: none;
 
-    @media (max-width: 668px) {
+    @media (max-width: 768px) {
       display: block;
       width: 100%;
       margin-top: 1rem;

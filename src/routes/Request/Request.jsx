@@ -60,10 +60,9 @@ function Request() {
     const currentIndex = requests?.findIndex(
       (item) => item.id === selectedRequest?.id
     );
-    console.log(currentIndex); // Burada currentIndex'i kontrol edin
-    if (currentIndex < requests?.length - 1) {
+    if (currentIndex < requests?.length - 1) { // Son elemandan bir önceki ise
       setSelectedRequest(requests[currentIndex + 1]);
-      // Burada isNextDisabled'ı doğru şekilde güncelleyin
+      // Sonraki eleman artık son eleman mı kontrol et
       setIsNextDisabled(currentIndex + 1 >= requests?.length - 1);
     } else {
       setIsNextDisabled(true);
@@ -214,14 +213,14 @@ function Request() {
                 text="Talebi Yanıtla"
                 disabled={!selectedRequest || (progress > -1 && progress < 100)}
               />
-              <img
-                src={next}
-                className={`prev-or-next ${
-                  isNextDisabled ? "enabled" : "disabled"
-                }`}
-                onClick={openNextRequest}
-                alt="Sonraki Talep"
-              />
+<img
+  src={next}
+  className={`prev-or-next ${
+    isNextDisabled ? "disabled" : "enabled" // Ters çevrildi
+  }`}
+  onClick={!isNextDisabled ? openNextRequest : undefined} // Sadece enabled durumda tıklanabilir
+  alt="Sonraki Talep"
+/>
             </div>
           </Col>
         ) : null}

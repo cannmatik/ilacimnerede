@@ -27,6 +27,10 @@ function Request() {
   const { data: requests, isLoading } = useGetRequest();
   const { data: requestDetail } = useGetRequestDetails(selectedRequest?.id);
   const { mutate: responseRequestMutation } = useResponseRequest();
+  useEffect(() => {
+    setSelectedRows([]);
+    setMessageText("");
+  }, [selectedRequest?.id]); // Her request değişiminde temizlik
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -36,15 +40,22 @@ function Request() {
 
   const handleDoubleTap = (row) => {
     const now = new Date().getTime();
-    const doubleTapDelay = 300; // Delay for detecting double-tap
-  
+    const doubleTapDelay = 300;
+
     if (touchTime.current + doubleTapDelay > now) {
-      row.toggleSelected(); // Toggle selection on double-tap
-      touchTime.current = 0; // Reset the touch time
+      const isSelected = selectedRows.some(item => item.id === row.original.id);
+      setSelectedRows(prev => 
+        isSelected 
+          ? prev.filter(item => item.id !== row.original.id)
+          : [...prev, row.original]
+      );
+      touchTime.current = 0;
     } else {
-      touchTime.current = now; // Update the time for single tap
+      touchTime.current = now;
     }
   };
+
+
 
   const openPrevRequest = () => {
     const currentIndex = requests?.findIndex(
@@ -52,26 +63,25 @@ function Request() {
     );
     if (currentIndex > 0) {
       setSelectedRequest(requests[currentIndex - 1]);
+      setSelectedRows([]); // Clear selected rows
       setIsPrevDisabled(false);
     } else {
       setIsPrevDisabled(true);
     }
   };
+
   const openNextRequest = () => {
     const currentIndex = requests?.findIndex(
       (item) => item.id === selectedRequest?.id
     );
-    if (currentIndex < requests?.length - 1) { // Son elemandan bir önceki ise
+    if (currentIndex < requests?.length - 1) {
       setSelectedRequest(requests[currentIndex + 1]);
-      // Sonraki eleman artık son eleman mı kontrol et
+      setSelectedRows([]); // Clear selected rows
       setIsNextDisabled(currentIndex + 1 >= requests?.length - 1);
     } else {
       setIsNextDisabled(true);
     }
   };
-  
-  
-  
 
   useEffect(() => {
     const currentIndex = requests?.findIndex(
@@ -83,7 +93,9 @@ function Request() {
 
   const handleConfirmRequest = async () => {
     setProgress(0);
-    setMessageText(""); // Mesaj alanını temizle
+    setMessageText(""); // Clear message input
+    setSelectedRows([]); // Clear selected rows
+
     const selectedRowsIds = selectedRows.map(({ id }) => id);
     const checkedRequestDetails = selectedRows.map(({ id }) => ({
       request_item_id: id,
@@ -97,12 +109,13 @@ function Request() {
         status: false,
       }));
 
-      const response = {
-        request_id: selectedRequest?.id,
-        pharmacy_id: pharmacyId,
-        create_date: new Date().toISOString(),
-        message_text: messageText, // Mesajı request'e ekleyin
-      };
+    const response = {
+      request_id: selectedRequest?.id,
+      pharmacy_id: pharmacyId,
+      create_date: new Date().toISOString(),
+      message_text: messageText, // Add message to request
+    };
+
     const finalData = [...checkedRequestDetails, ...uncheckedRequestDetails];
 
     const interval = setInterval(() => {
@@ -118,7 +131,7 @@ function Request() {
     try {
       await responseRequestMutation({ finalData, response });
       setProgress(100);
-      
+      setSelectedRows([]); // Clear selected rows after response
       const currentIndex = requests?.findIndex(
         (item) => item.id === selectedRequest?.id
       );
@@ -140,7 +153,7 @@ function Request() {
 
   useEffect(() => {
     if (!selectedRequest) {
-      setSelectedRows([]);
+      setSelectedRows([]); // Clear selected rows when no request is selected
     }
   }, [selectedRequest]);
 
@@ -177,7 +190,7 @@ function Request() {
             {isMobile && (
               <div className="mobile-header">
                 <INButton
-                     flex={true}
+                  flex={true}
                   onClick={() => setSelectedRequest(null)}
                   text="Geri Dön"
                 />
@@ -188,31 +201,32 @@ function Request() {
               <span>Talep Numarası: {selectedRequest?.id}</span>
               <span>Mesaj: {selectedRequest?.prescript_no}</span>
               <input
-        type="text"
-        value={messageText}
-        onChange={(e) => setMessageText(e.target.value)}
-        placeholder="Mesajınızı yazın..."
-        className="message-input"
-      />
+                type="text"
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+                placeholder="Mesajınızı yazın..."
+                className="message-input"
+              />
             </div>
+
             <INDataTable
-  data={requestDetail || []}
-  columns={columns_requestDetail}
-  rowHoverStyle={{ border: true, background: !isMobile }}
-  checkboxed={ [] } // This hides checkbox column on mobile
-  setSelectedRows={setSelectedRows}
-  unSelectAllOnTabChange={selectedRequest}
-  rowClassName={(row) => 
-    `${row.getIsSelected() ? 'selected-row' : 'unselected-row'} ${isMobile ? 'mobile-row' : ''}`
-  }
-  onRowClick={(row) => isMobile && handleDoubleTap(row)}
-/>
+              key={selectedRequest?.id || 'request-detail-table'} // Yeni key prop
+              data={requestDetail || []}
+              columns={columns_requestDetail}
+              rowHoverStyle={{ border: true, background: !isMobile }}
+              checkboxed={[]} // This hides checkbox column on mobile
+              setSelectedRows={setSelectedRows}
+              unSelectAllOnTabChange={selectedRequest}
+              rowClassName={(row) =>
+                `${row.getIsSelected() ? 'selected-row' : 'unselected-row'} ${isMobile ? 'mobile-row' : ''}`
+              }
+              onRowClick={(row) => isMobile && handleDoubleTap(row)}
+            />
+
             <div className="request-accept-footer">
               <img
                 src={before}
-                className={`prev-or-next ${
-                  isPrevDisabled ? "disabled" : "enabled"
-                }`}
+                className={`prev-or-next ${isPrevDisabled ? "disabled" : "enabled"}`}
                 onClick={openPrevRequest}
                 alt="Önceki Talep"
               />
@@ -222,14 +236,12 @@ function Request() {
                 text="Talebi Yanıtla"
                 disabled={!selectedRequest || (progress > -1 && progress < 100)}
               />
-<img
-  src={next}
-  className={`prev-or-next ${
-    isNextDisabled ? "disabled" : "enabled" // Ters çevrildi
-  }`}
-  onClick={!isNextDisabled ? openNextRequest : undefined} // Sadece enabled durumda tıklanabilir
-  alt="Sonraki Talep"
-/>
+              <img
+                src={next}
+                className={`prev-or-next ${isNextDisabled ? "disabled" : "enabled"}`}
+                onClick={!isNextDisabled ? openNextRequest : undefined}
+                alt="Sonraki Talep"
+              />
             </div>
           </Col>
         ) : null}

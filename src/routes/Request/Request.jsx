@@ -22,6 +22,7 @@ function Request() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const pharmacyId = useSelector(selectUserPharmacyId);
   const touchTime = useRef(0);
+  const [messageText, setMessageText] = useState("");
 
   const { data: requests, isLoading } = useGetRequest();
   const { data: requestDetail } = useGetRequestDetails(selectedRequest?.id);
@@ -82,7 +83,7 @@ function Request() {
 
   const handleConfirmRequest = async () => {
     setProgress(0);
-
+    setMessageText(""); // Mesaj alanını temizle
     const selectedRowsIds = selectedRows.map(({ id }) => id);
     const checkedRequestDetails = selectedRows.map(({ id }) => ({
       request_item_id: id,
@@ -96,11 +97,12 @@ function Request() {
         status: false,
       }));
 
-    const response = {
-      request_id: selectedRequest?.id,
-      pharmacy_id: pharmacyId,
-      create_date: new Date().toISOString(),
-    };
+      const response = {
+        request_id: selectedRequest?.id,
+        pharmacy_id: pharmacyId,
+        create_date: new Date().toISOString(),
+        message_text: messageText, // Mesajı request'e ekleyin
+      };
     const finalData = [...checkedRequestDetails, ...uncheckedRequestDetails];
 
     const interval = setInterval(() => {
@@ -185,6 +187,13 @@ function Request() {
             <div className="request-info">
               <span>Talep Numarası: {selectedRequest?.id}</span>
               <span>Mesaj: {selectedRequest?.prescript_no}</span>
+              <input
+        type="text"
+        value={messageText}
+        onChange={(e) => setMessageText(e.target.value)}
+        placeholder="Mesajınızı yazın..."
+        className="message-input"
+      />
             </div>
             <INDataTable
   data={requestDetail || []}

@@ -1,7 +1,7 @@
 import { supabase } from "@routes/Login/useCreateClient";
 import { selectUserPharmacyId } from "@store/selectors";
 import { useSelector } from "react-redux";
-import { INDataTable } from "@components";
+import { INDataTable, INButton } from "@components";
 import { Col, Row } from "react-grid-system";
 import { useState, useEffect } from "react";
 import { before, next } from "@assets";
@@ -14,17 +14,22 @@ const AnsweredResponse = () => {
   const [isPrevDisabled, setIsPrevDisabled] = useState(true);
   const [isNextDisabled, setIsNextDisabled] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState();
-  const [loading, setLoading] = useState(false); // Yükleme durumu için state
-  const [notification, setNotification] = useState(""); // Başarı/Hata bildirimi için state
+  const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState("");
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const { data: answeredRequests, isLoading, refetch } = useGetFetchedRequests(pharmacyId);
   const { data: answeredRequestDetails } = useGetRequestDetails(selectedRequest?.request_id, selectedRequest?.id);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const openPrevRequest = () => {
     const currentIndex = answeredRequests?.findIndex((item) => item.request_id === selectedRequest?.request_id);
     if (currentIndex > 0) {
       setSelectedRequest(answeredRequests[currentIndex - 1]);
-    } else {
-      setIsPrevDisabled(true);
     }
   };
 
@@ -32,115 +37,120 @@ const AnsweredResponse = () => {
     const currentIndex = answeredRequests?.findIndex((item) => item.request_id === selectedRequest?.request_id);
     if (currentIndex < answeredRequests?.length - 1) {
       setSelectedRequest(answeredRequests[currentIndex + 1]);
-    } else {
-      setIsNextDisabled(true);
     }
   };
 
-  // Cevaplanan talebi silme fonksiyonu
   const handleDeleteRequest = async (responseId) => {
-    setLoading(true); // Yükleme başlasın
-    setNotification(""); // Önceki bildirimleri sıfırla
-
+    setLoading(true);
+    setNotification("");
+    
     const { error } = await supabase.from("response").delete().eq("id", responseId);
-    setLoading(false); // Yükleme bitti
+    setLoading(false);
 
     if (error) {
-      console.error("Error deleting response:", error);
-      setNotification("Bir hata oluştu! Lütfen tekrar deneyin."); // Hata mesajı
+      setNotification("Bir hata oluştu! Lütfen tekrar deneyin.");
     } else {
-      setNotification("Talep başarıyla silindi."); // Başarı mesajı
-      refetch();  // Yanıt silindikten sonra tekrar veri çekme
+      setNotification("Talep başarıyla silindi.");
+      refetch();
 
-      // Silme işleminden sonra bir sonraki talebe geç
       const currentIndex = answeredRequests?.findIndex((item) => item.request_id === selectedRequest?.request_id);
       if (currentIndex < answeredRequests?.length - 1) {
-        setSelectedRequest(answeredRequests[currentIndex + 1]); // Bir sonraki talebe geç
+        setSelectedRequest(answeredRequests[currentIndex + 1]);
       } else {
-        setSelectedRequest(null); // Eğer bir sonraki talep yoksa, null yaparak "Şu an bekleyen talep yok" mesajını göster
+        setSelectedRequest(null);
       }
     }
   };
 
   useEffect(() => {
-    if (answeredRequests?.findIndex((item) => item.request_id === selectedRequest?.request_id) > 0) {
-      setIsPrevDisabled(false);
-    } else {
-      setIsPrevDisabled(true);
-    }
-    if (answeredRequests?.findIndex((item) => item.request_id === selectedRequest?.request_id) < answeredRequests?.length - 1) {
-      setIsNextDisabled(false);
-    } else {
-      setIsNextDisabled(true);
-    }
+    const currentIndex = answeredRequests?.findIndex((item) => item.request_id === selectedRequest?.request_id);
+    setIsPrevDisabled(currentIndex <= 0);
+    setIsNextDisabled(currentIndex >= answeredRequests?.length - 1);
   }, [selectedRequest, answeredRequests]);
 
   return (
     <>
       <br />
       <Row>
-        <Col xs={6}>
-          <INDataTable
-            data={answeredRequests || []}
-            columns={columns}
-            rowHoverStyle={{ border: true }}
-            onRowClick={(row) => {
-              setSelectedRequest(row.original);
-            }}
-            isLoading={isLoading}
-          />
-        </Col>
-        <Col xs={6} className="request-table">
-          <div className="request-info">
-            <span>Talep Numarası : {selectedRequest?.request_id}</span>
-            <span>Mesaj: {selectedRequest?.prescript_no}</span>
-          </div>
-          <INDataTable
-            data={answeredRequestDetails || []}
-            columns={columns_requestDetail || []}
-            rowHoverStyle={{ border: true }}
-            onRowClick={(row) => {
-              console.log(row.original);
-            }}
-          />
-          <div className="request-accept-footer">
-            <img
-              src={before}
-              className={`prev-or-next ${!isPrevDisabled ? "enabled" : "disabled"}`}
-              onClick={() => openPrevRequest()}
-            />
-            <img
-              src={next}
-              className={`prev-or-next ${!isNextDisabled ? "enabled" : "disabled"}`}
-              onClick={() => openNextRequest()}
-            />
-          </div>
-          {/* Yükleme çubuğu */}
-          {loading && (
-            <div className="loading-bar">
-              <div className="progress-bar"></div>
+        {(!isMobile || !selectedRequest) && (
+          <Col xs={12} md={6} className="table-container">
+            {isLoading ? (
+              <div className="spin-container center-content pulse">
+                <Spin size="large" />
+              </div>
+            ) : answeredRequests && answeredRequests.length > 0 ? (
+              <div className="fade-in" style={{ width: "100%" }}>
+                <INDataTable
+                  data={answeredRequests || []}
+                  columns={columns}
+                  rowHoverStyle={{ border: true }}
+                  onRowClick={(row) => setSelectedRequest(row.original)}
+                />
+              </div>
+            ) : (
+              <div className="center-content fade-in pulse">
+                <Empty description="Şu an cevaplanmış talep yok." />
+              </div>
+            )}
+          </Col>
+        )}
+
+        {(selectedRequest && !isMobile) || (isMobile && selectedRequest) ? (
+          <Col xs={12} md={6} className="request-table">
+            {isMobile && (
+              <div className="mobile-header">
+                <INButton
+                  flex={true}
+                  onClick={() => setSelectedRequest(null)}
+                  text="Geri Dön"
+                />
+              </div>
+            )}
+
+            <div className="request-info">
+              <span>Talep Numarası: {selectedRequest?.request_id}</span>
+              <span>Mesaj: {selectedRequest?.prescript_no}</span>
             </div>
-          )}
-          {/* Cevaplanan Talebi Sil butonu */}
-          <div className="delete-request-button-container">
-            <button
-              className="delete-request-button"
-              onClick={() => handleDeleteRequest(selectedRequest?.id)} // response_id kullanarak silme
-            >
-              Cevaplanan Talebi Sil
-            </button>
-          </div>
-          {/* Bildirim */}
-          {notification && (
-            <div className="notification">
-              <p>{notification}</p>
-            </div>
-          )}
-        </Col>
+
+            <INDataTable
+              data={answeredRequestDetails || []}
+              columns={columns_requestDetail}
+              rowHoverStyle={{ border: true }}
+            />
+
+<div className="request-accept-footer">
+  <img
+    src={before}
+    className={`prev-or-next ${isPrevDisabled ? "disabled" : "enabled"}`}
+    onClick={!isPrevDisabled ? openPrevRequest : undefined}
+    alt="Önceki Talep"
+  />
+  
+  <INButton
+    className="delete-request-button"
+    onClick={() => handleDeleteRequest(selectedRequest?.id)}
+    text="Verilen Yanıtı Geri Al"
+    disabled={loading}
+  />
+  
+  <img
+    src={next}
+    className={`prev-or-next ${isNextDisabled ? "disabled" : "enabled"}`}
+    onClick={!isNextDisabled ? openNextRequest : undefined}
+    alt="Sonraki Talep"
+  />
+</div>
+
+            {notification && (
+              <div className={`notification ${notification.includes("başarı") ? "success" : "error"}`}>
+                {notification}
+              </div>
+            )}
+          </Col>
+        ) : null}
       </Row>
     </>
   );
 };
 
 export default AnsweredResponse;
-  

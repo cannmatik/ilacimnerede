@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Col, Row } from "react-grid-system";
 import { INButton, INDataTable } from "@components";
 import "./style.scss";
@@ -19,11 +19,31 @@ function Request() {
   const [selectedRequest, setSelectedRequest] = useState();
   const [selectedRows, setSelectedRows] = useState([]);
   const [progress, setProgress] = useState(-1);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const pharmacyId = useSelector(selectUserPharmacyId);
+  const touchTime = useRef(0);
 
   const { data: requests, isLoading } = useGetRequest();
   const { data: requestDetail } = useGetRequestDetails(selectedRequest?.id);
   const { mutate: responseRequestMutation } = useResponseRequest();
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const handleDoubleTap = (row) => {
+    const now = new Date().getTime();
+    const doubleTapDelay = 300; // Delay for detecting double-tap
+  
+    if (touchTime.current + doubleTapDelay > now) {
+      row.toggleSelected(); // Toggle selection on double-tap
+      touchTime.current = 0; // Reset the touch time
+    } else {
+      touchTime.current = now; // Update the time for single tap
+    }
+  };
 
   const openPrevRequest = () => {
     const currentIndex = requests?.findIndex(
@@ -36,18 +56,22 @@ function Request() {
       setIsPrevDisabled(true);
     }
   };
-
   const openNextRequest = () => {
     const currentIndex = requests?.findIndex(
       (item) => item.id === selectedRequest?.id
     );
+    console.log(currentIndex); // Burada currentIndex'i kontrol edin
     if (currentIndex < requests?.length - 1) {
       setSelectedRequest(requests[currentIndex + 1]);
-      setIsNextDisabled(false);
+      // Burada isNextDisabled'ı doğru şekilde güncelleyin
+      setIsNextDisabled(currentIndex + 1 >= requests?.length - 1);
     } else {
       setIsNextDisabled(true);
     }
   };
+  
+  
+  
 
   useEffect(() => {
     const currentIndex = requests?.findIndex(
@@ -86,22 +110,21 @@ function Request() {
           clearInterval(interval);
           return prevProgress;
         }
-        return prevProgress + 5; // Yükleme çubuğu hızını yavaşlattık
+        return prevProgress + 5;
       });
-    }, 500); // 500ms aralık
+    }, 500);
 
     try {
       await responseRequestMutation({ finalData, response });
       setProgress(100);
       
-      // Talep yanıtlandıktan sonra bir sonraki talebe geç
       const currentIndex = requests?.findIndex(
         (item) => item.id === selectedRequest?.id
       );
       if (currentIndex < requests?.length - 1) {
         setSelectedRequest(requests[currentIndex + 1]);
       } else {
-        setSelectedRequest(null); // Eğer bir sonraki talep yoksa, null yaparak "Şu an bekleyen talep yok" mesajını göster
+        setSelectedRequest(null);
       }
     } catch (error) {
       console.error("Error responding to request:", error);
@@ -109,14 +132,14 @@ function Request() {
     } finally {
       clearInterval(interval);
       setTimeout(() => {
-        setProgress(-1); // Yükleme barını 2 saniye sonra sıfırla
+        setProgress(-1);
       }, 2000);
     }
   };
 
   useEffect(() => {
     if (!selectedRequest) {
-      setSelectedRows([]); // Talep yoksa, seçilen satırları sıfırlayalım
+      setSelectedRows([]);
     }
   }, [selectedRequest]);
 
@@ -124,41 +147,58 @@ function Request() {
     <>
       <br />
       <Row>
-        <Col xs={12} md={6} className="table-container">
-          {isLoading ? (
-            <div className="spin-container center-content pulse">
-              <Spin size="large" />
-            </div>
-          ) : requests && requests.length > 0 ? (
-            <div className="fade-in" style={{ width: "100%" }}>
-              <INDataTable
-                data={requests}
-                columns={columns}
-                rowHoverStyle={{ border: true }}
-                setSelectedRows={setSelectedRows}
-                onRowClick={(row) => setSelectedRequest(row.original)}
-              />
-            </div>
-          ) : (
-            <div className="center-content fade-in pulse">
-              <Empty description="Şu an bekleyen talep yok." />
-            </div>
-          )}
-        </Col>
-        {selectedRequest && (
+        {(!isMobile || !selectedRequest) && (
+          <Col xs={12} md={6} className="table-container">
+            {isLoading ? (
+              <div className="spin-container center-content pulse">
+                <Spin size="large" />
+              </div>
+            ) : requests && requests.length > 0 ? (
+              <div className="fade-in" style={{ width: "100%" }}>
+                <INDataTable
+                  data={requests}
+                  columns={columns}
+                  rowHoverStyle={{ border: true }}
+                  setSelectedRows={setSelectedRows}
+                  onRowClick={(row) => setSelectedRequest(row.original)}
+                />
+              </div>
+            ) : (
+              <div className="center-content fade-in pulse">
+                <Empty description="Şu an bekleyen talep yok." />
+              </div>
+            )}
+          </Col>
+        )}
+
+        {(selectedRequest && !isMobile) || (isMobile && selectedRequest) ? (
           <Col xs={12} md={6} className="request-table">
+            {isMobile && (
+              <div className="mobile-header">
+                <INButton
+                     flex={true}
+                  onClick={() => setSelectedRequest(null)}
+                  text="Geri Dön"
+                />
+              </div>
+            )}
+
             <div className="request-info">
               <span>Talep Numarası: {selectedRequest?.id}</span>
               <span>Mesaj: {selectedRequest?.prescript_no}</span>
             </div>
             <INDataTable
-              data={requestDetail || []}
-              columns={columns_requestDetail}
-              rowHoverStyle={{ border: true }}
-              checkboxed={true}
-              setSelectedRows={setSelectedRows}
-              unSelectAllOnTabChange={selectedRequest}
-            />
+  data={requestDetail || []}
+  columns={columns_requestDetail}
+  rowHoverStyle={{ border: true, background: !isMobile }}
+  checkboxed={ [] } // This hides checkbox column on mobile
+  setSelectedRows={setSelectedRows}
+  unSelectAllOnTabChange={selectedRequest}
+  rowClassName={(row) => 
+    `${row.getIsSelected() ? 'selected-row' : 'unselected-row'} ${isMobile ? 'mobile-row' : ''}`
+  }
+  onRowClick={(row) => isMobile && handleDoubleTap(row)}
+/>
             <div className="request-accept-footer">
               <img
                 src={before}
@@ -184,15 +224,15 @@ function Request() {
               />
             </div>
           </Col>
-        )}
+        ) : null}
       </Row>
 
       {progress > -1 && (
-        <div className="progress-container"> {/* Progress bar'ı üst kısma alıyoruz */}
+        <div className="progress-container">
           <Progress
             percent={progress}
             status={progress === 100 ? "success" : "active"}
-            style={{ marginTop: "20px", height: "30px" }} // Yükleme çubuğu boyutunu büyüttük
+            style={{ marginTop: "20px", height: "30px" }}
           />
         </div>
       )}

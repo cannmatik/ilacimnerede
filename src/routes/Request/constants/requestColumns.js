@@ -20,7 +20,7 @@ const columns_requestDetail = [
     accessor: "medicine_id",
   },
   {
-    header: "İlaç Adedi",
+    header: "Miktar",
     accessor: "medicine_qty",
   },
   {

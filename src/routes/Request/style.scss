@@ -4,72 +4,104 @@
   background-color: #fafafa;
   border-radius: 40px;
   max-height: 60vh;
+  position: relative;
+
+
+
+  /* MOBILE STİLLERİ */
+  @media (max-width: 768px) {
+    max-height: none;
+    border-radius: 16px;
+    margin-top: 8px;
+
+    .ilacimNerede-data-table-container {
+      tbody tr td {
+        padding: 8px !important;
+        font-size: 12px !important;
+      }
+
+      thead tr th {
+        padding: 8px !important;
+        font-size: 13px !important;
+      }
+    }
+
+    .request-info {
+      padding: 8px;
+      margin-bottom: 8px;
+      
+      span {
+        font-size: 14px;
+      }
+    }
+  }
 
   .request-accept-footer {
     display: flex;
     justify-content: center;
-    margin-top: 10px; // Butonlar ve tablo arasına biraz boşluk ekledim
+    padding: 16px 0;
+    gap: 15px;
 
     .prev-or-next {
-      &:is(.enabled) {
-        opacity: 1;
-        width: 30px;
-        height: 30px;
-        padding: 5px;
-        cursor: pointer;
-        transition: all 0.2s ease; // Geçiş efekti ekledim
+      width: 30px;
+      height: 30px;
+      padding: 5px;
+      cursor: pointer;
+      transition: all 0.2s ease;
 
-        &:hover {
-          transform: scale(1.1); // Hafif bir büyütme efekti
-          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); // Hafif bir gölge efekti
-        }
+      &.disabled {
+        opacity: 0.5;
+        pointer-events: none;
       }
 
-      &:is(.disabled) {
-        width: 30px;
-        height: 30px;
-        padding: 5px;
-        opacity: 0.5;
-        pointer-events: none; // Tıklamayı engeller
+      &:hover:not(.disabled) {
+        transform: scale(1.1);
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
       }
     }
   }
 }
 
+/* ANA TABLO (REQUEST LIST) STİLLERİ KORUNUYOR */
+.table-container {
+  .ilacimNerede-data-table-container {
+    tbody tr {
+      td {
+        background-color: #fff !important; // Ana tablo beyaz kalıyor
+        color: #333 !important;
+      }
+
+      &:hover td {
+        background-color: #f5f5f5 !important;
+      }
+    }
+  }
+}
+
+/* ORTAK STİLLER */
 .request-info {
   display: flex;
   flex-direction: column;
   padding: 10px 15px;
-  background-color: #fafafa;
-  border-radius: 40px;
-  max-height: 60vh;
-  margin-bottom: 10px; // Bilgi ve tablo arasına biraz boşluk ekledim
+  background-color: #fff;
+  border-radius: 12px;
+  margin: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 
   span {
-    margin-bottom: 5px; // Satırlar arasına boşluk ekledim
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #666;
   }
 }
 
-// İsteğe bağlı: Spin komponenti için stil özelleştirmesi
-.ant-spin-nested-loading > div > .ant-spin {
-  .ant-spin-dot-item {
-    background-color: #0bcc6b; // Dönen noktaların rengini değiştirdim
-  }
-
-  & .ant-spin-text {
-    color: #0bcc6b;
-    font-weight: 500; // Yazıyı kalınlaştırdım
-  }
+.mobile-header {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
 }
-
-.table-container {
-  position: sticky;
-  top: 0; /* Sol panelin kaymasını engellemek için yukarıya sabitle */
-  height: 100vh; /* Sol panelin yüksekliğini sabit tut */
-  overflow-y: auto; /* Yüksekliği sabit tutarken, içerik taşarsa kaydırılmasını sağla */
-  width: 100%; /* Genişliği sabitle */
-}
-
 
 .center-content {
   display: flex;
@@ -79,42 +111,44 @@
   width: 100%;
 
   .ant-empty-description {
-    color: #77857d;
+    color: #888;
+    font-size: 14px;
   }
 }
 
-.spin-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  width: 100%;
+/* PROGRESS BAR */
+.progress-container {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  max-width: 500px;
+  background: rgba(255,255,255,0.95);
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 1000;
+
+  .ant-progress-line {
+    padding-top: 5px;
+  }
 }
 
-/* Animasyonlar */
+/* ANİMASYONLAR */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
 }
 
 .fade-in {
-  animation: fadeIn 1s ease-in-out;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .pulse {

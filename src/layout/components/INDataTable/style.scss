@@ -90,7 +90,7 @@ table:not(.ant-picker-content) {
 }
 
 .ilacimNerede-data-table-container {
-  overflow-x: auto;
+  overflow-x: hidden;
   // TODO:Data yoksa loading gösterilecek
   .no-data-or-loading-container {
     display: flex;

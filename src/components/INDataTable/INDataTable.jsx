@@ -15,10 +15,10 @@ const columnHelper = createColumnHelper();
 const checkboxObj = [
   {
     accessor: "checkbox",
-    header: "",
+    header: "Mevcut",
     cell: ({ row }) => (
       <Checkbox
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}  // Checkbox tıklamasını engellemek için
         checked={row.getIsSelected()}
         onChange={row.getToggleSelectedHandler()}
       />
@@ -68,7 +68,16 @@ function INDataTable({
     toggleAllPageRowsSelected(false);
   }, [unSelectAllOnTabChange]);
 
-  const isAnyRowSelected = getSelectedRowModel().rows.length > 0;
+  // Row click handler modification based on checkbox availability
+  const handleRowClick = (row) => {
+    if (checkboxed) {
+      // Row seçimi sadece checkbox tablosu için yapılır
+      row.toggleSelected();
+    } else {
+      // Eğer checkbox yoksa, onRowClick çalıştırılır (yani normal tıklama işlevi)
+      onRowClick(row);
+    }
+  };
 
   return (
     <div className="ilacimNerede-data-table-container">
@@ -104,12 +113,14 @@ function INDataTable({
             {getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
+                onClick={() => handleRowClick(row)}  // Row selection based on checkbox availability
+                onDoubleClick={() => row.toggleSelected()}
                 className={classNames({
+                  'selected-row': row.getIsSelected() && checkboxed, // Seçili satırlar sadece checkbox varsa renk değiştirir
+                  'unselected-row': !row.getIsSelected() && checkboxed, // Seçilmeyen satırlar
                   "no-hover-bg": !rowHoverStyle.background,
                   "no-hover-border": !rowHoverStyle.border,
                 })}
-                onClick={() => onRowClick(row)}
-                onDoubleClick={() => row.toggleSelected()}
               >
                 {row.getVisibleCells().map((cell, index) => (
                   <td
@@ -123,8 +134,7 @@ function INDataTable({
                         cell.column.columnDef.cellClassName !== undefined,
                       "show-on-hover": cell.column.columnDef.showOnRowHover,
                     })}
-                    style={
-                      typeof cell.column.columnDef.cellStyle === "function"
+                    style={typeof cell.column.columnDef.cellStyle === "function"
                         ? cell.column.columnDef.cellStyle(cell.row.original)
                         : cell.column.columnDef.cellStyle
                     }
@@ -167,7 +177,7 @@ INDataTable.defaultProps = {
   onRowClick: () => {},
   rowHoverStyle: {
     background: true,
-    border: false,
+    border: true,
   },
 };
 

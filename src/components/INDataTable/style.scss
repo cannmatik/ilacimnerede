@@ -1,72 +1,75 @@
+/* style.scss */
 table:not(.ant-picker-content) {
   width: 100%;
-  border-spacing: 0px 10px;
+  border-spacing: 4px 8px;  /* Satırlar ve sütunlar arasında boşluk, ancak çok geniş değil */
+  border-collapse: separate;  /* Hücreler arasındaki boşluğu kontrol etmek için separate kullanıyoruz */
 
   thead tr th {
-    background-color: var(--primary-background);
+    background-color: #f4f7fb;  /* Başlıklar için daha açık bir renk */
     height: 50px;
     text-align: left;
-    padding: 0px 15px;
-    border-top: 1px solid transparent;
-    border-bottom: 1px solid transparent;
+    padding: 10px 15px;  /* Hücre içindeki boşluğu artırdık */
+    border: 1px solid #dde1e7;  /* Daha soft sınırlar */
     font-size: 14px;
-    font-weight: 500;
-    white-space: nowrap; // Başlıklar tek satırda kalır
-    text-overflow: ellipsis;
-    overflow: hidden;
+    font-weight: 600;
+    color: #333;
+    cursor: pointer;
+    min-width: 100px;  /* Minimum genişlik, yazının rahatça okunmasını sağlar */
+    transition: all 0.3s ease-in-out;
 
-    &:not(.right-corner) {
-      border-right: 1px solid var(--primary-disabled-color);
+    /* Yazı taşmasını sağla */
+    white-space: normal;
+    word-wrap: break-word;
+    text-overflow: clip;
+
+    &:hover {
+      background-color: #e9eff6;
+      border-color: #a7b1c2;
     }
-  }
-
-  tbody tr td {
-    background-color: var(--primary-background);
-    padding: 15px;
-    vertical-align: top;
-    height: 50px;
-    white-space: nowrap; // Metin taşarsa tek satırda tutar
-    text-overflow: ellipsis; // Uzun metinler için üç nokta ekler
-    overflow: hidden;
-    font-size: 13px;
-    border-spacing: initial;
 
     &:not(.right-corner) {
-      border-right: 1px solid var(--primary-disabled-color);
+      border-right: 1px solid #dde1e7;
     }
   }
 
   tbody {
-    tr:not(.no-hover-border) {
-      &:hover {
-        td {
-          border-top: 1px solid var(--primary-green);
-          border-bottom: 1px solid var(--primary-green);
-        }
-        .right-corner {
-          border-right: 1px solid var(--primary-green);
-        }
-        .left-corner {
-          border-left: 1px solid var(--primary-green);
-        }
-      }
-    }
-    tr:not(.no-hover-bg) {
-      &:hover {
-        background-color: var(--fourth-green);
-        td {
-          background-color: transparent;
-        }
-      }
-    }
-
     tr {
       cursor: pointer;
+
+      &.selected-row {
+        background-color: #25b597 !important;
+        color: #fff !important;
+        
+        td {
+          background-color: transparent !important;
+          border-color: #25b597 !important;
+        }
+      }
+
+      &.unselected-row {
+        background-color: #f8d7da !important;
+        color: #333 !important;
+        
+        td {
+          background-color: transparent !important;
+          border-color: #f8d7da !important;
+        }
+      }
+
       &:hover {
-        .show-on-hover {
-          * {
-            visibility: visible;
-          }
+        background-color: #f0f4f8;
+        
+        td {
+          border-top: 1px solid #dde1e7;
+          border-bottom: 1px solid #dde1e7;
+        }
+        
+        .right-corner {
+          border-right: 1px solid #dde1e7;
+        }
+        
+        .left-corner {
+          border-left: 1px solid #dde1e7;
         }
       }
     }
@@ -75,82 +78,60 @@ table:not(.ant-picker-content) {
   .left-corner {
     border-top-left-radius: 15px;
     border-bottom-left-radius: 15px;
-    border-left: 1px solid transparent;
+    border-left: 1px solid #dde1e7;
   }
 
   .right-corner {
     border-top-right-radius: 15px;
     border-bottom-right-radius: 15px;
-    border-right: 1px solid transparent;
+    border-right: 1px solid #dde1e7;
   }
 
-  .show-on-hover {
-    * {
-      visibility: hidden;
-    }
+  .show-on-hover * {
+    visibility: hidden;
   }
 }
 
 .ilacimNerede-data-table-container {
   width: 100%;
-  overflow-x: auto; /* Yatay kaydırma özelliği */
+  overflow-x: auto;
+  padding: 20px 0;
+
   table {
     width: 100%;
-    border-spacing: 0 10px;
-    table-layout: auto; /* İçeriğe göre genişlik ayarı */
+    border-spacing: 4px 8px;  /* Satırlar ve sütunlar arasına belirgin boşluk ekledik */
+    border-collapse: separate;
   }
 
   thead tr th,
-  tbody tr td {
-    padding: 15px;
-    white-space: nowrap; /* İçeriğin taşmasını önler */
-    text-overflow: ellipsis; /* Taşan metni kısaltır */
-    overflow: hidden;
-    min-width: 120px; /* Minimum genişlik */
-  }
-
-  thead tr th {
-    font-size: 14px;
-    font-weight: 500;
-    text-align: left;
-    background-color: var(--primary-background);
-    border-bottom: 1px solid var(--primary-disabled-color);
-  }
-
-  tbody tr td {
-    font-size: 13px;
-    background-color: var(--primary-background);
-    border-bottom: 1px solid var(--primary-disabled-color);
+  tbody td {
+    padding: 12px 15px;  /* Hücre içindeki boşluk */
+    white-space: normal;
+    word-wrap: break-word;
+    text-overflow: clip;
+    overflow: visible;
+    border-radius: 8px;
+    border: 1px solid #dde1e7;  /* Her hücre için ince bir sınır ekledik */
   }
 
   tbody tr {
-    &:hover {
+    &:hover:not(.selected-row):not(.unselected-row) {
       td {
-        background-color: var(--fourth-green); /* Hover durumunda arka plan */
+        background-color: #f9fafb;
       }
     }
   }
-
-  /* Kenar yuvarlama */
-  .left-corner {
-    border-top-left-radius: 15px;
-    border-bottom-left-radius: 15px;
-  }
-
-  .right-corner {
-    border-top-right-radius: 15px;
-    border-bottom-right-radius: 15px;
-  }
 }
-
 
 .ilacimNerede-table-action-bar {
   display: flex;
   align-items: center;
-  background-color: var(--primary-background);
+  background-color: #ffffff;
   height: 70px;
   border-radius: 15px;
   padding-left: 15px;
   margin-top: 10px;
-  flex-wrap: wrap; // Aksiyon çubuğunu responsive yapmak için
+  flex-wrap: wrap;
+  border: 1px solid #dde1e7;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }

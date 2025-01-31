@@ -1,9 +1,17 @@
+.mobile-header{
+  display: flex;
+  justify-content: center;
+  align-items: center; // Center the items vertically
+}
+
+
 .request-table {
   width: 100%;
   overflow: auto;
   background-color: #fafafa;
   border-radius: 40px;
   max-height: 60vh;
+  
 .request-accept-footer {
   display: flex;
   justify-content: center;

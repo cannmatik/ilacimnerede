@@ -22,8 +22,8 @@ const fetchRequests = async ({
   pharmacy_id,
 }) => {
   let { data, error } = await supabase
-    .from("user_request")
-    .select("id, create_date, tc_no, prescript_no, district_id, city_id") // district_id ve city_id'yi de seçiyoruz
+    .from("request")
+    .select("id, create_date, message_text, district_id, city_id") // district_id ve city_id'yi de seçiyoruz
     .not("status", "eq", 2)
     .eq("city_id", city_id)
     .or(`neighbourhood_id.is.null,neighbourhood_id.eq.${neighbourhood_id}`)

@@ -112,7 +112,7 @@ function FinishedResponse() {
           {selectedRequest && (
             <div className="request-info">
               <span>Talep Numarası: {selectedRequest?.request_id}</span>
-              <span>Mesaj: {selectedRequest?.prescript_no}</span>
+              <span>Mesaj: {selectedRequest?.message_text}</span>
             </div>
           )}
           {/* Sağ taraf için koşullu renderlama */}

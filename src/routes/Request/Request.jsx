@@ -199,7 +199,7 @@ function Request() {
 
             <div className="request-info">
               <span>Talep Numarası: {selectedRequest?.id}</span>
-              <span>Mesaj: {selectedRequest?.prescript_no}</span>
+              <span>Mesaj: {selectedRequest?.message_text}</span>
               <input
                 type="text"
                 value={messageText}

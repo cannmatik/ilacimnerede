@@ -31,8 +31,8 @@ const fetchFinishedRequests = async ({ pharmacy_id }) => {
   const requestIds = responses.map(({ request_id }) => request_id);
 
   const { data: userInfo, error: userInfoError } = await supabase
-    .from("user_request")
-    .select("id, tc_no  , prescript_no")
+    .from("request")
+    .select("id, message_text")
     .in("id", requestIds)
     .eq("status", 2);
 
@@ -41,12 +41,12 @@ const fetchFinishedRequests = async ({ pharmacy_id }) => {
   debugger;
 
   const userInfoMap = new Map(
-    userInfo.map(({ id, tc_no, prescript_no }) => [id, { tc_no, prescript_no }])
+    userInfo.map(({ id, message_text }) => [id, { message_text }])
   );
 
   return responses.map((response) => {
-    const { tc_no, prescript_no } = userInfoMap.get(response.request_id) || {};
-    return { ...response, tc_no, prescript_no };
+    const {  message_text } = userInfoMap.get(response.request_id) || {};
+    return { ...response, message_text };
   });
 };
 

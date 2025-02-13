@@ -1,43 +1,50 @@
-.mobile-header{
+// Header yüksekliği değişkeni
+$header-height: 80px;
+
+/* Mobile Header */
+.mobile-header {
   display: flex;
   justify-content: center;
-  align-items: center; // Center the items vertically
+  align-items: center; // Elemanları dikeyde ortalar
+  margin-top: $header-height; // Header yüksekliği kadar üst boşluk eklenir
 }
 
-
+/* Request Table */
 .request-table {
   width: 100%;
   overflow: auto;
   background-color: #fafafa;
   border-radius: 40px;
   max-height: 60vh;
-  
-.request-accept-footer {
-  display: flex;
-  justify-content: center;
-  align-items: center; // Center the items vertically
+  margin-top: $header-height; // Header ile çakışmayı önlemek için boşluk eklenir
 
-  .prev-or-next {
-    &:is(.enabled) {
-      opacity: 1;
-      width: 30px;
-      height: 30px;
-      padding: 5px;
-      cursor: pointer;
-      margin: 0 10px; // Add margin to space out the icons from the button
-    }
-    &:is(.disabled) {
-      width: 30px;
-      height: 30px;
-      padding: 5px;
-      transition: opacity 0.3s ease;
-      opacity: 0.5;
-      margin: 0 10px; // Add margin for consistency
+  .request-accept-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center; // Elemanları dikeyde ortalar
+
+    .prev-or-next {
+      &:is(.enabled) {
+        opacity: 1;
+        width: 30px;
+        height: 30px;
+        padding: 5px;
+        cursor: pointer;
+        margin: 0 10px; // Butonlar arasında eşit boşluk
+      }
+      &:is(.disabled) {
+        width: 30px;
+        height: 30px;
+        padding: 5px;
+        transition: opacity 0.3s ease;
+        opacity: 0.5;
+        margin: 0 10px; // Tutarlılık için margin
+      }
     }
   }
 }
-}
 
+/* Request Info */
 .request-info {
   display: flex;
   flex-direction: column;
@@ -45,64 +52,62 @@
   background-color: #fafafa;
   border-radius: 40px;
   max-height: 60vh;
+  margin-top: $header-height; // Header ile çakışmayı önlemek için boşluk
 }
 
-// .tick-icon {
-//   width: 16px; /* Adjust the size as needed */
-//   height:16px;
-//   fill: green;
-//   display: inline-block;
-// }
-
+/* Icon Styles */
 .icon {
   position: relative;
   display: inline-block;
-  width: 16px; /* Adjust size as needed */
+  width: 16px; /* Gerekirse boyut ayarlanabilir */
   height: 16px;
   left: 17px;
-  top:5px;
+  top: 5px;
 }
 
 .tick-icon::before {
   content: '';
   position: absolute;
-  width: 6px; /* Adjust thickness as needed */
-  height: 12px; /* Adjust length as needed */
-  border-right: 2px solid green; /* Color of the tick */
-  border-bottom: 2px solid green; /* Color of the tick */
+  width: 6px; /* Kalınlık ayarı */
+  height: 12px; /* Uzunluk ayarı */
+  border-right: 2px solid green; /* İşaretin rengi */
+  border-bottom: 2px solid green; /* İşaretin rengi */
   transform: rotate(45deg);
-  top: 1px; /* Adjust position as needed */
-  left: 4px; /* Adjust position as needed */
+  top: 1px; /* Konum ayarı */
+  left: 4px; /* Konum ayarı */
 }
 
 .cross-icon::before {
   content: '';
   position: absolute;
-  width: 2px; /* Adjust thickness as needed */
-  height: 12px; /* Adjust length as needed */
-  background-color: red; /* Color of the cross */
+  width: 2px; /* Kalınlık ayarı */
+  height: 12px; /* Uzunluk ayarı */
+  background-color: red; /* Çarpı rengini ayarlar */
   transform: rotate(45deg);
-  top: 2px; /* Adjust position as needed */
-  left: 7px; /* Adjust position as needed */
+  top: 2px; /* Konum ayarı */
+  left: 7px; /* Konum ayarı */
 }
 
 .cross-icon::after {
   content: '';
   position: absolute;
-  width: 2px; /* Adjust thickness as needed */
-  height: 12px; /* Adjust length as needed */
-  background-color: red; /* Color of the cross */
+  width: 2px; /* Kalınlık ayarı */
+  height: 12px; /* Uzunluk ayarı */
+  background-color: red; /* Çarpı rengini ayarlar */
   transform: rotate(-45deg);
-  top: 2px; /* Adjust position as needed */
-  left: 7px; /* Adjust position as needed */
+  top: 2px; /* Konum ayarı */
+  left: 7px; /* Konum ayarı */
 }
+
+/* Delete Request Button Container */
 .delete-request-button-container {
   display: flex;
   justify-content: center;
   margin-top: 20px;
-  margin-bottom: 40px;  // Alt boşluk ekleyerek butonun görünmesini sağlıyoruz
+  margin-bottom: 40px;  // Alt boşluk eklenerek butonun görünürlüğü sağlanır
 }
 
+/* Delete Request Button */
 .delete-request-button {
   background-color: #e74c3c;
   color: white;

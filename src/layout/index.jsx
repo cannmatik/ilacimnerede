@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 
 import "./style.scss";
@@ -11,17 +11,17 @@ function Layout() {
   const userLoggedIn = useSelector((state) => state.user.isLoggedIn);
   const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [progress, setProgress] = useState(0);
-  const progressIntervalRef = useRef(null);
 
   // Kullanıcı doğrulama işlemi
   useEffect(() => {
     const checkAuth = async () => {
+      // Gerçek auth kontrolü
       const authCheckResult = await checkUserAuth();
+
       setIsAuthChecked(true);
       if (authCheckResult) {
-        // Progressi 100'e ayarla ve ardından yönlendir
-        setProgress(100);
-        window.location.href = "/home";
+        // Eğer kullanıcı giriş yapmışsa, yönlendirme yapılabilir.
+        window.location.href = "/home"; // Ana sayfaya yönlendirme
       }
     };
 
@@ -30,27 +30,22 @@ function Layout() {
 
   // Yükleme ilerlemesi
   useEffect(() => {
-    if (isAuthChecked && progressIntervalRef.current === null) {
-      progressIntervalRef.current = setInterval(() => {
+    if (isAuthChecked) {
+      const progressInterval = setInterval(() => {
         setProgress((prevProgress) => {
           if (prevProgress >= 100) {
-            clearInterval(progressIntervalRef.current);
-            progressIntervalRef.current = null;
+            clearInterval(progressInterval);
             return 100;
           }
           return Math.min(prevProgress + Math.random() * 10, 100);
         });
-      }, 60);
-    }
+      }, 100);
 
-    return () => {
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-      }
-    };
+      return () => clearInterval(progressInterval);
+    }
   }, [isAuthChecked]);
 
-  // Auth kontrolü tamamlanmadıysa veya yükleme devam ediyorsa
+  // Eğer auth kontrolü tamamlanmadıysa veya yükleme devam ediyorsa
   if (!isAuthChecked || progress < 100) {
     return (
       <div className="loading-container">
@@ -65,7 +60,7 @@ function Layout() {
     );
   }
 
-  // Auth kontrolü tamamlandığında
+  // Eğer auth kontrolü tamamlandıysa ve progress %100 olduysa:
   return (
     <React.Suspense fallback={<div>Yükleniyor...</div>}>
       {userLoggedIn ? (
@@ -95,7 +90,10 @@ const checkUserAuth = async () => {
         },
       });
 
-      return response.ok;
+      if (response.ok) {
+        return true;
+      }
+      return false;
     } catch (error) {
       console.error("Token doğrulama hatası:", error);
       return false;

@@ -241,7 +241,7 @@ function Request() {
                 className={`prev-or-next ${isNextDisabled ? "disabled" : "enabled"}`}
                 onClick={!isNextDisabled ? openNextRequest : undefined}
                 alt="Sonraki Talep"
-              />
+              />g
             </div>
           </Col>
         ) : null}

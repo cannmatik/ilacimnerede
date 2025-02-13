@@ -10,7 +10,6 @@ import { useSelector } from "react-redux";
 import { message, Button, Checkbox } from "antd"; // Ant Design importları
 import { useState, useMemo, useEffect } from "react";
 
-
 const REQUEST_KEYS = {
   ALL: ["Request", "requests"],
   DETAIL: (id) => ["Request", "requestDetails", id],
@@ -19,15 +18,11 @@ const REQUEST_KEYS = {
 import moment from "moment";
 import "moment/locale/tr";
 
-moment.locale("tr"); // Dil ayarını yap
-console.log("Moment.js dil ayarı (Ana Dosya):", moment.locale()); // Test için kontrol et
-console.log("Örnek tarih:", moment().format("DD MM YYYY HH:mm"));
-
 const fetchRequests = async ({ city_id, neighbourhood_id, district_id, pharmacy_id }) => {
   let { data, error } = await supabase
     .from("request")
-    .select("id, create_date, message_text, district_id, city_id, response_count")  // 📌 response_count eklendi
-    .not("status", "eq", 2)
+    .select("id, create_date, message_text, district_id, city_id, response_count, status") // 📌 response_count ve status ekledik
+    .not("status", "eq", 2) // 📌 `status = 2` olanları dahil etme (Kapalı talepler)
     .eq("city_id", city_id)
     .or(`neighbourhood_id.is.null,neighbourhood_id.eq.${neighbourhood_id}`)
     .or(`district_id.is.null,district_id.eq.${district_id}`);
@@ -41,16 +36,36 @@ const fetchRequests = async ({ city_id, neighbourhood_id, district_id, pharmacy_
     return [];
   }
 
-  // 📌 Türkçe tarih formatı ve `response_count` ekliyoruz
+  // 📌 Yanıtlayan eczane sayısını düzgün gösterelim
   let formattedData = data.map(item => ({
     ...item, 
     create_date: moment(item.create_date).locale('tr').format("DD MM YYYY HH:mm"),
-    response_count: item.response_count || 0  // Yanıt yoksa 0 göster
+    response_count: item.response_count ?? 0, // Yanıt yoksa 0 göster
+    status: item.status // Status kontrolünü düzgün yap
   }));
+
+  // 📌 Daha önce yanıtlanmamış talepleri filtrele
+  const { data: unFinishedRequests, error: unfinishedError } = await supabase
+    .from("response")
+    .select("request_id")
+    .eq("pharmacy_id", pharmacy_id);
+
+  if (unfinishedError) {
+    console.log("error filtering requests:", unfinishedError);
+    return formattedData;
+  }
+
+  if (unFinishedRequests && unFinishedRequests.length > 0) {
+    formattedData = formattedData.filter(
+      (item) =>
+        !unFinishedRequests.some(
+          (unFinishedRequest) => unFinishedRequest.request_id === item.id
+        )
+    );
+  }
 
   return formattedData; 
 };
-
 
 async function getRequestDetails({ queryKey }) {
   const id = queryKey[2];

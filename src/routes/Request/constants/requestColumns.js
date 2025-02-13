@@ -10,8 +10,8 @@ const columns = [
     header: "Oluşturulma Tarihi",
     accessor: "create_date",
     Cell: ({ value }) => {
-      return moment(value).locale('tr').format('DD.MM.YYYY HH:mm');
-    }
+      return moment(value).format('DD MMMM YYYY HH.mm'); // 📌 Türkçe formatta görüntüleme
+    }      
   },
 ];
 const columns_requestDetail = [

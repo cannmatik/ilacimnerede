@@ -6,7 +6,6 @@ import { privateRoutes } from "@routes/private";
 function App() {
   const location = useLocation();
 
-  // privatePath'i sadece ilk renderda set et
   useEffect(() => {
     const privatePath = privateRoutes.find(
       (route) => route.path === location.pathname
@@ -15,7 +14,7 @@ function App() {
     if (privatePath) {
       localStorage.setItem("redirectPath", privatePath);
     }
-  }, [location]); // location değiştiğinde tekrar çalışacak
+  }, [location]);
 
   return (
     <>

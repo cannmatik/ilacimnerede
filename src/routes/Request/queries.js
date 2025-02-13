@@ -15,15 +15,13 @@ const REQUEST_KEYS = {
   DETAIL: (id) => ["Request", "requestDetails", id],
 };
 
-const fetchRequests = async ({
-  city_id,
-  neighbourhood_id,
-  district_id,
-  pharmacy_id,
-}) => {
+import moment from "moment";
+import "moment/locale/tr";
+
+const fetchRequests = async ({ city_id, neighbourhood_id, district_id, pharmacy_id }) => {
   let { data, error } = await supabase
     .from("request")
-    .select("id, create_date, message_text, district_id, city_id") // district_id ve city_id'yi de seçiyoruz
+    .select("id, create_date, message_text, district_id, city_id") 
     .not("status", "eq", 2)
     .eq("city_id", city_id)
     .or(`neighbourhood_id.is.null,neighbourhood_id.eq.${neighbourhood_id}`)
@@ -34,23 +32,38 @@ const fetchRequests = async ({
     return [];
   }
 
-  if (data) {
-    const { data: unFinishedRequests } = await supabase
-      .from("response")
-      .select()
-      .eq("pharmacy_id", pharmacy_id);
-
-    if (unFinishedRequests) {
-      data = data.filter(
-        (item) =>
-          !unFinishedRequests.some(
-            (unFinishedRequest) => unFinishedRequest.request_id === item.id
-          )
-      );
-    }
+  // Eğer data boşsa direkt geri dön.
+  if (!data || data.length === 0) {
+    return [];
   }
 
-  return data;
+  // 📌 Tüm veriyi koruyarak sadece `create_date` formatını değiştiriyoruz
+  let formattedData = data.map(item => ({
+    ...item, 
+    create_date: moment(item.create_date).locale('tr').format("DD MMMM YYYY HH.mm")
+  }));
+
+  // ✅ `unFinishedRequests` filtrelemesini sadece veri varsa yap.
+  const { data: unFinishedRequests, error: unfinishedError } = await supabase
+    .from("response")
+    .select()
+    .eq("pharmacy_id", pharmacy_id);
+
+  if (unfinishedError) {
+    console.log("error filtering requests:", unfinishedError);
+    return formattedData; // Hata olursa yine de formatlanmış veriyi döndür.
+  }
+
+  if (unFinishedRequests && unFinishedRequests.length > 0) {
+    formattedData = formattedData.filter(
+      (item) =>
+        !unFinishedRequests.some(
+          (unFinishedRequest) => unFinishedRequest.request_id === item.id
+        )
+    );
+  }
+
+  return formattedData; // 🔥 Formatlanmış ve filtrelenmiş veriyi döndür.
 };
 
 async function getRequestDetails({ queryKey }) {

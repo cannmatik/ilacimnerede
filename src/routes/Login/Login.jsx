@@ -55,6 +55,7 @@ function Login() {
         <Auth
           supabaseClient={supabase}
           appearance={{ theme: ThemeSupa }}
+          view="sign_in"
           providers={[]}
           localization={{
             variables: {
@@ -68,32 +69,15 @@ function Login() {
                 link_text: "Hesabınız Zaten Varsa Giriş Yapın",
                 confirmation_text: "Şifrenizi sıfırlamak için e-postanızı kontrol edin"
               },
-              sign_up: {
-                email_label: "E-posta adresinizi girin",
-                password_label: "Şifrenizi girin",
-                email_input_placeholder: "E-posta adresiniz",
-                password_input_placeholder: "Şifreniz",
-                button_label: "Kayıt Ol",
-                loading_button_label: "Kaydolunuyor...",
-                link_text: "Hesabınız yok mu? Kayıt Olun",
-                confirmation_text: "Hesabınızı aktif hale getirmek için e-postanızı kontrol edin"
-              },
-              forgotten_password: {
-                email_label: "E-posta adresinizi girin",
-                password_label: "Şifrenizi girin",
-                email_input_placeholder: "E-posta adresiniz",
-                button_label: "Şifremi Sıfırla",
-                loading_button_label: "Sıfırlama Bağlantısı Gönderiliyor...",
-                link_text: "Şifrenizi mi unuttunuz?",
-                confirmation_text: "Şifrenizi sıfırlamak için e-postanızı kontrol edin"
-              },
-              update_password: {
-                password_label: "Yeni şifrenizi girin",
-                password_input_placeholder: "Yeni şifreniz",
-                button_label: "Şifreyi Güncelle",
-                loading_button_label: "Güncelleniyor...",
-                confirmation_text: "Şifreniz güncellendi"
-              }
+                sign_up: {
+                  link_text: "", // Kayıt ol linkini etkisiz hale getirmek için boş bırakılır
+                  // Diğer metinler...
+                },
+                forgotten_password: {
+                  link_text: "", // Parolamı unuttum linki için boş değer
+                  // Diğer metinler...
+                },
+            
             },
           }}
         />

@@ -1,13 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import "./style.scss";
 import {
   useReactTable,
   createColumnHelper,
   getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
   flexRender,
 } from "@tanstack/react-table";
-import { Checkbox } from "antd";
+import { Checkbox, Input, Select } from "antd";
 import classNames from "classnames";
 
 const columnHelper = createColumnHelper();
@@ -18,7 +20,7 @@ const checkboxObj = [
     header: "Mevcut",
     cell: ({ row }) => (
       <Checkbox
-        onClick={(e) => e.stopPropagation()}  // Checkbox tıklamasını engellemek için
+        onClick={(e) => e.stopPropagation()} // Checkbox tıklamasını engellemek için
         checked={row.getIsSelected()}
         onChange={row.getToggleSelectedHandler()}
       />
@@ -38,6 +40,9 @@ function INDataTable({
   rowHoverStyle,
   isLoading,
 }) {
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [selectedFilterColumn, setSelectedFilterColumn] = useState(columns[0]?.accessor || "");
+
   const $columns = checkboxed ? [...columns, ...checkboxObj] : columns;
 
   const table = useReactTable({
@@ -46,6 +51,12 @@ function INDataTable({
       columnHelper.accessor(column.accessor, { ...column })
     ),
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    state: {
+      globalFilter,
+    },
+    onGlobalFilterChange: setGlobalFilter,
   });
 
   const {
@@ -55,32 +66,46 @@ function INDataTable({
     toggleAllPageRowsSelected,
   } = table;
 
-  const checkedRows = JSON.stringify(
-    getSelectedRowModel().rows.map((item) => item.original)
-  );
-
   useEffect(() => {
-    const $checkedRows = JSON.parse(checkedRows);
-    setSelectedRows($checkedRows);
-  }, [checkedRows]);
+    const checkedRows = getSelectedRowModel().rows.map((item) => item.original);
+    setSelectedRows(checkedRows);
+  }, [getSelectedRowModel().rows]);
 
   useEffect(() => {
     toggleAllPageRowsSelected(false);
   }, [unSelectAllOnTabChange]);
 
-  // Row click handler modification based on checkbox availability
   const handleRowClick = (row) => {
     if (checkboxed) {
-      // Row seçimi sadece checkbox tablosu için yapılır
-      row.toggleSelected();
+      row.toggleSelected(); // Checkbox varsa satırı seç
     } else {
-      // Eğer checkbox yoksa, onRowClick çalıştırılır (yani normal tıklama işlevi)
-      onRowClick(row);
+      onRowClick(row); // Yoksa satır seçimini çalıştır
     }
   };
 
   return (
     <div className="ilacimNerede-data-table-container">
+      {/* 🔎 Filtreleme Alanı */}
+      <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+        <Select
+          style={{ width: "200px" }}
+          value={selectedFilterColumn}
+          onChange={setSelectedFilterColumn}
+        >
+          {columns.map((col) => (
+            <Select.Option key={col.accessor} value={col.accessor}>
+              {col.header}
+            </Select.Option>
+          ))}
+        </Select>
+        <Input
+          placeholder="Tabloda Ara..."
+          value={globalFilter}
+          onChange={(e) => setGlobalFilter(e.target.value)}
+          style={{ flex: 1 }}
+        />
+      </div>
+
       <div className="table-wrapper">
         <table>
           <thead>
@@ -89,7 +114,9 @@ function INDataTable({
                 {headerGroup.headers.map((header, index) => (
                   <th
                     key={header.id}
+                    onClick={header.column.getToggleSortingHandler()} // Sıralama için tıklanabilir başlıklar
                     className={classNames({
+                      "sortable-header": true,
                       "left-corner": index === 0,
                       "right-corner": index === headerGroup.headers.length - 1,
                       [header.column.columnDef.headerClassName]:
@@ -103,6 +130,9 @@ function INDataTable({
                           header.column.columnDef.header,
                           header.getContext()
                         )}
+                    {header.column.getIsSorted() ? (
+                      header.column.getIsSorted() === "desc" ? " 🔽" : " 🔼"
+                    ) : null}
                   </th>
                 ))}
               </tr>
@@ -113,11 +143,11 @@ function INDataTable({
             {getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
-                onClick={() => handleRowClick(row)}  // Row selection based on checkbox availability
-                onDoubleClick={() => row.toggleSelected()}
+                onClick={() => handleRowClick(row)}
+                onDoubleClick={() => row.toggleSelected()} // Çift tıklama ile seçim yapma
                 className={classNames({
-                  'selected-row': row.getIsSelected() && checkboxed, // Seçili satırlar sadece checkbox varsa renk değiştirir
-                  'unselected-row': !row.getIsSelected() && checkboxed, // Seçilmeyen satırlar
+                  "selected-row": row.getIsSelected() && checkboxed, // Seçili satırlar checkbox varsa renk değiştirir
+                  "unselected-row": !row.getIsSelected() && checkboxed, // Seçilmeyen satırlar
                   "no-hover-bg": !rowHoverStyle.background,
                   "no-hover-border": !rowHoverStyle.border,
                 })}

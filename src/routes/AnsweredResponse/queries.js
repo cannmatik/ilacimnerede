@@ -7,6 +7,8 @@
   } from "@store/selectors";
   import { useMutation, useQuery } from "@tanstack/react-query";
   import { useSelector } from "react-redux";
+  import moment from "moment";
+  import "moment/locale/tr";
 
   const ANSWERED_REQUEST_KEYS = {
     ALL: ["Answered-Request", "AnswredRequests"],
@@ -18,34 +20,43 @@
     ],
   };
 
+  
+  
+  moment.locale("tr"); // Türkçe dil ayarını aktif et
+  
   const fetchAnsweredRequests = async ({ pharmacy_id }) => {
     const { data: responses, error } = await supabase
       .from("response")
       .select("id,request_id, pharmacy_id, create_date")
       .eq("status", 1)
       .eq("pharmacy_id", pharmacy_id);
-
+  
     if (error) return [];
-
+  
     const requestIds = responses.map(({ request_id }) => request_id);
-
+  
     const { data: userInfo, error: userInfoError } = await supabase
       .from("request")
       .select("id, message_text")
       .in("id", requestIds);
-
+  
     if (userInfoError) return [];
-
+  
     const userInfoMap = new Map(
-      userInfo.map(({ id, message_text }) => [id, {  message_text }])
+      userInfo.map(({ id, message_text }) => [id, { message_text }])
     );
-
+  
     return responses.map((response) => {
-      const {  message_text } = userInfoMap.get(response.request_id) || {};
-      return { ...response, message_text };
+      const { message_text } = userInfoMap.get(response.request_id) || {};
+  
+      return { 
+        ...response, 
+        message_text,
+        create_date: moment(response.create_date).locale("tr").format("DD MM YYYY HH:mm") // İngilizce ay isimlerini kaldırdık
+      };
     });
   };
-
+  
   async function getRequestDetails({ queryKey }) {
     debugger;
     const request_id = queryKey[2];

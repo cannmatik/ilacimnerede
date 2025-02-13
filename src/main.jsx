@@ -12,10 +12,6 @@ import App from "./App";
 import moment from "moment";
 import "moment/locale/tr";
 
-moment.locale("tr"); // Türkçe ayarını başta yap
-console.log("Moment.js dil ayarı (Main.js):", moment.locale()); // Test için konsola yazdır
-
-
 
 const theme = {
   token: {

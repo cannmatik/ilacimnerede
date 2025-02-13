@@ -19,6 +19,11 @@ const ANSWERED_REQUEST_KEYS = {
   ],
 };
 
+import moment from "moment";
+import "moment/locale/tr";
+
+moment.locale("tr"); // Türkçeyi zorunlu yap
+
 const fetchFinishedRequests = async ({ pharmacy_id }) => {
   const { data: responses, error } = await supabase
     .from("response")
@@ -38,17 +43,21 @@ const fetchFinishedRequests = async ({ pharmacy_id }) => {
 
   if (userInfoError) return [];
 
-  debugger;
-
   const userInfoMap = new Map(
     userInfo.map(({ id, message_text }) => [id, { message_text }])
   );
 
   return responses.map((response) => {
-    const {  message_text } = userInfoMap.get(response.request_id) || {};
-    return { ...response, message_text };
+    const { message_text } = userInfoMap.get(response.request_id) || {};
+
+    return { 
+      ...response, 
+      message_text,
+      create_date: moment(response.create_date).locale("tr").format("DD MM YYYY HH:mm") // İngilizce ay isimlerini kaldırdık
+    };
   });
 };
+
 
 async function getRequestDetails({ queryKey }) {
   debugger;

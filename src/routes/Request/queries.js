@@ -10,6 +10,7 @@ import { useSelector } from "react-redux";
 import { message, Button, Checkbox } from "antd"; // Ant Design importları
 import { useState, useMemo, useEffect } from "react";
 
+
 const REQUEST_KEYS = {
   ALL: ["Request", "requests"],
   DETAIL: (id) => ["Request", "requestDetails", id],
@@ -18,10 +19,14 @@ const REQUEST_KEYS = {
 import moment from "moment";
 import "moment/locale/tr";
 
+moment.locale("tr"); // Dil ayarını yap
+console.log("Moment.js dil ayarı (Ana Dosya):", moment.locale()); // Test için kontrol et
+console.log("Örnek tarih:", moment().format("DD MM YYYY HH:mm"));
+
 const fetchRequests = async ({ city_id, neighbourhood_id, district_id, pharmacy_id }) => {
   let { data, error } = await supabase
     .from("request")
-    .select("id, create_date, message_text, district_id, city_id") 
+    .select("id, create_date, message_text, district_id, city_id, response_count")  // 📌 response_count eklendi
     .not("status", "eq", 2)
     .eq("city_id", city_id)
     .or(`neighbourhood_id.is.null,neighbourhood_id.eq.${neighbourhood_id}`)
@@ -32,39 +37,20 @@ const fetchRequests = async ({ city_id, neighbourhood_id, district_id, pharmacy_
     return [];
   }
 
-  // Eğer data boşsa direkt geri dön.
   if (!data || data.length === 0) {
     return [];
   }
 
-  // 📌 Tüm veriyi koruyarak sadece `create_date` formatını değiştiriyoruz
+  // 📌 Türkçe tarih formatı ve `response_count` ekliyoruz
   let formattedData = data.map(item => ({
     ...item, 
-    create_date: moment(item.create_date).locale('tr').format("DD MMMM YYYY HH.mm")
+    create_date: moment(item.create_date).locale('tr').format("DD MM YYYY HH:mm"),
+    response_count: item.response_count || 0  // Yanıt yoksa 0 göster
   }));
 
-  // ✅ `unFinishedRequests` filtrelemesini sadece veri varsa yap.
-  const { data: unFinishedRequests, error: unfinishedError } = await supabase
-    .from("response")
-    .select()
-    .eq("pharmacy_id", pharmacy_id);
-
-  if (unfinishedError) {
-    console.log("error filtering requests:", unfinishedError);
-    return formattedData; // Hata olursa yine de formatlanmış veriyi döndür.
-  }
-
-  if (unFinishedRequests && unFinishedRequests.length > 0) {
-    formattedData = formattedData.filter(
-      (item) =>
-        !unFinishedRequests.some(
-          (unFinishedRequest) => unFinishedRequest.request_id === item.id
-        )
-    );
-  }
-
-  return formattedData; // 🔥 Formatlanmış ve filtrelenmiş veriyi döndür.
+  return formattedData; 
 };
+
 
 async function getRequestDetails({ queryKey }) {
   const id = queryKey[2];

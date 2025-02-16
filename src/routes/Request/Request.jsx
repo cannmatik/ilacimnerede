@@ -177,9 +177,9 @@ function Request() {
                 />
               </div>
             ) : (
-              <div className="center-content fade-in pulse">
-                <Empty description="Şu an bekleyen talep yok." />
-              </div>
+<div className="empty-container fade-in pulse">
+  <Empty description="Şu an bekleyen talep yok." />
+</div>
             )}
           </Col>
         )}

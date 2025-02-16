@@ -102,9 +102,9 @@ function FinishedResponse() {
               />
             </div>
           ) : (
-            <div className="center-content fade-in pulse">
-              <Empty description="Şu an kapatılan talebiniz yok." />
-            </div>
+<div className="empty-container fade-in pulse">
+  <Empty description="Kapatılan talebiniz yok." />
+</div>
           )}
         </Col>
         <Col xs={12} md={6} className="request-table">

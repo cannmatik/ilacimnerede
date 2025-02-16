@@ -109,9 +109,9 @@ const AnsweredResponse = () => {
                 />
               </div>
             ) : (
-              <div className="center-content fade-in pulse">
-                <Empty description="Şu an cevaplanmış talep yok." />
-              </div>
+<div className="empty-container fade-in pulse">
+  <Empty description="Henüz hiçbir talebi cevaplamadınız." />
+</div>
             )}
           </Col>
         )}

@@ -1,136 +1,191 @@
-// Header yüksekliği değişkeni
+// style.scss (AnsweredResponse için)
+
+// Header yüksekliği
 $header-height: 80px;
 
-/* Mobile Header */
-.mobile-header {
-  display: flex;
-  justify-content: center;
-  align-items: center; // Elemanları dikeyde ortalar
-  margin-top: $header-height; // Header yüksekliği kadar üst boşluk eklenir
-}
-
-/* Request Table */
-.request-table {
-  width: 100%;
-  overflow: auto;
-  background-color: #fafafa;
-  border-radius: 40px;
-  max-height: 60vh;
-  margin-top: $header-height; // Header ile çakışmayı önlemek için boşluk eklenir
-
-  .request-accept-footer {
-    display: flex;
-    justify-content: center;
-    align-items: center; // Elemanları dikeyde ortalar
-
-    .prev-or-next {
-      &:is(.enabled) {
-        opacity: 1;
-        width: 30px;
-        height: 30px;
-        padding: 5px;
-        cursor: pointer;
-        margin: 0 10px; // Butonlar arasında eşit boşluk
-      }
-      &:is(.disabled) {
-        width: 30px;
-        height: 30px;
-        padding: 5px;
-        transition: opacity 0.3s ease;
-        opacity: 0.5;
-        margin: 0 10px; // Tutarlılık için margin
-      }
-    }
+// Genel fadeIn animasyonu
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* Request Info */
-.request-info {
-  display: flex;
-  flex-direction: column;
-  padding: 10px 15px;
-  background-color: #fafafa;
-  border-radius: 40px;
-  max-height: 60vh;
-  margin-top: $header-height; // Header ile çakışmayı önlemek için boşluk
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
 }
 
-/* Icon Styles */
-.icon {
-  position: relative;
-  display: inline-block;
-  width: 16px; /* Gerekirse boyut ayarlanabilir */
-  height: 16px;
-  left: 17px;
-  top: 5px;
+/* Ana Container */
+.answered-table-container {
+  .answered-table-wrapper {
+    width: 100%;
+  }
 }
 
-.tick-icon::before {
-  content: '';
-  position: absolute;
-  width: 6px; /* Kalınlık ayarı */
-  height: 12px; /* Uzunluk ayarı */
-  border-right: 2px solid green; /* İşaretin rengi */
-  border-bottom: 2px solid green; /* İşaretin rengi */
-  transform: rotate(45deg);
-  top: 1px; /* Konum ayarı */
-  left: 4px; /* Konum ayarı */
-}
-
-.cross-icon::before {
-  content: '';
-  position: absolute;
-  width: 2px; /* Kalınlık ayarı */
-  height: 12px; /* Uzunluk ayarı */
-  background-color: red; /* Çarpı rengini ayarlar */
-  transform: rotate(45deg);
-  top: 2px; /* Konum ayarı */
-  left: 7px; /* Konum ayarı */
-}
-
-.cross-icon::after {
-  content: '';
-  position: absolute;
-  width: 2px; /* Kalınlık ayarı */
-  height: 12px; /* Uzunluk ayarı */
-  background-color: red; /* Çarpı rengini ayarlar */
-  transform: rotate(-45deg);
-  top: 2px; /* Konum ayarı */
-  left: 7px; /* Konum ayarı */
-}
-
-/* Delete Request Button Container */
-.delete-request-button-container {
+/* Spinner Container */
+.answered-spin-container {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
-  margin-bottom: 40px;  // Alt boşluk eklenerek butonun görünürlüğü sağlanır
+  align-items: center;
+  min-height: 200px;
 }
 
-/* Delete Request Button */
-.delete-request-button {
-  background-color: #e74c3c;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s ease;
-}
-
-.delete-request-button:hover {
-  background-color: #c0392b;
-}
-
-.delete-request-button:disabled {
-  background-color: #95a5a6;
-  cursor: not-allowed;
-}
-.empty-container {
-  height: calc(100vh - 80px); // Header yüksekliğine göre ayarla
+/* Boş Durum Container */
+.answered-empty-container {
+  height: calc(100vh - #{$header-height});
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+/* Sağ Panel - Answered Request Table */
+.answered-request-table {
+  width: 100%;
+  overflow: auto;
+  background-color: #fafafa;
+  border-radius: 20px; // Modern, yuvarlatılmış kenarlar
+  margin-top: $header-height;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobil Header */
+.answered-mobile-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: $header-height;
+  padding: 10px;
+}
+
+/* Talep Bilgileri */
+.answered-request-info {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 15px;
+  background-color: #fff;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+  span {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+  }
+}
+
+/* Footer (Navigasyon & Buton) */
+.answered-request-footer {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 15px;
+  padding: 10px 0;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Navigasyon İkonları */
+.answered-nav-icon {
+  width: 30px;
+  height: 30px;
+  padding: 5px;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+  
+  &.enabled {
+    opacity: 1;
+  }
+  
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+/* Silme Butonu */
+.answered-delete-button {
+  background-color: #e74c3c;
+  color: #fff;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+  
+  &:hover {
+    background-color: #c0392b;
+  }
+  
+  &:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+  }
+}
+
+/* Bildirim */
+.answered-notification {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  font-size: 14px;
+  
+  &.success {
+    background-color: #dff0d8;
+    color: #3c763d;
+  }
+  
+  &.error {
+    background-color: #f2dede;
+    color: #a94442;
+  }
+}
+
+/* İkon Stilleri (Tik & Çarpı) */
+.answered-icon {
+  position: relative;
+  display: inline-block;
+  width: 16px; /* İkon boyutu */
+  height: 16px;
+}
+
+.answered-tick-icon::before {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 12px;
+  border-right: 2px solid green;
+  border-bottom: 2px solid green;
+  transform: rotate(45deg);
+  top: 1px;
+  left: 4px;
+}
+
+.answered-cross-icon::before {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 12px;
+  background-color: red;
+  transform: rotate(45deg);
+  top: 2px;
+  left: 7px;
+}
+
+.answered-cross-icon::after {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 12px;
+  background-color: red;
+  transform: rotate(-45deg);
+  top: 2px;
+  left: 7px;
 }

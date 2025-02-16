@@ -32,7 +32,7 @@ const AnsweredResponse = () => {
     selectedRequest?.id
   );
 
-  // Verileri yeniden çek
+  // Yeniden veri çekme
   useEffect(() => {
     if (pharmacyId) refetch();
   }, [pharmacyId, refetch]);
@@ -44,19 +44,27 @@ const AnsweredResponse = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Önceki talep
+  // Önceki talep navigasyonu
   const openPrevRequest = () => {
-    const currentIndex = answeredRequests.findIndex(item => item.request_id === selectedRequest?.request_id);
-    if (currentIndex > 0) setSelectedRequest(answeredRequests[currentIndex - 1]);
+    const currentIndex = answeredRequests.findIndex(
+      (item) => item.request_id === selectedRequest?.request_id
+    );
+    if (currentIndex > 0) {
+      setSelectedRequest(answeredRequests[currentIndex - 1]);
+    }
   };
 
-  // Sonraki talep
+  // Sonraki talep navigasyonu
   const openNextRequest = () => {
-    const currentIndex = answeredRequests.findIndex(item => item.request_id === selectedRequest?.request_id);
-    if (currentIndex < answeredRequests.length - 1) setSelectedRequest(answeredRequests[currentIndex + 1]);
+    const currentIndex = answeredRequests.findIndex(
+      (item) => item.request_id === selectedRequest?.request_id
+    );
+    if (currentIndex < answeredRequests.length - 1) {
+      setSelectedRequest(answeredRequests[currentIndex + 1]);
+    }
   };
 
-  // Talep silme
+  // Talep silme işlemi
   const handleDeleteRequest = async (responseId) => {
     setLoading(true);
     setNotification("");
@@ -68,7 +76,9 @@ const AnsweredResponse = () => {
       setNotification("Talep başarıyla silindi.");
       refetch();
       
-      const currentIndex = answeredRequests.findIndex(item => item.request_id === selectedRequest?.request_id);
+      const currentIndex = answeredRequests.findIndex(
+        (item) => item.request_id === selectedRequest?.request_id
+      );
       if (currentIndex < answeredRequests.length - 1) {
         setSelectedRequest(answeredRequests[currentIndex + 1]);
       } else {
@@ -82,9 +92,11 @@ const AnsweredResponse = () => {
     }
   };
 
-  // Navigasyon durumu
+  // Navigasyon butonlarının aktifliğini güncelleme
   useEffect(() => {
-    const currentIndex = answeredRequests.findIndex(item => item.request_id === selectedRequest?.request_id);
+    const currentIndex = answeredRequests.findIndex(
+      (item) => item.request_id === selectedRequest?.request_id
+    );
     setIsPrevDisabled(currentIndex <= 0);
     setIsNextDisabled(currentIndex >= answeredRequests.length - 1);
   }, [selectedRequest, answeredRequests]);
@@ -94,13 +106,13 @@ const AnsweredResponse = () => {
       <br />
       <Row>
         {(!isMobile || !selectedRequest) && (
-          <Col xs={12} md={6} className="table-container">
+          <Col xs={12} md={6} className="answered-table-container">
             {isLoading ? (
-              <div className="spin-container center-content pulse">
+              <div className="answered-spin-container center-content pulse">
                 <Spin size="large" />
               </div>
             ) : answeredRequests.length > 0 ? (
-              <div className="fade-in" style={{ width: "100%" }}>
+              <div className="answered-table-wrapper fade-in" style={{ width: "100%" }}>
                 <INDataTable
                   data={answeredRequests}
                   columns={columns}
@@ -109,17 +121,17 @@ const AnsweredResponse = () => {
                 />
               </div>
             ) : (
-<div className="empty-container fade-in pulse">
-  <Empty description="Henüz hiçbir talebi cevaplamadınız." />
-</div>
+              <div className="answered-empty-container fade-in pulse">
+                <Empty description="Henüz hiçbir talebi cevaplamadınız." />
+              </div>
             )}
           </Col>
         )}
 
-        {(selectedRequest && !isMobile) || (isMobile && selectedRequest) ? (
-          <Col xs={12} md={6} className="request-table">
+        {selectedRequest && (
+          <Col xs={12} md={6} className="answered-request-table">
             {isMobile && (
-              <div className="mobile-header">
+              <div className="answered-mobile-header">
                 <INButton
                   flex={true}
                   onClick={() => setSelectedRequest(null)}
@@ -128,7 +140,7 @@ const AnsweredResponse = () => {
               </div>
             )}
 
-            <div className="request-info">
+            <div className="answered-request-info">
               <span>Talep Numarası: {selectedRequest?.request_id}</span>
               <span>Mesaj: {selectedRequest?.message_text}</span>
             </div>
@@ -141,16 +153,16 @@ const AnsweredResponse = () => {
               emptyText="Detay bulunamadı"
             />
 
-            <div className="request-accept-footer">
+            <div className="answered-request-footer">
               <img
                 src={before}
-                className={`prev-or-next ${isPrevDisabled ? "disabled" : "enabled"}`}
+                className={`answered-nav-icon ${isPrevDisabled ? "disabled" : "enabled"}`}
                 onClick={!isPrevDisabled ? openPrevRequest : undefined}
                 alt="Önceki Talep"
               />
               
               <INButton
-                className="delete-request-button"
+                className="answered-delete-button"
                 onClick={() => handleDeleteRequest(selectedRequest?.id)}
                 text="Verilen Yanıtı Geri Al"
                 disabled={loading}
@@ -158,19 +170,19 @@ const AnsweredResponse = () => {
               
               <img
                 src={next}
-                className={`prev-or-next ${isNextDisabled ? "disabled" : "enabled"}`}
+                className={`answered-nav-icon ${isNextDisabled ? "disabled" : "enabled"}`}
                 onClick={!isNextDisabled ? openNextRequest : undefined}
                 alt="Sonraki Talep"
               />
             </div>
 
             {notification && (
-              <div className={`notification ${notification.includes("başarı") ? "success" : "error"}`}>
+              <div className={`answered-notification ${notification.includes("başarı") ? "success" : "error"}`}>
                 {notification}
               </div>
             )}
           </Col>
-        ) : null}
+        )}
       </Row>
     </>
   );

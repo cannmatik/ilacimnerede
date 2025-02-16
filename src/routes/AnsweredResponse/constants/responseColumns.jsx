@@ -1,4 +1,4 @@
-import { INCheckbox } from "@components";
+// responseColumns.jsx
 import "../style.scss";
 
 const columns = [
@@ -28,7 +28,15 @@ const columns_requestDetail = [
   {
     header: "Durum",
     accessor: "status",
-    cell: ({ row }) => <div>{row.original.status ? <span className="icon tick-icon"></span> : <span className="icon cross-icon"></span>}</div>,
+    cell: ({ row }) => (
+      <div>
+        {row.original.status ? (
+          <span className="answered-icon answered-tick-icon"></span>
+        ) : (
+          <span className="answered-icon answered-cross-icon"></span>
+        )}
+      </div>
+    ),
   },
 ];
 

@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+const ConfrimUser = React.lazy(() => import ("./ConfrimUser"));
 
 const Login = React.lazy(() => import("./Login"));
 
@@ -8,6 +9,11 @@ const publicRoutes = [
     path: "/login",
     element: Login,
     title: "Ilacım Nerede",
+  },
+  {
+    path: "/confrimuser",
+    element: ConfrimUser,
+    title: "Ilacım Nerede Doğrulama",
   },
   {
     path: "/*",

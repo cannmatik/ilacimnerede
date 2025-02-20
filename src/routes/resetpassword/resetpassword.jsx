@@ -5,9 +5,8 @@ import "./style.scss";
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
-  // URL'de "code" parametresi varsa, bu reset linkinin tıklanmış olduğunu gösterir.
+  // URL'de "code" parametresi varsa, kullanıcı reset linkine tıklamış demektir.
   const code = searchParams.get('code');
-  const emailFromLink = searchParams.get('email'); // E-posta linkinde gönderilmişse kullanın.
 
   // Reset link gönderme formu için state'ler
   const [email, setEmail] = useState('');
@@ -21,7 +20,6 @@ const ResetPassword = () => {
   const [updateStatus, setUpdateStatus] = useState('idle'); // idle, loading, success, error
 
   // Eğer "code" parametresi varsa, kullanıcı reset linkine tıklamış demektir.
-  // Bu durumda, kullanıcıdan yeni şifre alınır ve verifyOtp ile güncelleme yapılır.
   if (code) {
     const handlePasswordUpdate = async (e) => {
       e.preventDefault();
@@ -31,11 +29,10 @@ const ResetPassword = () => {
         return;
       }
       setUpdateStatus('loading');
-      // Şifre güncelleme için verifyOtp kullanıyoruz.
+      // Şifre güncelleme için verifyOtp çağrısı; email parametresini göndermiyoruz.
       const { error } = await supabase.auth.verifyOtp({
         token: code,
         type: 'recovery',
-        email: emailFromLink, // Supabase reset linkinde email parametresi de gönderiliyorsa
         password: newPassword,
       });
       if (error) {
@@ -84,7 +81,6 @@ const ResetPassword = () => {
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setRequestStatus('loading');
-    // Reset linkine yönlendirilecek URL: Bu sayfa
     const redirectTo = window.location.origin + '/resetpassword';
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
     if (error) {

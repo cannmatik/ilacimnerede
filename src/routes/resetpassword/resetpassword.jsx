@@ -5,22 +5,24 @@ import "./style.scss";
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
-  // URL'de "token" ve "type" parametrelerini okuyalım
+  // URL'de "token" parametresi bekliyoruz
   const token = searchParams.get('token');
-  const type = searchParams.get('type');
+  // "type" parametresini kullanmak yerine, reset password için her zaman 'recovery' değerini kullanıyoruz.
+  const type = 'recovery';
 
-  // Eğer token varsa, linke tıklanmış demektir; yeni şifre formunu gösterelim.
+  // Reset link gönderme formu için state'ler
+  const [email, setEmail] = useState('');
+  const [requestMessage, setRequestMessage] = useState('');
+  const [requestStatus, setRequestStatus] = useState('idle'); // idle, loading, success, error
+
+  // Yeni şifre güncelleme formu için state'ler
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [updateMessage, setUpdateMessage] = useState('');
   const [updateStatus, setUpdateStatus] = useState('idle'); // idle, loading, success, error
 
-  // Reset linki gönderme formu state'leri (bu kısım aynı kalabilir)
-  const [email, setEmail] = useState('');
-  const [requestMessage, setRequestMessage] = useState('');
-  const [requestStatus, setRequestStatus] = useState('idle'); // idle, loading, success, error
-
-  if (token && type) {
+  // Eğer "token" parametresi varsa, reset linkine tıklanmış demektir.
+  if (token) {
     const handlePasswordUpdate = async (e) => {
       e.preventDefault();
       if (newPassword !== confirmPassword) {
@@ -31,7 +33,7 @@ const ResetPassword = () => {
       setUpdateStatus('loading');
       const { error } = await supabase.auth.verifyOtp({
         token,
-        type, // 'recovery' olması beklenir
+        type, // 'recovery' olarak sabit
         password: newPassword,
       });
       if (error) {
@@ -76,7 +78,7 @@ const ResetPassword = () => {
     );
   }
 
-  // "token" parametresi yoksa, reset linki gönderme formunu gösterelim.
+  // "token" parametresi yoksa, reset linki gönderme formunu gösteriyoruz.
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setRequestStatus('loading');

@@ -1,0 +1,70 @@
+.reset-password-container {
+    max-width: 500px;
+    margin: 40px auto;
+    background-color: #f1ecec; /* Marka arka plan rengi */
+    padding: 20px;
+    border: 1px solid #303030; /* Sınır ve ana metin rengi */
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  
+    h1 {
+      color: #25b597; /* Vurgulayıcı marka rengi */
+      margin-bottom: 20px;
+    }
+  
+    .reset-password-form {
+      display: flex;
+      flex-direction: column;
+  
+      .form-group {
+        margin-bottom: 15px;
+        
+        label {
+          display: block;
+          margin-bottom: 5px;
+          color: #303030;
+        }
+        
+        input {
+          width: 100%;
+          padding: 8px;
+          border: 1px solid #303030;
+          border-radius: 4px;
+        }
+      }
+  
+      .reset-button {
+        background-color: #25b597;
+        color: #ffffff;
+        padding: 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+  
+        &:disabled {
+          background-color: #cccccc;
+          cursor: not-allowed;
+        }
+        
+        &:hover:not(:disabled) {
+          background-color: #1e9c80;
+        }
+      }
+    }
+  
+    .message {
+      margin-top: 20px;
+      font-size: 16px;
+  
+      &.success {
+        color: #25b597;
+      }
+      
+      &.error {
+        color: #dc3545;
+      }
+    }
+  }
+  

@@ -5,9 +5,11 @@ import "./style.scss";
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
-  const code = searchParams.get('code'); // E-posta linkinde "code" parametresi var mı kontrol ediyoruz.
+  // URL'de "code" parametresi varsa, bu reset linkinin tıklanmış olduğunu gösterir.
+  const code = searchParams.get('code');
+  const emailFromLink = searchParams.get('email'); // E-posta linkinde gönderilmişse kullanın.
 
-  // E-posta ile reset link gönderme formu için state'ler
+  // Reset link gönderme formu için state'ler
   const [email, setEmail] = useState('');
   const [requestMessage, setRequestMessage] = useState('');
   const [requestStatus, setRequestStatus] = useState('idle'); // idle, loading, success, error
@@ -18,8 +20,8 @@ const ResetPassword = () => {
   const [updateMessage, setUpdateMessage] = useState('');
   const [updateStatus, setUpdateStatus] = useState('idle'); // idle, loading, success, error
 
-  // Eğer "code" parametresi varsa, kullanıcı e-posta linkine tıklamış demektir.
-  // Bu durumda yeni şifre formunu gösteriyoruz.
+  // Eğer "code" parametresi varsa, kullanıcı reset linkine tıklamış demektir.
+  // Bu durumda, kullanıcıdan yeni şifre alınır ve verifyOtp ile güncelleme yapılır.
   if (code) {
     const handlePasswordUpdate = async (e) => {
       e.preventDefault();
@@ -29,9 +31,13 @@ const ResetPassword = () => {
         return;
       }
       setUpdateStatus('loading');
-      // Kullanıcı reset linkine tıkladığında Supabase, recovery oturumu oluşturur.
-      // updateUser metodu ile şifre güncellenir.
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      // Şifre güncelleme için verifyOtp kullanıyoruz.
+      const { error } = await supabase.auth.verifyOtp({
+        token: code,
+        type: 'recovery',
+        email: emailFromLink, // Supabase reset linkinde email parametresi de gönderiliyorsa
+        password: newPassword,
+      });
       if (error) {
         setUpdateMessage(`Şifre güncelleme sırasında hata: ${error.message}`);
         setUpdateStatus('error');
@@ -78,7 +84,7 @@ const ResetPassword = () => {
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setRequestStatus('loading');
-    // Kullanıcının reset linkine tıklayınca yönlendirileceği URL: Bu sayfa
+    // Reset linkine yönlendirilecek URL: Bu sayfa
     const redirectTo = window.location.origin + '/resetpassword';
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
     if (error) {

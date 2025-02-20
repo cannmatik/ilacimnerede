@@ -5,10 +5,9 @@ import "./style.scss";
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
-  // URL'de "token" parametresi bekliyoruz
-  const token = searchParams.get('token');
-  // "type" parametresini kullanmak yerine, reset password için her zaman 'recovery' değerini kullanıyoruz.
-  const type = 'recovery';
+  // URL'den "code" ve "email" parametrelerini alıyoruz
+  const code = searchParams.get('code');
+  const emailFromLink = searchParams.get('email');
 
   // Reset link gönderme formu için state'ler
   const [email, setEmail] = useState('');
@@ -21,8 +20,9 @@ const ResetPassword = () => {
   const [updateMessage, setUpdateMessage] = useState('');
   const [updateStatus, setUpdateStatus] = useState('idle'); // idle, loading, success, error
 
-  // Eğer "token" parametresi varsa, reset linkine tıklanmış demektir.
-  if (token) {
+  // Eğer URL'de code ve email parametreleri varsa, reset linkine tıklanmıştır.
+  // Bu durumda yeni şifre formunu gösteriyoruz.
+  if (code && emailFromLink) {
     const handlePasswordUpdate = async (e) => {
       e.preventDefault();
       if (newPassword !== confirmPassword) {
@@ -31,9 +31,10 @@ const ResetPassword = () => {
         return;
       }
       setUpdateStatus('loading');
+      // verifyOtp çağrısında email gönderilmiyor; sadece token, type ve password kullanılıyor.
       const { error } = await supabase.auth.verifyOtp({
-        token,
-        type, // 'recovery' olarak sabit
+        token: code,
+        type: 'recovery',
         password: newPassword,
       });
       if (error) {
@@ -78,10 +79,11 @@ const ResetPassword = () => {
     );
   }
 
-  // "token" parametresi yoksa, reset linki gönderme formunu gösteriyoruz.
+  // URL'de code parametresi yoksa, reset linki gönderme formunu gösteriyoruz.
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setRequestStatus('loading');
+    // Kullanıcıya reset linki gönderilecek URL; bu sayfa, reset linkine tıklandığında kullanılacak.
     const redirectTo = window.location.origin + '/resetpassword';
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
     if (error) {

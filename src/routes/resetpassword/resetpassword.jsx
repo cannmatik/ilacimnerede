@@ -1,27 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { supabase } from "@routes/Login/useCreateClient";
-import "./style.scss";
+import { supabase } from '@routes/Login/useCreateClient';
+import './style.scss';
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
-  // Reset e-postasından gelen token; email parametresi reset linkinde gönderilebilir ama updateUser için kullanılmaz.
-  const code = searchParams.get('code');
-  // const emailFromLink = searchParams.get('email'); // Kullanım dışı bırakıyoruz
+  // Reset e-postası gönderilirken redirect URL olarak bu sayfa ayarlandıysa,
+  // Supabase, linke tıklanınca otomatik olarak kullanıcıyı recovery flow ile oturum açar.
+  const [session, setSession] = useState(null);
 
-  // Reset link gönderme formu için state'ler:
-  const [email, setEmail] = useState('');
-  const [requestMessage, setRequestMessage] = useState('');
-  const [requestStatus, setRequestStatus] = useState('idle'); // idle, loading, success, error
+  useEffect(() => {
+    // Oturum durumunu kontrol ediyoruz.
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+  }, []);
 
-  // Yeni şifre güncelleme formu için state'ler:
+  // Yeni şifre güncelleme formu için state'ler
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [updateMessage, setUpdateMessage] = useState('');
   const [updateStatus, setUpdateStatus] = useState('idle'); // idle, loading, success, error
 
-  // Eğer URL'de "code" parametresi varsa, reset linkine tıklanmış demektir; dolayısıyla yeni şifre formunu göster:
-  if (code) {
+  // Reset link isteği formu için state'ler
+  const [email, setEmail] = useState('');
+  const [requestMessage, setRequestMessage] = useState('');
+  const [requestStatus, setRequestStatus] = useState('idle'); // idle, loading, success, error
+
+  // Eğer oturum (session) mevcutsa, yani reset linke tıklanıp recovery flow tamamlanmışsa,
+  // kullanıcıya yeni şifre güncelleme formunu gösteriyoruz.
+  if (session) {
     const handlePasswordUpdate = async (e) => {
       e.preventDefault();
       if (newPassword !== confirmPassword) {
@@ -30,12 +38,7 @@ const ResetPassword = () => {
         return;
       }
       setUpdateStatus('loading');
-      // verifyOtp çağrısında yalnızca token, type ve password kullanıyoruz.
-      const { error } = await supabase.auth.verifyOtp({
-        token: code,
-        type: 'recovery',
-        password: newPassword,
-      });
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) {
         setUpdateMessage(`Şifre güncelleme sırasında hata: ${error.message}`);
         setUpdateStatus('error');
@@ -78,11 +81,11 @@ const ResetPassword = () => {
     );
   }
 
-  // Eğer URL'de "code" parametresi yoksa, reset linki gönderme formunu göster:
+  // Eğer oturum mevcut değilse, reset linki gönderme formunu gösteriyoruz.
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setRequestStatus('loading');
-    // Kullanıcının reset linkine tıkladığında yönlendirileceği URL (bu sayfa):
+    // redirectTo parametresi, reset e-postasındaki linke tıklandığında kullanıcıyı bu sayfaya yönlendirecek.
     const redirectTo = window.location.origin + '/resetpassword';
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
     if (error) {

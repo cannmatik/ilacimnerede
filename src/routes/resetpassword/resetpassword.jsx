@@ -5,60 +5,42 @@ import "./style.scss";
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
-  const token = searchParams.get('token');
-  const type = searchParams.get('type');
-  const emailFromLink = searchParams.get('email');
+  const code = searchParams.get('code'); // E-posta linkinde "code" parametresi var mı kontrol ediyoruz.
 
-  // Durumlar
+  // E-posta ile reset link gönderme formu için state'ler
   const [email, setEmail] = useState('');
+  const [requestMessage, setRequestMessage] = useState('');
+  const [requestStatus, setRequestStatus] = useState('idle'); // idle, loading, success, error
+
+  // Yeni şifre güncelleme formu için state'ler
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [message, setMessage] = useState('');
-  const [status, setStatus] = useState('idle'); // idle, loading, success, error
+  const [updateMessage, setUpdateMessage] = useState('');
+  const [updateStatus, setUpdateStatus] = useState('idle'); // idle, loading, success, error
 
-  // E-posta ile reset link gönderme işlemi
-  const handleEmailSubmit = async (e) => {
-    e.preventDefault();
-    setStatus('loading');
-    // redirectTo parametresi: linke tıklandığında yönlendirilecek URL (bu sayfa)
-    const redirectTo = window.location.origin + '/resetpassword';
-    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
-    
-    if (error) {
-      setMessage(`Hata: ${error.message}`);
-      setStatus('error');
-    } else {
-      setMessage('Şifre sıfırlama e-postası gönderildi. Lütfen e-posta kutunuzu kontrol edin.');
-      setStatus('success');
-    }
-  };
+  // Eğer "code" parametresi varsa, kullanıcı e-posta linkine tıklamış demektir.
+  // Bu durumda yeni şifre formunu gösteriyoruz.
+  if (code) {
+    const handlePasswordUpdate = async (e) => {
+      e.preventDefault();
+      if (newPassword !== confirmPassword) {
+        setUpdateMessage('Girilen şifreler eşleşmiyor!');
+        setUpdateStatus('error');
+        return;
+      }
+      setUpdateStatus('loading');
+      // Kullanıcı reset linkine tıkladığında Supabase, recovery oturumu oluşturur.
+      // updateUser metodu ile şifre güncellenir.
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        setUpdateMessage(`Şifre güncelleme sırasında hata: ${error.message}`);
+        setUpdateStatus('error');
+      } else {
+        setUpdateMessage('Şifreniz başarıyla güncellendi.');
+        setUpdateStatus('success');
+      }
+    };
 
-  // Yeni şifre güncelleme işlemi
-  const handlePasswordUpdate = async (e) => {
-    e.preventDefault();
-    if (newPassword !== confirmPassword) {
-      setMessage('Girilen şifreler eşleşmiyor!');
-      setStatus('error');
-      return;
-    }
-    setStatus('loading');
-    const { error } = await supabase.auth.verifyOtp({
-      token,
-      type,
-      email: emailFromLink,
-      password: newPassword,
-    });
-    if (error) {
-      setMessage(`Şifre güncelleme sırasında hata: ${error.message}`);
-      setStatus('error');
-    } else {
-      setMessage('Şifreniz başarıyla güncellendi.');
-      setStatus('success');
-    }
-  };
-
-  // URL parametreleri varsa yeni şifre formunu, yoksa e-posta formunu gösteriyoruz.
-  if (token && type && emailFromLink) {
     return (
       <div className="reset-password-container">
         <h1>Yeni Şifre Belirleme</h1>
@@ -83,14 +65,30 @@ const ResetPassword = () => {
               required
             />
           </div>
-          <button type="submit" className="reset-button" disabled={status === 'loading'}>
-            {status === 'loading' ? 'Güncelleniyor...' : 'Şifreyi Güncelle'}
+          <button type="submit" className="reset-button" disabled={updateStatus === 'loading'}>
+            {updateStatus === 'loading' ? 'Güncelleniyor...' : 'Şifreyi Güncelle'}
           </button>
         </form>
-        {message && <p className={`message ${status}`}>{message}</p>}
+        {updateMessage && <p className={`message ${updateStatus}`}>{updateMessage}</p>}
       </div>
     );
   }
+
+  // "code" parametresi yoksa, reset linki gönderme formunu gösteriyoruz.
+  const handleEmailSubmit = async (e) => {
+    e.preventDefault();
+    setRequestStatus('loading');
+    // Kullanıcının reset linkine tıklayınca yönlendirileceği URL: Bu sayfa
+    const redirectTo = window.location.origin + '/resetpassword';
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+    if (error) {
+      setRequestMessage(`Hata: ${error.message}`);
+      setRequestStatus('error');
+    } else {
+      setRequestMessage('Şifre sıfırlama e-postası gönderildi. Lütfen e-posta kutunuzu kontrol edin.');
+      setRequestStatus('success');
+    }
+  };
 
   return (
     <div className="reset-password-container">
@@ -106,11 +104,11 @@ const ResetPassword = () => {
             required
           />
         </div>
-        <button type="submit" className="reset-button" disabled={status === 'loading'}>
-          {status === 'loading' ? 'Gönderiliyor...' : 'Şifre Sıfırlama Linki Gönder'}
+        <button type="submit" className="reset-button" disabled={requestStatus === 'loading'}>
+          {requestStatus === 'loading' ? 'Gönderiliyor...' : 'Şifre Sıfırlama Linki Gönder'}
         </button>
       </form>
-      {message && <p className={`message ${status}`}>{message}</p>}
+      {requestMessage && <p className={`message ${requestStatus}`}>{requestMessage}</p>}
     </div>
   );
 };

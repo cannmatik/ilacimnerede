@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from "@routes/Login/useCreateClient";
 import "./style.scss";
@@ -6,7 +6,7 @@ import "./style.scss";
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
   // URL'den "code" ve "email" parametrelerini alıyoruz
-  const code = searchParams.get('code');
+  const token = searchParams.get('code'); // Email şablonunda "code" olarak gönderiliyor
   const emailFromLink = searchParams.get('email');
 
   // Reset link gönderme formu için state'ler
@@ -20,9 +20,16 @@ const ResetPassword = () => {
   const [updateMessage, setUpdateMessage] = useState('');
   const [updateStatus, setUpdateStatus] = useState('idle'); // idle, loading, success, error
 
-  // Eğer URL'de code ve email parametreleri varsa, reset linkine tıklanmıştır.
-  // Bu durumda yeni şifre formunu gösteriyoruz.
-  if (code && emailFromLink) {
+  // Eğer URL'de token ve email parametreleri varsa, reset linkine tıklanmıştır.
+  // Bu durumda, URL'den email bilgisini kaldırarak verifyOtp çağrısının email parametresi almamasını sağlıyoruz.
+  useEffect(() => {
+    if (token && emailFromLink) {
+      // Query string'i temizleyerek email parametresini kaldırıyoruz.
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [token, emailFromLink]);
+
+  if (token && emailFromLink) {
     const handlePasswordUpdate = async (e) => {
       e.preventDefault();
       if (newPassword !== confirmPassword) {
@@ -31,9 +38,9 @@ const ResetPassword = () => {
         return;
       }
       setUpdateStatus('loading');
-      // verifyOtp çağrısında email gönderilmiyor; sadece token, type ve password kullanılıyor.
+      // verifyOtp çağrısında sadece token, type ve password gönderiyoruz.
       const { error } = await supabase.auth.verifyOtp({
-        token: code,
+        token,
         type: 'recovery',
         password: newPassword,
       });
@@ -79,11 +86,11 @@ const ResetPassword = () => {
     );
   }
 
-  // URL'de code parametresi yoksa, reset linki gönderme formunu gösteriyoruz.
+  // URL'de token parametresi yoksa, reset linki gönderme formunu gösteriyoruz.
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setRequestStatus('loading');
-    // Kullanıcıya reset linki gönderilecek URL; bu sayfa, reset linkine tıklandığında kullanılacak.
+    // Reset linkine yönlendirilecek URL: Bu sayfa
     const redirectTo = window.location.origin + '/resetpassword';
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
     if (error) {

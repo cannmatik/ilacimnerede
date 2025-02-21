@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { supabase } from '@routes/Login/useCreateClient';
+import { supabase } from '@routes/Login/useCreateClient'; // Bu dosyada createBrowserClient çağrısında flowType:'implicit' eklenmiş olmalı.
 import './style.scss';
 
 const ResetPassword = () => {
@@ -15,12 +15,11 @@ const ResetPassword = () => {
 
   useEffect(() => {
     if (token && type === 'recovery') {
-      // Instead of verifyOtp, use exchangeCodeForSession to exchange the code for a session.
       supabase.auth
-        .exchangeCodeForSession(token)
+        .verifyOtp({ token, type: 'recovery' })
         .then(({ data, error }) => {
           if (error) {
-            console.error('exchangeCodeForSession error:', error);
+            console.error('verifyOtp error:', error);
             setMessage('Şifre sıfırlama bağlantınız geçersiz veya süresi dolmuş.');
           } else if (data.session) {
             setSession(data.session);

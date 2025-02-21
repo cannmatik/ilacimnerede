@@ -1,68 +1,56 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@routes/Login/useCreateClient';
 import './style.scss';
 
 const ResetPassword = () => {
-  const [accessToken, setAccessToken] = useState('');
-  const [refreshToken, setRefreshToken] = useState('');
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('code');
+  const type = searchParams.get('type');
   const [session, setSession] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [updateMessage, setUpdateMessage] = useState('');
-  const [updateStatus, setUpdateStatus] = useState('idle'); // idle, loading, success, error
+  const [message, setMessage] = useState('');
+  const [status, setStatus] = useState('idle'); // idle, loading, success, error
 
   useEffect(() => {
-    // URL hash'den access_token ve refresh_token değerlerini alıyoruz.
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const at = hashParams.get('access_token');
-    const rt = hashParams.get('refresh_token');
-    if (!at || !rt) {
-      console.error('Token bilgileri URL hash içerisinde bulunamadı.');
-      return;
+    if (token && type === 'recovery') {
+      supabase.auth
+        .verifyOtp({
+          token,
+          type: 'recovery'
+        })
+        .then(({ data, error }) => {
+          if (error) {
+            console.error('verifyOtp error:', error);
+            setMessage('Şifre sıfırlama bağlantınız geçersiz veya süresi dolmuş.');
+          } else {
+            setSession(data.session);
+          }
+        });
     }
-    setAccessToken(at);
-    setRefreshToken(rt);
+  }, [token, type]);
 
-    // Elde edilen tokenlarla oturumu oluşturuyoruz.
-    supabase.auth
-      .setSession({
-        access_token: at,
-        refresh_token: rt,
-      })
-      .then(({ data: { session }, error }) => {
-        if (error) {
-          console.error('setSession hatası:', error.message);
-          return;
-        }
-        setSession(session);
-      });
-  }, []);
-
-  const handlePasswordUpdate = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      setUpdateMessage('Girilen şifreler eşleşmiyor!');
-      setUpdateStatus('error');
+      setMessage('Girilen şifreler eşleşmiyor!');
+      setStatus('error');
       return;
     }
-    setUpdateStatus('loading');
-
+    setStatus('loading');
     if (!session) {
-      setUpdateMessage('Geçerli oturum bulunamadı.');
-      setUpdateStatus('error');
+      setMessage('Geçerli oturum bulunamadı. Lütfen e-postadaki bağlantıyı kullanın.');
+      setStatus('error');
       return;
     }
-
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword,
-    });
-
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) {
-      setUpdateMessage(`Şifre güncelleme sırasında hata: ${error.message}`);
-      setUpdateStatus('error');
+      setMessage(`Şifre güncelleme hatası: ${error.message}`);
+      setStatus('error');
     } else {
-      setUpdateMessage('Şifreniz başarıyla güncellendi.');
-      setUpdateStatus('success');
+      setMessage('Şifreniz başarıyla güncellendi.');
+      setStatus('success');
     }
   };
 
@@ -70,7 +58,7 @@ const ResetPassword = () => {
     return (
       <div className="reset-password-container">
         <h1>Yeni Şifre Belirleme</h1>
-        <p>Lütfen şifre sıfırlama e-postasındaki linke tıklayarak bu sayfaya erişiniz.</p>
+        { message ? <p>{message}</p> : <p>Lütfen şifre sıfırlama e-postasındaki bağlantıya tıklayarak bu sayfaya erişiniz.</p> }
       </div>
     );
   }
@@ -78,7 +66,7 @@ const ResetPassword = () => {
   return (
     <div className="reset-password-container">
       <h1>Yeni Şifre Belirleme</h1>
-      <form onSubmit={handlePasswordUpdate} className="reset-password-form">
+      <form onSubmit={handleSubmit} className="reset-password-form">
         <div className="form-group">
           <label htmlFor="newPassword">Yeni Şifre:</label>
           <input
@@ -99,11 +87,11 @@ const ResetPassword = () => {
             required
           />
         </div>
-        <button type="submit" className="reset-button" disabled={updateStatus === 'loading'}>
-          {updateStatus === 'loading' ? 'Güncelleniyor...' : 'Şifreyi Güncelle'}
+        <button type="submit" className="reset-button" disabled={status === 'loading'}>
+          {status === 'loading' ? 'Güncelleniyor...' : 'Şifreyi Güncelle'}
         </button>
       </form>
-      {updateMessage && <p className={`message ${updateStatus}`}>{updateMessage}</p>}
+      {message && <p className={`message ${status}`}>{message}</p>}
     </div>
   );
 };

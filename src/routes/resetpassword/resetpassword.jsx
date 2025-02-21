@@ -5,8 +5,8 @@ import './style.scss';
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
-  
-  // URL'den gelen parametreleri state'e aktararak saklıyoruz.
+
+  // URL’den gelen parametreleri state’e aktararak saklıyoruz.
   const [resetToken, setResetToken] = useState(null);
   const [resetEmail, setResetEmail] = useState(null);
 
@@ -16,24 +16,24 @@ const ResetPassword = () => {
     if (token && emailFromLink) {
       setResetToken(token);
       setResetEmail(emailFromLink);
-      // URL'deki query parametrelerini temizleyerek kullanıcının formu bozmasını engelliyoruz.
+      // URL’deki query parametrelerini temizleyerek kullanıcının formu bozmasını engelliyoruz.
       const newUrl = window.location.origin + window.location.pathname;
       window.history.replaceState({}, '', newUrl);
     }
   }, [searchParams]);
 
-  // Reset link gönderme formu için state'ler
+  // Reset link gönderme formu için state’ler
   const [email, setEmail] = useState('');
   const [requestMessage, setRequestMessage] = useState('');
   const [requestStatus, setRequestStatus] = useState('idle'); // idle, loading, success, error
 
-  // Yeni şifre güncelleme formu için state'ler
+  // Yeni şifre güncelleme formu için state’ler
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [updateMessage, setUpdateMessage] = useState('');
   const [updateStatus, setUpdateStatus] = useState('idle'); // idle, loading, success, error
 
-  // Eğer resetToken ve resetEmail state'lerinde değer varsa, reset linkine tıklanmış demektir.
+  // Eğer resetToken ve resetEmail set edilmişse, kullanıcı reset linkine tıklamış demektir.
   if (resetToken && resetEmail) {
     const handlePasswordUpdate = async (e) => {
       e.preventDefault();
@@ -43,11 +43,9 @@ const ResetPassword = () => {
         return;
       }
       setUpdateStatus('loading');
-      // verifyOtp çağrısında yalnızca token, type ve password gönderiyoruz.
-      const { error } = await supabase.auth.verifyOtp({
-        token: resetToken,
-        type: 'recovery',
-        password: newPassword,
+      // Supabase’in updateUser() metodu ile şifre güncellemesi yapıyoruz.
+      const { data, error } = await supabase.auth.updateUser({
+        password: newPassword
       });
       if (error) {
         setUpdateMessage(`Şifre güncelleme sırasında hata: ${error.message}`);
@@ -91,7 +89,7 @@ const ResetPassword = () => {
     );
   }
 
-  // Eğer resetToken state'inde değer yoksa, kullanıcı reset linki henüz almamış demektir.
+  // Reset link henüz gönderilmemişse, kullanıcıya reset e-posta gönderme formunu gösteriyoruz.
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setRequestStatus('loading');

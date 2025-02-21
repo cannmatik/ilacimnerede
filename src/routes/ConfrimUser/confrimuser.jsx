@@ -7,6 +7,7 @@ const ConfirmUser = () => {
   const [searchParams] = useSearchParams();
   const [message, setMessage] = useState('Doğrulama bekleniyor...');
   const [status, setStatus] = useState('pending');
+  const [countdown, setCountdown] = useState(10);
 
   useEffect(() => {
     const token_hash = searchParams.get('token_hash');
@@ -21,10 +22,18 @@ const ConfirmUser = () => {
           } else {
             setMessage('E‑posta doğrulaması başarılı.');
             setStatus('success');
-            // 2 saniye sonra sekmeyi kapatmayı deniyoruz.
-            setTimeout(() => {
-              window.close();
-            }, 2000);
+            
+            // Geri sayımı başlat
+            const intervalId = setInterval(() => {
+              setCountdown(prev => {
+                if (prev <= 1) {
+                  clearInterval(intervalId);
+                  window.close();
+                  return 0;
+                }
+                return prev - 1;
+              });
+            }, 1000);
           }
         });
     } else {
@@ -37,6 +46,9 @@ const ConfirmUser = () => {
     <div className="confirm-user-container">
       <h1>Kullanıcı Doğrulama</h1>
       <p className={`message ${status}`}>{message}</p>
+      {status === 'success' && (
+        <p>Sayfa {countdown} saniye içerisinde kapatılacaktır.</p>
+      )}
     </div>
   );
 };

@@ -1,9 +1,96 @@
 .App-header {
   display: flex;
-  justify-content: space-around;
+  justify-content: center; // Ortalamak için space-around yerine center kullandık
   align-items: center;
   height: 100vh;
   background: url("../../assets/ilacimNerede.jpg");
   background-size: cover;
   overflow: auto;
+  padding: 20px; // Formun kenarlardan boşluk alması için padding ekledik
+}
+
+// Supabase Auth UI için özel stiller
+.supabase-auth-ui {
+  width: 100%;
+  max-width: 400px; // Formun maksimum genişliğini belirledik
+  background: rgba(255, 255, 255, 0.9); // Form arka planına hafif bir saydamlık ekledik
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); // Forma gölge efekti ekledik
+
+  // Giriş formu için özel stiller
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px; // Input alanları arasına boşluk ekledik
+
+    // Input alanları için özel stiller
+    .auth-input {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px; // Yazı boyutunu büyüttük
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      outline: none;
+
+      &:focus {
+        border-color: #25b597; // Odaklandığında border rengini değiştirdik
+        box-shadow: 0 0 0 2px rgba(37, 181, 151, 0.2); // Odaklandığında hafif bir gölge ekledik
+      }
+    }
+
+    // Şifre göster/gizle butonu için özel stiller
+    .auth-password-input {
+      position: relative;
+
+      .password-toggle-button {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #25b597; // Buton rengini marka rengiyle uyumlu hale getirdik
+
+        &:hover {
+          color: #1e9c80; // Hover durumunda rengi koyulaştırdık
+        }
+      }
+    }
+
+    // Giriş yap butonu için özel stiller
+    .auth-button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background-color: #25b597;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: #1e9c80; // Hover durumunda rengi koyulaştırdık
+      }
+
+      &:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+      }
+    }
+
+    // Parolamı unuttum bağlantısı için özel stiller
+    .auth-forgot-password {
+      text-align: center;
+      color: #25b597;
+      text-decoration: none;
+      font-size: 14px;
+
+      &:hover {
+        text-decoration: underline; // Hover durumunda altı çizili yaptık
+      }
+    }
+  }
 }

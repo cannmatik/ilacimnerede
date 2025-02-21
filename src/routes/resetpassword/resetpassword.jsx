@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@routes/Login/useCreateClient';
-import { useSearchParams } from 'react-router-dom';
 import './style.scss';
 
 const ResetPassword = () => {
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get('code'); 
-  const recoveryType = searchParams.get('type'); // "recovery" olmalı
+  const [accessToken, setAccessToken] = useState('');
+  const [refreshToken, setRefreshToken] = useState('');
   const [session, setSession] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -14,27 +12,31 @@ const ResetPassword = () => {
   const [updateStatus, setUpdateStatus] = useState('idle'); // idle, loading, success, error
 
   useEffect(() => {
-    // Eğer URL'de recovery tipi varsa ve oturum henüz oluşturulmamışsa, OTP ile oturumu oluşturmayı deneyelim.
-    if (recoveryType === 'recovery' && token && !session) {
-      supabase.auth
-        .verifyOtp({
-          token,
-          type: 'recovery'
-        })
-        .then(({ data, error }) => {
-          if (error) {
-            console.error('verifyOtp hatası:', error.message);
-          } else {
-            setSession(data.session);
-          }
-        });
+    // URL hash'den access_token ve refresh_token değerlerini alıyoruz.
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const at = hashParams.get('access_token');
+    const rt = hashParams.get('refresh_token');
+    if (!at || !rt) {
+      console.error('Token bilgileri URL hash içerisinde bulunamadı.');
+      return;
     }
-    // Ayrıca, sayfa yüklendiğinde oturum bilgisini kontrol ediyoruz.
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) setSession(session);
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recoveryType, token]);
+    setAccessToken(at);
+    setRefreshToken(rt);
+
+    // Elde edilen tokenlarla oturumu oluşturuyoruz.
+    supabase.auth
+      .setSession({
+        access_token: at,
+        refresh_token: rt,
+      })
+      .then(({ data: { session }, error }) => {
+        if (error) {
+          console.error('setSession hatası:', error.message);
+          return;
+        }
+        setSession(session);
+      });
+  }, []);
 
   const handlePasswordUpdate = async (e) => {
     e.preventDefault();
@@ -46,13 +48,13 @@ const ResetPassword = () => {
     setUpdateStatus('loading');
 
     if (!session) {
-      setUpdateMessage('Geçerli oturum bulunamadı. Lütfen reset e-postasındaki linki kullanın.');
+      setUpdateMessage('Geçerli oturum bulunamadı.');
       setUpdateStatus('error');
       return;
     }
 
     const { error } = await supabase.auth.updateUser({
-      password: newPassword
+      password: newPassword,
     });
 
     if (error) {
@@ -107,4 +109,3 @@ const ResetPassword = () => {
 };
 
 export default ResetPassword;
-  

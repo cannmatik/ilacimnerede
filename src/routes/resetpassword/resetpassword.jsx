@@ -54,11 +54,12 @@ const ResetPassword = () => {
     }
   };
 
+  // Eğer session oluşturulamadıysa hata veya bilgilendirme mesajı gösteriyoruz.
   if (!session) {
     return (
       <div className="reset-password-container">
         <h1>Yeni Şifre Belirleme</h1>
-        { message ? <p>{message}</p> : <p>Lütfen şifre sıfırlama e-postasındaki bağlantıya tıklayarak bu sayfaya erişiniz.</p> }
+        <p>{message || 'Lütfen şifre sıfırlama e-postasındaki bağlantıya tıklayarak bu sayfaya erişiniz.'}</p>
       </div>
     );
   }

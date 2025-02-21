@@ -15,11 +15,12 @@ const ResetPassword = () => {
 
   useEffect(() => {
     if (token && type === 'recovery') {
+      // Instead of verifyOtp, use exchangeCodeForSession to exchange the code for a session.
       supabase.auth
-        .verifyOtp({ token, type: 'recovery' })
+        .exchangeCodeForSession(token)
         .then(({ data, error }) => {
           if (error) {
-            console.error('verifyOtp error:', error);
+            console.error('exchangeCodeForSession error:', error);
             setMessage('Şifre sıfırlama bağlantınız geçersiz veya süresi dolmuş.');
           } else if (data.session) {
             setSession(data.session);

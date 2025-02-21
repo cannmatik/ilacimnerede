@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './style.scss';
-import { supabase } from '@routes/Login/useCreateClient'; // client oluşturulurken flowType: 'implicit' kullanılıyor
+import { supabase } from '@routes/Login/useCreateClient'; // client implicit flow ile oluşturulmuş
 
 const ResetPassword = () => {
   const [session, setSession] = useState(null);
@@ -17,7 +17,6 @@ const ResetPassword = () => {
     const refreshToken = params.get('refresh_token');
 
     if (accessToken && refreshToken) {
-      // Tokenlarla oturum oluşturuyoruz.
       supabase.auth
         .setSession({
           access_token: accessToken,
@@ -102,3 +101,4 @@ const ResetPassword = () => {
 };
 
 export default ResetPassword;
+  

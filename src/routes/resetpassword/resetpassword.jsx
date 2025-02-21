@@ -1,18 +1,27 @@
-import React, { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '@routes/Login/useCreateClient';
 import './style.scss';
 
 const ResetPassword = () => {
-  const [searchParams] = useSearchParams();
-  // URL'den gelen reset token'ı alıyoruz (gerekli olmayabilir, ancak dokümantasyon açısından referans için bırakıldı).
-  const token = searchParams.get('code');
-
-  // Yeni şifre belirleme formu için state'ler
+  const [session, setSession] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [updateMessage, setUpdateMessage] = useState('');
   const [updateStatus, setUpdateStatus] = useState('idle'); // idle, loading, success, error
+
+  useEffect(() => {
+    // Dinleyici ekleyerek PASSWORD_RECOVERY durumunda oturumu yakalıyoruz.
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setSession(session);
+      }
+    });
+    // Oturum bilgisini başlangıçta da kontrol edelim.
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+    return () => authListener.unsubscribe();
+  }, []);
 
   const handlePasswordUpdate = async (e) => {
     e.preventDefault();
@@ -23,8 +32,14 @@ const ResetPassword = () => {
     }
     setUpdateStatus('loading');
 
-    // Sadece updateUser() metodu ile şifre güncellemesi yapıyoruz.
-    const { data, error } = await supabase.auth.updateUser({
+    // updateUser metodunu çağırmadan önce oturumun mevcut olduğundan emin oluyoruz.
+    if (!session) {
+      setUpdateMessage('Geçerli oturum bulunamadı. Lütfen şifre sıfırlama e-postasındaki linke tıklayarak işlemi başlatınız.');
+      setUpdateStatus('error');
+      return;
+    }
+
+    const { error } = await supabase.auth.updateUser({
       password: newPassword
     });
 
@@ -36,6 +51,15 @@ const ResetPassword = () => {
       setUpdateStatus('success');
     }
   };
+
+  if (!session) {
+    return (
+      <div className="reset-password-container">
+        <h1>Yeni Şifre Belirleme</h1>
+        <p>Lütfen şifre sıfırlama e-postasındaki linke tıklayarak bu sayfaya erişiniz.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="reset-password-container">

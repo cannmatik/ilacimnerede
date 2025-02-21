@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { supabase } from '@routes/Login/useCreateClient';
 import './style.scss';
+import { supabase } from '@routes/Login/useCreateClient'; // client oluşturulurken flowType: 'implicit' kullanılıyor
 
 const ResetPassword = () => {
-  const [searchParams] = useSearchParams();
-  // URL parametreleri referans amaçlı; oturum oluşturma onAuthStateChange ile bekleniyor.
-  const token = searchParams.get('code');
-  const type = searchParams.get('type');
   const [session, setSession] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -15,13 +10,30 @@ const ResetPassword = () => {
   const [status, setStatus] = useState('idle'); // idle, loading, success, error
 
   useEffect(() => {
-    // onAuthStateChange dinleyicisi, reset e-postasındaki linke tıklandığında Supabase’in PASSWORD_RECOVERY olayını yakalamalı.
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        setSession(session);
-      }
-    });
-    return () => authListener.unsubscribe();
+    // URL hash içerisindeki tokenları alıyoruz.
+    const hash = window.location.hash.substring(1); // "#" karakterini kaldırır
+    const params = new URLSearchParams(hash);
+    const accessToken = params.get('access_token');
+    const refreshToken = params.get('refresh_token');
+
+    if (accessToken && refreshToken) {
+      // Tokenlarla oturum oluşturuyoruz.
+      supabase.auth
+        .setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        })
+        .then(({ data, error }) => {
+          if (error) {
+            console.error('setSession error:', error);
+            setMessage('Geçerli oturum oluşturulamadı.');
+          } else if (data.session) {
+            setSession(data.session);
+          }
+        });
+    } else {
+      setMessage('Lütfen şifre sıfırlama e-postasındaki bağlantıya tıklayarak bu sayfaya erişiniz.');
+    }
   }, []);
 
   const handleSubmit = async (e) => {
@@ -33,7 +45,7 @@ const ResetPassword = () => {
     }
     setStatus('loading');
     if (!session) {
-      setMessage('Geçerli oturum bulunamadı. Lütfen e-postadaki bağlantıyı kullanın.');
+      setMessage('Geçerli oturum bulunamadı.');
       setStatus('error');
       return;
     }
@@ -51,7 +63,7 @@ const ResetPassword = () => {
     return (
       <div className="reset-password-container">
         <h1>Yeni Şifre Belirleme</h1>
-        <p>{message || 'Lütfen şifre sıfırlama e-postasındaki bağlantıya tıklayarak bu sayfaya erişiniz.'}</p>
+        <p>{message}</p>
       </div>
     );
   }

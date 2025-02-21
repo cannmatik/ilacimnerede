@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './style.scss';
-import { supabase } from '@routes/Login/useCreateClient'; // client implicit flow ile oluşturulmuş
+import { supabase } from '@routes/Login/useCreateClient'; // Supabase client'ını import ediyoruz
 
 const ResetPassword = () => {
   const [session, setSession] = useState(null);
@@ -10,7 +10,7 @@ const ResetPassword = () => {
   const [status, setStatus] = useState('idle'); // idle, loading, success, error
 
   useEffect(() => {
-    // URL hash içerisindeki tokenları alıyoruz.
+    // URL hash'inden token'ları alıyoruz
     const hash = window.location.hash.substring(1); // "#" karakterini kaldırır
     const params = new URLSearchParams(hash);
     const accessToken = params.get('access_token');
@@ -26,29 +26,39 @@ const ResetPassword = () => {
           if (error) {
             console.error('setSession error:', error);
             setMessage('Geçerli oturum oluşturulamadı.');
+            setStatus('error');
           } else if (data.session) {
             setSession(data.session);
           }
         });
     } else {
       setMessage('Lütfen şifre sıfırlama e-postasındaki bağlantıya tıklayarak bu sayfaya erişiniz.');
+      setStatus('error');
     }
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Şifrelerin eşleşip eşleşmediğini kontrol ediyoruz
     if (newPassword !== confirmPassword) {
       setMessage('Girilen şifreler eşleşmiyor!');
       setStatus('error');
       return;
     }
+
     setStatus('loading');
+
+    // Oturum kontrolü
     if (!session) {
       setMessage('Geçerli oturum bulunamadı.');
       setStatus('error');
       return;
     }
+
+    // Şifreyi güncelleme işlemi
     const { error } = await supabase.auth.updateUser({ password: newPassword });
+
     if (error) {
       setMessage(`Şifre güncelleme hatası: ${error.message}`);
       setStatus('error');
@@ -62,7 +72,7 @@ const ResetPassword = () => {
     return (
       <div className="reset-password-container">
         <h1>Yeni Şifre Belirleme</h1>
-        <p>{message}</p>
+        <p className={`message ${status}`}>{message}</p>
       </div>
     );
   }
@@ -79,6 +89,7 @@ const ResetPassword = () => {
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             required
+            minLength={6} // Şifre en az 6 karakter olmalı
           />
         </div>
         <div className="form-group">
@@ -89,6 +100,7 @@ const ResetPassword = () => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
+            minLength={6} // Şifre en az 6 karakter olmalı
           />
         </div>
         <button type="submit" className="reset-button" disabled={status === 'loading'}>
@@ -101,4 +113,3 @@ const ResetPassword = () => {
 };
 
 export default ResetPassword;
-  

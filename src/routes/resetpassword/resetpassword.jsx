@@ -5,7 +5,7 @@ import './style.scss';
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
-  // URL'den gelen reset token'ı alıyoruz.
+  // URL'den gelen reset token'ı alıyoruz (gerekli olmayabilir, ancak dokümantasyon açısından referans için bırakıldı).
   const token = searchParams.get('code');
 
   // Yeni şifre belirleme formu için state'ler
@@ -23,19 +23,13 @@ const ResetPassword = () => {
     }
     setUpdateStatus('loading');
 
-    // İlk olarak updateUser ile şifre güncellemesini deniyoruz.
-    let res = await supabase.auth.updateUser({ password: newPassword });
-    // Eğer updateUser başarısız olursa ve URL'de token varsa, verifyOtp ile güncellemeyi deniyoruz.
-    if (res.error && token) {
-      res = await supabase.auth.verifyOtp({
-        token,
-        type: 'recovery',
-        password: newPassword,
-      });
-    }
+    // Sadece updateUser() metodu ile şifre güncellemesi yapıyoruz.
+    const { data, error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
 
-    if (res.error) {
-      setUpdateMessage(`Şifre güncelleme sırasında hata: ${res.error.message}`);
+    if (error) {
+      setUpdateMessage(`Şifre güncelleme sırasında hata: ${error.message}`);
       setUpdateStatus('error');
     } else {
       setUpdateMessage('Şifreniz başarıyla güncellendi.');

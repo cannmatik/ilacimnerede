@@ -25,8 +25,12 @@ const ResetPassword = () => {
         .then(({ data, error }) => {
           if (error) {
             console.error('verifyOtp error:', error);
-            setMessage('Geçerli oturum oluşturulamadı.');
+            setMessage('URL\'nin süresi dolmuş veya daha önce kullanılmış.');
             setStatus('error');
+            // 10 saniye sonra sayfayı kapat
+            setTimeout(() => {
+              window.close();
+            }, 10000); // 10 saniye
           } else if (data.session) {
             setSession(data.session);
           }
@@ -34,6 +38,10 @@ const ResetPassword = () => {
     } else {
       setMessage('Lütfen şifre sıfırlama e-postasındaki bağlantıya tıklayarak bu sayfaya erişiniz.');
       setStatus('error');
+      // 10 saniye sonra sayfayı kapat
+      setTimeout(() => {
+        window.close();
+      }, 10000); // 10 saniye
     }
   }, []);
 
@@ -63,8 +71,12 @@ const ResetPassword = () => {
       setMessage(`Şifre güncelleme hatası: ${error.message}`);
       setStatus('error');
     } else {
-      setMessage('Şifreniz başarıyla güncellendi.');
+      setMessage('Şifreniz başarıyla güncellendi. Sayfa 10 saniye içinde kapanacak...');
       setStatus('success');
+      // 10 saniye sonra sayfayı kapat
+      setTimeout(() => {
+        window.close();
+      }, 10000); // 10 saniye
     }
   };
 

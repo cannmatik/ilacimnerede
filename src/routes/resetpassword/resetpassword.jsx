@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@routes/Login/useCreateClient';
+import { useSearchParams } from 'react-router-dom';
 import './style.scss';
 
 const ResetPassword = () => {
+  const [searchParams] = useSearchParams();
+  const recoveryType = searchParams.get('type'); // "recovery" olmalı
   const [session, setSession] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -10,13 +13,13 @@ const ResetPassword = () => {
   const [updateStatus, setUpdateStatus] = useState('idle'); // idle, loading, success, error
 
   useEffect(() => {
-    // Dinleyici ekleyerek PASSWORD_RECOVERY durumunda oturumu yakalıyoruz.
+    // PASSWORD_RECOVERY oturumu dinleniyor
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         setSession(session);
       }
     });
-    // Oturum bilgisini başlangıçta da kontrol edelim.
+    // Sayfa yüklendiğinde oturum bilgisini kontrol ediyoruz
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
@@ -32,9 +35,8 @@ const ResetPassword = () => {
     }
     setUpdateStatus('loading');
 
-    // updateUser metodunu çağırmadan önce oturumun mevcut olduğundan emin oluyoruz.
     if (!session) {
-      setUpdateMessage('Geçerli oturum bulunamadı. Lütfen şifre sıfırlama e-postasındaki linke tıklayarak işlemi başlatınız.');
+      setUpdateMessage('Geçerli oturum bulunamadı. Lütfen reset e-postasındaki linki kullanın.');
       setUpdateStatus('error');
       return;
     }
@@ -95,3 +97,4 @@ const ResetPassword = () => {
 };
 
 export default ResetPassword;
+  

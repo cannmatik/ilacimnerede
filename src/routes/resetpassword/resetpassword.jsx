@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { supabase } from '@routes/Login/useCreateClient'; // Bu dosyada createBrowserClient çağrısında flowType:'implicit' eklenmiş olmalı.
+import { supabase } from '@routes/Login/useCreateClient';
 import './style.scss';
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
-  // Gelen parametreler artık yalnızca referans amaçlı, çünkü implicit flow ile oturum zaten oluşturulmuş olmalı.
+  // URL parametreleri referans amaçlı; oturum oluşturma onAuthStateChange ile bekleniyor.
   const token = searchParams.get('code');
   const type = searchParams.get('type');
   const [session, setSession] = useState(null);
@@ -15,14 +15,13 @@ const ResetPassword = () => {
   const [status, setStatus] = useState('idle'); // idle, loading, success, error
 
   useEffect(() => {
-    // Implicit flow kullanıldığı için, reset bağlantısından dönen URL'den oturum kontrolü yapıyoruz.
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
+    // onAuthStateChange dinleyicisi, reset e-postasındaki linke tıklandığında Supabase’in PASSWORD_RECOVERY olayını yakalamalı.
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
         setSession(session);
-      } else {
-        setMessage('Geçerli oturum bulunamadı. Lütfen e-postadaki bağlantıyı kullanın.');
       }
     });
+    return () => authListener.unsubscribe();
   }, []);
 
   const handleSubmit = async (e) => {

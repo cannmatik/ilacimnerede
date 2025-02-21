@@ -9,34 +9,25 @@ const ConfirmUser = () => {
   const [status, setStatus] = useState('pending');
 
   useEffect(() => {
-    let token, type, email;
-    const confirmationUrl = searchParams.get('confirmation_url');
+    const token_hash = searchParams.get('token_hash');
+    // Eğer type parametresi gönderilmezse, varsayılan olarak 'email' kullanılır.
+    const type = searchParams.get('type') || 'email';
+    const redirect_to = searchParams.get('redirect_to');
 
-    if (confirmationUrl) {
-      try {
-        const parsedUrl = new URL(confirmationUrl);
-        token = parsedUrl.searchParams.get('token');
-        type = parsedUrl.searchParams.get('type');
-        email = parsedUrl.searchParams.get('email');
-      } catch (error) {
-        console.error("Geçersiz confirmation_url:", error);
-      }
-    }
-    
-    // confirmation_url içerisindeki email bulunamazsa, dışarıdaki query parametresinden alırız.
-    if (!email) {
-      email = searchParams.get('email');
-    }
-
-    if (token && type && email) {
-      supabase.auth.verifyOtp({ token, type, email })
-        .then(({ error }) => {
+    if (token_hash && type) {
+      supabase.auth.verifyOtp({ token_hash, type })
+        .then(({ data, error }) => {
           if (error) {
             setMessage(`Doğrulama sırasında hata: ${error.message}`);
             setStatus('error');
           } else {
             setMessage('E‑posta doğrulaması başarılı. Artık giriş yapabilirsiniz.');
             setStatus('success');
+            if (redirect_to) {
+              setTimeout(() => {
+                window.location.href = redirect_to;
+              }, 2000);
+            }
           }
         });
     } else {

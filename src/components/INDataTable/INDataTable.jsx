@@ -40,23 +40,35 @@ function INDataTable({
   rowHoverStyle,
   isLoading,
 }) {
+  // Arama kutusuna girilen değeri saklar
   const [globalFilter, setGlobalFilter] = useState("");
-  const [selectedFilterColumn, setSelectedFilterColumn] = useState(columns[0]?.accessor || "");
+  // Hangi sütun üzerinden filtreleme yapılacağını belirler
+  const [selectedFilterColumn, setSelectedFilterColumn] = useState(
+    columns[0]?.accessor || ""
+  );
+  // Sütun bazlı filtre değerlerini saklar
+  const [columnFilters, setColumnFilters] = useState([]);
 
   const $columns = checkboxed ? [...columns, ...checkboxObj] : columns;
 
+  // Her sütuna varsayılan filterFn ekleniyor (zaten tanımlı değilse)
+  const tableColumns = $columns.map((column) =>
+    columnHelper.accessor(column.accessor, {
+      ...column,
+      filterFn: column.filterFn || "includesString",
+    })
+  );
+
   const table = useReactTable({
     data,
-    columns: $columns.map((column) =>
-      columnHelper.accessor(column.accessor, { ...column })
-    ),
+    columns: tableColumns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     state: {
-      globalFilter,
+      columnFilters,
     },
-    onGlobalFilterChange: setGlobalFilter,
+    onColumnFiltersChange: setColumnFilters,
   });
 
   const {
@@ -74,6 +86,15 @@ function INDataTable({
   useEffect(() => {
     toggleAllPageRowsSelected(false);
   }, [unSelectAllOnTabChange]);
+
+  // Global filtre değeri veya seçilen sütun değiştiğinde sütun filtrelerini günceller
+  useEffect(() => {
+    if (globalFilter) {
+      setColumnFilters([{ id: selectedFilterColumn, value: globalFilter }]);
+    } else {
+      setColumnFilters([]);
+    }
+  }, [globalFilter, selectedFilterColumn]);
 
   const handleRowClick = (row) => {
     if (checkboxed) {
@@ -114,7 +135,7 @@ function INDataTable({
                 {headerGroup.headers.map((header, index) => (
                   <th
                     key={header.id}
-                    onClick={header.column.getToggleSortingHandler()} // Sıralama için tıklanabilir başlıklar
+                    onClick={header.column.getToggleSortingHandler()}
                     className={classNames({
                       "sortable-header": true,
                       "left-corner": index === 0,
@@ -130,9 +151,11 @@ function INDataTable({
                           header.column.columnDef.header,
                           header.getContext()
                         )}
-                    {header.column.getIsSorted() ? (
-                      header.column.getIsSorted() === "desc" ? " 🔽" : " 🔼"
-                    ) : null}
+                    {header.column.getIsSorted()
+                      ? header.column.getIsSorted() === "desc"
+                        ? " 🔽"
+                        : " 🔼"
+                      : null}
                   </th>
                 ))}
               </tr>
@@ -144,10 +167,10 @@ function INDataTable({
               <tr
                 key={row.id}
                 onClick={() => handleRowClick(row)}
-                onDoubleClick={() => row.toggleSelected()} // Çift tıklama ile seçim yapma
+                onDoubleClick={() => row.toggleSelected()}
                 className={classNames({
-                  "selected-row": row.getIsSelected() && checkboxed, // Seçili satırlar checkbox varsa renk değiştirir
-                  "unselected-row": !row.getIsSelected() && checkboxed, // Seçilmeyen satırlar
+                  "selected-row": row.getIsSelected() && checkboxed,
+                  "unselected-row": !row.getIsSelected() && checkboxed,
                   "no-hover-bg": !rowHoverStyle.background,
                   "no-hover-border": !rowHoverStyle.border,
                 })}
@@ -157,14 +180,18 @@ function INDataTable({
                     key={cell.id}
                     className={classNames({
                       "left-corner": index === 0,
-                      "right-corner": index === row.getVisibleCells().length - 1,
+                      "right-corner":
+                        index === row.getVisibleCells().length - 1,
                       [typeof cell.column.columnDef.cellClassName === "function"
-                        ? cell.column.columnDef.cellClassName(cell.row.original)
+                        ? cell.column.columnDef.cellClassName(
+                            cell.row.original
+                          )
                         : cell.column.columnDef.cellClassName]:
                         cell.column.columnDef.cellClassName !== undefined,
                       "show-on-hover": cell.column.columnDef.showOnRowHover,
                     })}
-                    style={typeof cell.column.columnDef.cellStyle === "function"
+                    style={
+                      typeof cell.column.columnDef.cellStyle === "function"
                         ? cell.column.columnDef.cellStyle(cell.row.original)
                         : cell.column.columnDef.cellStyle
                     }

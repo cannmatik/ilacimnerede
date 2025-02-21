@@ -1,17 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { supabase } from "@routes/Login/useCreateClient"; // Doğru client importu
+import { supabase } from "@routes/Login/useCreateClient";
 import "./style.scss";
 
 const ConfirmUser = () => {
   const [searchParams] = useSearchParams();
   const [message, setMessage] = useState('Doğrulama bekleniyor...');
-  const [status, setStatus] = useState('pending'); // pending, success veya error durumlarını izler
+  const [status, setStatus] = useState('pending');
 
   useEffect(() => {
-    const token = searchParams.get('token');
-    const type = searchParams.get('type'); // Örneğin: 'signup'
-    const email = searchParams.get('email');
+    let token, type, email;
+    const confirmationUrl = searchParams.get('confirmation_url');
+
+    if (confirmationUrl) {
+      try {
+        const parsedUrl = new URL(confirmationUrl);
+        token = parsedUrl.searchParams.get('token');
+        type = parsedUrl.searchParams.get('type');
+        email = parsedUrl.searchParams.get('email');
+      } catch (error) {
+        console.error("Geçersiz confirmation_url:", error);
+      }
+    }
+    
+    // confirmation_url içerisindeki email bulunamazsa, dışarıdaki query parametresinden alırız.
+    if (!email) {
+      email = searchParams.get('email');
+    }
 
     if (token && type && email) {
       supabase.auth.verifyOtp({ token, type, email })
@@ -20,7 +35,7 @@ const ConfirmUser = () => {
             setMessage(`Doğrulama sırasında hata: ${error.message}`);
             setStatus('error');
           } else {
-            setMessage('E-posta doğrulaması başarılı. Artık giriş yapabilirsiniz.');
+            setMessage('E‑posta doğrulaması başarılı. Artık giriş yapabilirsiniz.');
             setStatus('success');
           }
         });

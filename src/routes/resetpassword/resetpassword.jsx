@@ -24,8 +24,10 @@ const ResetPassword = () => {
           if (error) {
             console.error('verifyOtp error:', error);
             setMessage('Şifre sıfırlama bağlantınız geçersiz veya süresi dolmuş.');
-          } else {
+          } else if (data && data.session) {
             setSession(data.session);
+          } else {
+            setMessage('Bilinmeyen bir hata oluştu.');
           }
         });
     }
@@ -54,7 +56,6 @@ const ResetPassword = () => {
     }
   };
 
-  // Eğer session oluşturulamadıysa hata veya bilgilendirme mesajı gösteriyoruz.
   if (!session) {
     return (
       <div className="reset-password-container">

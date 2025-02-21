@@ -5,6 +5,7 @@ import './style.scss';
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
+  // Gelen parametreler artık yalnızca referans amaçlı, çünkü implicit flow ile oturum zaten oluşturulmuş olmalı.
   const token = searchParams.get('code');
   const type = searchParams.get('type');
   const [session, setSession] = useState(null);
@@ -14,19 +15,15 @@ const ResetPassword = () => {
   const [status, setStatus] = useState('idle'); // idle, loading, success, error
 
   useEffect(() => {
-    if (token && type === 'recovery') {
-      supabase.auth
-        .verifyOtp({ token, type: 'recovery' })
-        .then(({ data, error }) => {
-          if (error) {
-            console.error('verifyOtp error:', error);
-            setMessage('Şifre sıfırlama bağlantınız geçersiz veya süresi dolmuş.');
-          } else if (data.session) {
-            setSession(data.session);
-          }
-        });
-    }
-  }, [token, type]);
+    // Implicit flow kullanıldığı için, reset bağlantısından dönen URL'den oturum kontrolü yapıyoruz.
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setSession(session);
+      } else {
+        setMessage('Geçerli oturum bulunamadı. Lütfen e-postadaki bağlantıyı kullanın.');
+      }
+    });
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

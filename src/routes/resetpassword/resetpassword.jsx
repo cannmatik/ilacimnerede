@@ -10,21 +10,21 @@ const ResetPassword = () => {
   const [status, setStatus] = useState('idle'); // idle, loading, success, error
 
   useEffect(() => {
-    // URL hash'inden token'ları alıyoruz
-    const hash = window.location.hash.substring(1); // "#" karakterini kaldırır
-    const params = new URLSearchParams(hash);
-    const accessToken = params.get('access_token');
-    const refreshToken = params.get('refresh_token');
+    // URL'den token_hash ve type parametrelerini alıyoruz
+    const params = new URLSearchParams(window.location.search);
+    const tokenHash = params.get('token_hash');
+    const type = params.get('type');
 
-    if (accessToken && refreshToken) {
+    if (tokenHash && type === 'recovery') {
+      // Supabase'in recovery session'ını oluşturuyoruz
       supabase.auth
-        .setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
+        .verifyOtp({
+          type: 'recovery',
+          token_hash: tokenHash,
         })
         .then(({ data, error }) => {
           if (error) {
-            console.error('setSession error:', error);
+            console.error('verifyOtp error:', error);
             setMessage('Geçerli oturum oluşturulamadı.');
             setStatus('error');
           } else if (data.session) {

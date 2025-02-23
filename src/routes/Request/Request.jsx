@@ -43,9 +43,7 @@ function Request() {
     const now = new Date().getTime();
     const doubleTapDelay = 300;
     if (touchTime.current + doubleTapDelay > now) {
-      const isSelected = selectedRows.some(
-        (item) => item.id === row.original.id
-      );
+      const isSelected = selectedRows.some((item) => item.id === row.original.id);
       setSelectedRows((prev) =>
         isSelected
           ? prev.filter((item) => item.id !== row.original.id)
@@ -58,9 +56,7 @@ function Request() {
   };
 
   const openPrevRequest = () => {
-    const currentIndex = requests?.findIndex(
-      (item) => item.id === selectedRequest?.id
-    );
+    const currentIndex = requests?.findIndex((item) => item.id === selectedRequest?.id);
     if (currentIndex > 0) {
       setSelectedRequest(requests[currentIndex - 1]);
       setSelectedRows([]);
@@ -71,9 +67,7 @@ function Request() {
   };
 
   const openNextRequest = () => {
-    const currentIndex = requests?.findIndex(
-      (item) => item.id === selectedRequest?.id
-    );
+    const currentIndex = requests?.findIndex((item) => item.id === selectedRequest?.id);
     if (currentIndex < requests?.length - 1) {
       setSelectedRequest(requests[currentIndex + 1]);
       setSelectedRows([]);
@@ -84,9 +78,7 @@ function Request() {
   };
 
   useEffect(() => {
-    const currentIndex = requests?.findIndex(
-      (item) => item.id === selectedRequest?.id
-    );
+    const currentIndex = requests?.findIndex((item) => item.id === selectedRequest?.id);
     setIsPrevDisabled(currentIndex <= 0);
     setIsNextDisabled(currentIndex >= requests?.length - 1);
   }, [selectedRequest, requests]);
@@ -132,9 +124,7 @@ function Request() {
       await responseRequestMutation({ finalData, response });
       setProgress(100);
       setSelectedRows([]);
-      const currentIndex = requests?.findIndex(
-        (item) => item.id === selectedRequest?.id
-      );
+      const currentIndex = requests?.findIndex((item) => item.id === selectedRequest?.id);
       if (currentIndex < requests?.length - 1) {
         setSelectedRequest(requests[currentIndex + 1]);
       } else {
@@ -177,9 +167,9 @@ function Request() {
                 />
               </div>
             ) : (
-<div className="empty-container fade-in pulse">
-  <Empty description="Şu an bekleyen talebiniz yok." />
-</div>
+              <div className="empty-container fade-in pulse">
+                <Empty description="Şu an bekleyen talebiniz yok." />
+              </div>
             )}
           </Col>
         )}
@@ -207,7 +197,7 @@ function Request() {
                   data={requestDetail || []}
                   columns={columns_requestDetail}
                   rowHoverStyle={{ border: true, background: !isMobile }}
-                  checkboxed={[]} 
+                  checkboxed={[]}
                   setSelectedRows={setSelectedRows}
                   unSelectAllOnTabChange={selectedRequest}
                   rowClassName={(row) =>

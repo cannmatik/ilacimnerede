@@ -7,22 +7,21 @@ import {
 } from "@store/selectors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
-import { message, Button, Checkbox } from "antd"; // Ant Design importları
+import { message } from "antd";
 import { useState, useMemo, useEffect } from "react";
+import moment from "moment";
+import "moment/locale/tr";
 
 const REQUEST_KEYS = {
   ALL: ["Request", "requests"],
   DETAIL: (id) => ["Request", "requestDetails", id],
 };
 
-import moment from "moment";
-import "moment/locale/tr";
-
 const fetchRequests = async ({ city_id, neighbourhood_id, district_id, pharmacy_id }) => {
   let { data, error } = await supabase
     .from("request")
-    .select("id, create_date, message_text, district_id, city_id, response_count, status") // 📌 response_count ve status ekledik
-    .not("status", "eq", 2) // 📌 `status = 2` olanları dahil etme (Kapalı talepler)
+    .select("id, create_date, message_text, district_id, city_id, response_count, status")
+    .not("status", "eq", 2) // Kapalı talepleri dahil etme
     .eq("city_id", city_id)
     .or(`neighbourhood_id.is.null,neighbourhood_id.eq.${neighbourhood_id}`)
     .or(`district_id.is.null,district_id.eq.${district_id}`);
@@ -36,15 +35,13 @@ const fetchRequests = async ({ city_id, neighbourhood_id, district_id, pharmacy_
     return [];
   }
 
-  // 📌 Yanıtlayan eczane sayısını düzgün gösterelim
   let formattedData = data.map(item => ({
-    ...item, 
+    ...item,
     create_date: moment(item.create_date).locale('tr').format("DD MM YYYY HH:mm"),
-    response_count: item.response_count ?? 0, // Yanıt yoksa 0 göster
-    status: item.status // Status kontrolünü düzgün yap
+    response_count: item.response_count ?? 0,
+    status: item.status
   }));
 
-  // 📌 Daha önce yanıtlanmamış talepleri filtrele
   const { data: unFinishedRequests, error: unfinishedError } = await supabase
     .from("response")
     .select("request_id")
@@ -64,16 +61,14 @@ const fetchRequests = async ({ city_id, neighbourhood_id, district_id, pharmacy_
     );
   }
 
-  return formattedData; 
+  return formattedData;
 };
 
 async function getRequestDetails({ queryKey }) {
   const id = queryKey[2];
   const { data, error } = await supabase
     .from("request_item")
-    .select(
-      "request_id,id,position_no,medicine_id, medicine_qty, medicine (name)"
-    )
+    .select("request_id,id,position_no,medicine_id, medicine_qty, medicine (name)")
     .eq("request_id", id);
   if (error) {
     console.log("error");
@@ -85,7 +80,6 @@ async function getRequestDetails({ queryKey }) {
 
 async function responseRequest(finalData, response) {
   try {
-    // 1. "public.response" tablosuna kayıt yap
     const { data: responseData, error: responseError } = await supabase
       .from("response")
       .insert({
@@ -98,9 +92,7 @@ async function responseRequest(finalData, response) {
       .select();
 
     if (responseError) {
-      throw new Error(
-        `Response tablosuna kayıt yapılırken hata oluştu: ${responseError.message}`
-      );
+      throw new Error(`Response tablosuna kayıt yapılırken hata oluştu: ${responseError.message}`);
     }
 
     const responseId = responseData[0]?.id;
@@ -108,11 +100,10 @@ async function responseRequest(finalData, response) {
       throw new Error("Response kaydı oluşturulamadı veya ID alınamadı.");
     }
 
-    // 2. "response_item" tablosuna kayıt yap
     const responseItems = finalData.map((item) => ({
-      response_id: responseId, // Daha önce oluşturulan response ID'si
-      request_item_id: item.request_item_id, // Gelen request_item_id
-      status: item.status ?? true, // Varsayılan true
+      response_id: responseId,
+      request_item_id: item.request_item_id,
+      status: item.status ?? true,
     }));
 
     const { data: responseItemsData, error: responseItemsError } = await supabase
@@ -121,29 +112,20 @@ async function responseRequest(finalData, response) {
       .select();
 
     if (responseItemsError) {
-      throw new Error(
-        `Response_item tablosuna kayıt yapılırken hata oluştu: ${responseItemsError.message}`
-      );
+      throw new Error(`Response_item tablosuna kayıt yapılırken hata oluştu: ${responseItemsError.message}`);
     }
 
-    // 3. "request_item" tablosunu güncelle
-    // finalData dizisindeki her bir öğe için bir güncelleme işlemi oluştur
     const updatePromises = finalData.map((item) =>
       supabase
         .from("request_item")
-        .update({ status: item.status }) // Doğrudan boolean değeri atayın
+        .update({ status: item.status })
         .eq("id", item.request_item_id)
     );
 
-    // Tüm güncelleme işlemlerini eşzamanlı olarak çalıştır
     const updateResults = await Promise.all(updatePromises);
-
-    // Her bir güncelleme sonucunu kontrol et
     for (const result of updateResults) {
       if (result.error) {
-        throw new Error(
-          `Request_item tablosu güncellenirken hata oluştu: ${result.error.message}`
-        );
+        throw new Error(`Request_item tablosu güncellenirken hata oluştu: ${result.error.message}`);
       }
     }
 
@@ -151,7 +133,7 @@ async function responseRequest(finalData, response) {
     return { response: responseData, responseItems: responseItemsData };
   } catch (error) {
     console.error("Hata:", error.message);
-    throw error; // Hatayı üst seviyeye ilet
+    throw error;
   }
 }
 
@@ -161,39 +143,46 @@ const useGetRequest = () => {
   const district_id = useSelector(selectUserDistrictId);
   const pharmacy_id = useSelector(selectUserPharmacyId);
   const [hiddenDistrictIds, setHiddenDistrictIds] = useState([]);
+  const queryClient = useQueryClient();
 
   const { data: allRequests, ...rest } = useQuery(REQUEST_KEYS.ALL, () =>
     fetchRequests({ city_id, neighbourhood_id, district_id, pharmacy_id })
   );
 
-    // allRequests'i kullanarak district'leri ve city'leri çekiyoruz
-    const { districts, cities } = useMemo(() => {
-      const uniqueDistricts = new Set();
-      const uniqueCities = new Set();
-  
-      if (allRequests) {
-        allRequests.forEach((request) => {
-          uniqueDistricts.add(
-            JSON.stringify({ id: request.district_id, name: request.district_id })
-          );
-          uniqueCities.add(
-            JSON.stringify({ id: request.city_id, name: request.city_id })
-          );
-        });
-      }
-  
-      return {
-        districts: Array.from(uniqueDistricts).map(JSON.parse),
-        cities: Array.from(uniqueCities).map(JSON.parse),
-      };
-    }, [allRequests]);
-  
+  // Realtime subscription for request table
+  useEffect(() => {
+    const subscription = supabase
+      .channel('public:request')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'request' }, (payload) => {
+        queryClient.invalidateQueries(REQUEST_KEYS.ALL);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [queryClient]);
+
+  const { districts, cities } = useMemo(() => {
+    const uniqueDistricts = new Set();
+    const uniqueCities = new Set();
+
+    if (allRequests) {
+      allRequests.forEach((request) => {
+        uniqueDistricts.add(JSON.stringify({ id: request.district_id, name: request.district_id }));
+        uniqueCities.add(JSON.stringify({ id: request.city_id, name: request.city_id }));
+      });
+    }
+
+    return {
+      districts: Array.from(uniqueDistricts).map(JSON.parse),
+      cities: Array.from(uniqueCities).map(JSON.parse),
+    };
+  }, [allRequests]);
 
   const filteredRequests = useMemo(() => {
     if (!allRequests) return [];
-    return allRequests.filter(
-      (request) => !hiddenDistrictIds.includes(request.district_id)
-    );
+    return allRequests.filter((request) => !hiddenDistrictIds.includes(request.district_id));
   }, [allRequests, hiddenDistrictIds]);
 
   const toggleDistrictVisibility = (districtId) => {
@@ -216,12 +205,9 @@ const useGetRequest = () => {
 };
 
 const useGetRequestDetails = (id) => {
-    const pharmacy_id = useSelector(selectUserPharmacyId);
-
-  return useQuery(
-    REQUEST_KEYS.DETAIL(id),
-    () => getRequestDetails({ queryKey: REQUEST_KEYS.DETAIL(id), pharmacy_id }),
-    {
+  const pharmacy_id = useSelector(selectUserPharmacyId);
+  return useQuery(REQUEST_KEYS.DETAIL(id), () =>
+    getRequestDetails({ queryKey: REQUEST_KEYS.DETAIL(id), pharmacy_id }), {
       enabled: !!id,
     }
   );

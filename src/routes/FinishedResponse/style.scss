@@ -1,3 +1,19 @@
+.main-content {
+  min-height: 100vh;
+  height: auto;
+  padding-top: 80px; /* Header yüksekliği kadar */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: visible; /* Varsayılan değer */
+  z-index: 1; /* Header'dan daha düşük bir değer */
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding-bottom: 1px; /* Mobilde footer için alt boşluk */
+  }
+}
 //Önceki stiller aynı kalabilir
 .request-table {
   width: 100%;

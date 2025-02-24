@@ -6,7 +6,7 @@ import { columns, columns_requestDetail } from "./constants/responseColumns";
 import { useSelector } from "react-redux";
 import { selectUserPharmacyId } from "@store/selectors";
 import { before, next } from "@assets";
-import "./style.scss";
+import "./frstyle.scss";
 import { Spin, Empty } from "antd";
 
 function FinishedResponse() {

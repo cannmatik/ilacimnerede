@@ -2,7 +2,7 @@ import { supabase } from "@routes/Login/useCreateClient";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import "./style.scss";
+import "./hpstyle.scss";
 import dayjs from 'dayjs'; // dayjs'i import et
 import 'dayjs/locale/tr'; // Türkçe yerelleştirme
 

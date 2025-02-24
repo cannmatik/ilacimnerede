@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import { before, next } from "@assets";
 import { useGetFetchedRequests, useGetRequestDetails } from "./queries";
 import { columns, columns_requestDetail } from "./constants/responseColumns";
-import "./style.scss";
+import "./arstyle.scss";
 
 const AnsweredResponse = () => {
   const pharmacyId = useSelector(selectUserPharmacyId);

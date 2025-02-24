@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Col, Row } from "react-grid-system";
 import { INButton, INDataTable } from "@components";
-import "./style.scss";
+import "./rstyle.scss";
 import { Spin, Progress, Empty } from "antd";
 import {
   useGetRequest,

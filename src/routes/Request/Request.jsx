@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Col, Row } from "react-grid-system";
 import { INButton, INDataTable } from "@components";
 import "./rstyle.scss";
-import { Spin, Progress, Empty } from "antd";
+import { Spin, Progress, Empty, Modal } from "antd";
 import {
   useGetRequest,
   useGetRequestDetails,
@@ -24,21 +24,61 @@ function Request() {
   const touchTime = useRef(0);
   const [messageText, setMessageText] = useState("");
 
+  // Bildirim izni sorulacak modal
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
+
   const { data: requests, isLoading } = useGetRequest();
   const { data: requestDetail } = useGetRequestDetails(selectedRequest?.id);
   const { mutate: responseRequestMutation } = useResponseRequest();
 
+  // (1) Ekran ilk kez açıldığında bildirim izni sorgulamak istiyoruz
+  useEffect(() => {
+    // Tarayıcı Notification API destekli mi?
+    if ("Notification" in window) {
+      // Eğer henüz "default" ise izin sorulmamış demektir
+      if (Notification.permission === "default") {
+        setShowPermissionModal(true);
+      }
+      // "granted" veya "denied" ise modal açmayacağız
+    }
+  }, []);
+
+  // (2) Modal'da "Evet" (OK) tıklanırsa
+  const handlePermissionOk = () => {
+    setShowPermissionModal(false);
+    Notification.requestPermission().then((permission) => {
+      if (permission === "granted") {
+        console.log("Bildirim izni verildi!");
+        // İsteğe bağlı: Test amaçlı anında örnek bir bildirim gösterebilirsiniz:
+        new Notification("Bildirim Testi", {
+          body: "Başarılı! Artık yeni talep geldiğinde bildirim alacaksınız.",
+        });
+      } else {
+        console.log("Kullanıcı bildirim iznini reddetti veya kapattı.");
+      }
+    });
+  };
+
+  // (3) Modal'da "Hayır" (Cancel) tıklanırsa
+  const handlePermissionCancel = () => {
+    setShowPermissionModal(false);
+    console.log("Kullanıcı bildirim izni istemedi.");
+  };
+
+  // (4) Seçilen talep değiştiğinde row selection ve messageText sıfırla
   useEffect(() => {
     setSelectedRows([]);
     setMessageText("");
   }, [selectedRequest?.id]);
 
+  // (5) Ekran boyutu değişimini takip
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // (6) Mobilde double-tap seçme
   const handleDoubleTap = (row) => {
     const now = new Date().getTime();
     const doubleTapDelay = 300;
@@ -55,8 +95,11 @@ function Request() {
     }
   };
 
+  // (7) Önceki/sonraki talep butonları
   const openPrevRequest = () => {
-    const currentIndex = requests?.findIndex((item) => item.id === selectedRequest?.id);
+    const currentIndex = requests?.findIndex(
+      (item) => item.id === selectedRequest?.id
+    );
     if (currentIndex > 0) {
       setSelectedRequest(requests[currentIndex - 1]);
       setSelectedRows([]);
@@ -67,7 +110,9 @@ function Request() {
   };
 
   const openNextRequest = () => {
-    const currentIndex = requests?.findIndex((item) => item.id === selectedRequest?.id);
+    const currentIndex = requests?.findIndex(
+      (item) => item.id === selectedRequest?.id
+    );
     if (currentIndex < requests?.length - 1) {
       setSelectedRequest(requests[currentIndex + 1]);
       setSelectedRows([]);
@@ -77,12 +122,16 @@ function Request() {
     }
   };
 
+  // (8) Prev/Next disabled ayarı
   useEffect(() => {
-    const currentIndex = requests?.findIndex((item) => item.id === selectedRequest?.id);
+    const currentIndex = requests?.findIndex(
+      (item) => item.id === selectedRequest?.id
+    );
     setIsPrevDisabled(currentIndex <= 0);
     setIsNextDisabled(currentIndex >= requests?.length - 1);
   }, [selectedRequest, requests]);
 
+  // (9) Talebi Yanıtla butonu
   const handleConfirmRequest = async () => {
     setProgress(0);
     setMessageText("");
@@ -110,6 +159,7 @@ function Request() {
 
     const finalData = [...checkedRequestDetails, ...uncheckedRequestDetails];
 
+    // Yanıt gönderilme işlemi sırasında progress bar doldurma
     const interval = setInterval(() => {
       setProgress((prevProgress) => {
         if (prevProgress >= 100) {
@@ -124,7 +174,9 @@ function Request() {
       await responseRequestMutation({ finalData, response });
       setProgress(100);
       setSelectedRows([]);
-      const currentIndex = requests?.findIndex((item) => item.id === selectedRequest?.id);
+      const currentIndex = requests?.findIndex(
+        (item) => item.id === selectedRequest?.id
+      );
       if (currentIndex < requests?.length - 1) {
         setSelectedRequest(requests[currentIndex + 1]);
       } else {
@@ -141,6 +193,7 @@ function Request() {
     }
   };
 
+  // (10) Seçili talep yoksa row seçimini sıfırla
   useEffect(() => {
     if (!selectedRequest) {
       setSelectedRows([]);
@@ -149,6 +202,42 @@ function Request() {
 
   return (
     <div className="main-content">
+      {/* Bildirim İzni Sorma Modalı */}
+      <Modal
+        open={showPermissionModal}
+        onOk={handlePermissionOk}
+        onCancel={handlePermissionCancel}
+        okText="Evet"
+        cancelText="Hayır"
+        title={
+          <span style={{ color: "#333333", fontWeight: 600 }}>
+            Önemli Taleplerden Anında Haberdar Olmak İster misin?
+          </span>
+        }
+        bodyStyle={{
+          backgroundColor: "#f1ecec",
+        }}
+        okButtonProps={{
+          style: {
+            backgroundColor: "#25b597",
+            borderColor: "#25b597",
+            color: "#f1ecec",
+          },
+        }}
+        cancelButtonProps={{
+          style: {
+            backgroundColor: "#333333",
+            borderColor: "#333333",
+            color: "#f1ecec",
+          },
+        }}
+      >
+        <div style={{ color: "#333333" }}>
+          Yeni talepler geldiğinde tarayıcı bildirimleri aracılığıyla haberdar olmak
+          ister misiniz?
+        </div>
+      </Modal>
+
       <Row>
         {(!isMobile || !selectedRequest) && (
           <Col xs={12} md={6} className="table-container">

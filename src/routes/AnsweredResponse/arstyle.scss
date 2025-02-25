@@ -1,15 +1,14 @@
 /* arstyle.scss */
 
-/* Ana kapsayıcı: header altında kalmaması için üstten boşluk veriyoruz */
+/* Ana kapsayıcı */
 .answered-content {
-  margin-top: 80px; /* Header varsa, içerik altta kalmasın diye */
+  margin-top: 80px; /* Örnek: Header altına boşluk */
   position: relative;
   z-index: 1;
 }
 
 /* Soldaki tablo alanı */
 .answered-table-container {
-  /* Beyaz arkaplanı kaldırıyoruz */
   background: none !important;
   box-shadow: none !important;
 }
@@ -21,7 +20,7 @@
   width: 100%;
 }
 
-/* Spin ve Empty center düzen */
+/* Spin / Empty center */
 .answered-spin-container,
 .answered-empty-container {
   display: flex;
@@ -30,14 +29,7 @@
   height: 400px;
 }
 
-/* Mobilde geri butonu için header benzeri alan */
-.answered-mobile-header {
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: flex-start;
-}
-
-/* Right panel: sağ taraftaki tüm içeriği tutar */
+/* Right panel, header vb. */
 .right-panel {
   display: flex;
   flex-direction: column;
@@ -45,7 +37,6 @@
   background: transparent;
 }
 
-/* Üst kısım (talep bilgileri vb.) */
 .right-header {
   padding: 0.5rem;
   .request-info {
@@ -59,7 +50,6 @@
   }
 }
 
-/* Tablo scroll alanı */
 .table-scroll-container {
   flex: 1;
   overflow-y: auto;
@@ -68,26 +58,28 @@
 
 /* Alt butonların olduğu kısım */
 .bottom-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+
   .footer-row {
     display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
+    justify-content: center;
+    margin: 0.5rem 0;
+
+    .nav-button {
+      margin: 0 5px;
+    }
   }
+
   .back-button-row {
-    margin-top: 5px; // Üst satır ile arasında boşluk
-    justify-content: left; // Geri butonunu ortalamak için
+    justify-content: center;
   }
 }
 
-@media (max-width: 768px) {
-  .nav-button {
-    white-space: normal; // Yazının sarmalamasını sağlar
-    font-size: 16px; // Gerekirse font boyutunu küçültebilirsiniz
-  }
-}
-
-
-/* Bildirim alanı */
+/* Bildirim için */
 .answered-notification {
   margin-top: 10px;
   padding: 8px 12px;
@@ -103,11 +95,10 @@
   }
 }
 
-/* Animasyonlar, geçiş efektleri vs. */
+/* Animasyonlar */
 .fade-in {
   animation: fadein 0.4s;
 }
-
 @keyframes fadein {
   from {
     opacity: 0;
@@ -116,11 +107,9 @@
     opacity: 1;
   }
 }
-
 .pulse {
   animation: pulse 2s infinite;
 }
-
 @keyframes pulse {
   0% {
     transform: scale(1);
@@ -132,16 +121,19 @@
     transform: scale(1);
   }
 }
+
 .answered-icon {
+  display: inline-block;
   width: 16px;
   height: 16px;
-  display: inline-block;
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-left: 6px;
+
   &.answered-tick-icon {
-    background: url('/icons/tick.png') no-repeat center center;
-    background-size: contain;
+    background-image: url("/icons/tick.png"); // Yeşil tik görseli
   }
   &.answered-cross-icon {
-    background: url('/icons/cross.png') no-repeat center center;
-    background-size: contain;
+    background-image: url("/icons/cross.png"); // Kırmızı çarpı görseli
   }
 }

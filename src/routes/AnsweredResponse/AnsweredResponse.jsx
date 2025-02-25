@@ -1,4 +1,3 @@
-// AnsweredResponse.jsx
 import React, { useState, useEffect } from "react";
 import { Spin, Empty } from "antd";
 import { supabase } from "@routes/Login/useCreateClient";
@@ -8,9 +7,8 @@ import { INDataTable, INButton } from "@components";
 import { Col, Row } from "react-grid-system";
 import { useGetFetchedRequests, useGetRequestDetails } from "./queries";
 import { columns, columns_requestDetail } from "./constants/responseColumns";
-import { before, next } from "@assets";
-import { LeftOutlined } from "@ant-design/icons";
 import "./arstyle.scss";
+import { LeftOutlined } from "@ant-design/icons";
 
 const AnsweredResponse = () => {
   const pharmacyId = useSelector(selectUserPharmacyId);
@@ -25,7 +23,6 @@ const AnsweredResponse = () => {
   const {
     data: answeredRequests = [],
     isLoading,
-    error: fetchError,
     refetch,
   } = useGetFetchedRequests(pharmacyId);
 
@@ -34,7 +31,7 @@ const AnsweredResponse = () => {
     selectedRequest?.id
   );
 
-  // Veriyi yeniden çek
+  // Yeniden veri çekme
   useEffect(() => {
     if (pharmacyId) refetch();
   }, [pharmacyId, refetch]);
@@ -46,7 +43,7 @@ const AnsweredResponse = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Önceki talep
+  // Önceki / Sonraki talep
   const openPrevRequest = () => {
     const currentIndex = answeredRequests.findIndex(
       (item) => item.request_id === selectedRequest?.request_id
@@ -56,7 +53,6 @@ const AnsweredResponse = () => {
     }
   };
 
-  // Sonraki talep
   const openNextRequest = () => {
     const currentIndex = answeredRequests.findIndex(
       (item) => item.request_id === selectedRequest?.request_id
@@ -78,7 +74,7 @@ const AnsweredResponse = () => {
       setNotification("Yanıt başarıyla geri alındı.");
       refetch();
 
-      // Bir sonrakine geç
+      // Sonrakine geç
       const currentIndex = answeredRequests.findIndex(
         (item) => item.request_id === selectedRequest?.request_id
       );
@@ -95,7 +91,7 @@ const AnsweredResponse = () => {
     }
   };
 
-  // Navigasyon butonlarının aktifliğini güncelle
+  // Buton aktifliklerini güncelle
   useEffect(() => {
     const currentIndex = answeredRequests.findIndex(
       (item) => item.request_id === selectedRequest?.request_id
@@ -132,7 +128,6 @@ const AnsweredResponse = () => {
 
         {selectedRequest && (
           <Col xs={12} md={6} className="answered-request-table">
-            {/* Artık geri butonu yukarıda değil, alt buton grubuna eklenecek */}
             <div className="right-panel">
               <div className="right-header">
                 <div className="request-info">
@@ -162,42 +157,44 @@ const AnsweredResponse = () => {
               </div>
 
               <div className="bottom-footer">
-  <div className="footer-row">
-    <INButton
-      onClick={!isPrevDisabled ? openPrevRequest : undefined}
-      text="Önceki Talep"
-      disabled={isPrevDisabled}
-      className="nav-button"
-    />
-    <INButton
-      className="answered-delete-button"
-      onClick={() => handleDeleteRequest(selectedRequest?.id)}
-      text="Verilen Yanıtı Geri Al"
-      disabled={loading}
-    />
-    <INButton
-      onClick={!isNextDisabled ? openNextRequest : undefined}
-      text="Sonraki Talep"
-      disabled={isNextDisabled}
-      className="nav-button"
-    />
-  </div>
-  {isMobile && (
-    <div className="footer-row back-button-row">
-      <INButton
-        onClick={() => setSelectedRequest(null)}
-        text={
-          <>
-            <LeftOutlined style={{ marginRight: 4 }} />
-            Geri
-          </>
-        }
-        className="nav-button"
-      />
-    </div>
-  )}
-</div>
+                <div className="footer-row">
+                  <INButton
+                    onClick={!isPrevDisabled ? openPrevRequest : undefined}
+                    text="Önceki Talep"
+                    disabled={isPrevDisabled}
+                    className="nav-button"
+                  />
 
+                  <INButton
+                    className="answered-delete-button"
+                    onClick={() => handleDeleteRequest(selectedRequest?.id)}
+                    text="Verilen Yanıtı Geri Al"
+                    disabled={loading}
+                  />
+
+                  <INButton
+                    onClick={!isNextDisabled ? openNextRequest : undefined}
+                    text="Sonraki Talep"
+                    disabled={isNextDisabled}
+                    className="nav-button"
+                  />
+                </div>
+
+                {isMobile && (
+                  <div className="footer-row back-button-row">
+                    <INButton
+                      onClick={() => setSelectedRequest(null)}
+                      text={
+                        <>
+                          <LeftOutlined style={{ marginRight: 4 }} />
+                          Geri
+                        </>
+                      }
+                      className="nav-button"
+                    />
+                  </div>
+                )}
+              </div>
 
               {notification && (
                 <div

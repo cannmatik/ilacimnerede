@@ -109,7 +109,7 @@
 
 
 /* 5) Footer: Navigasyon Butonları (Desktop) */
-.bottom-footer {
+.bottom-footer-req {
   display: flex;
   justify-content: center;
   gap: 15px;
@@ -135,8 +135,8 @@
 }
 
 /* Mobilde Butonlar */
-.bottom-footer .nav-button,
-.bottom-footer .mobileBack {
+.bottom-footer-req .nav-button,
+.bottom-footer-req .mobileBack {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -170,9 +170,9 @@
 }
 
 /* Disabled Butonlar */
-.bottom-footer button:disabled,
-.bottom-footer .nav-button:disabled,
-.bottom-footer .mobileBack:disabled {
+.bottom-footer-req button:disabled,
+.bottom-footer-req .nav-button:disabled,
+.bottom-footer-req .mobileBack:disabled {
   opacity: 0.5 !important;
   color: #888 !important;
   pointer-events: none !important;

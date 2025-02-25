@@ -1,14 +1,15 @@
 // AnsweredResponse.jsx
+import React, { useState, useEffect } from "react";
 import { Spin, Empty } from "antd";
 import { supabase } from "@routes/Login/useCreateClient";
 import { selectUserPharmacyId } from "@store/selectors";
 import { useSelector } from "react-redux";
 import { INDataTable, INButton } from "@components";
 import { Col, Row } from "react-grid-system";
-import { useState, useEffect } from "react";
-import { before, next } from "@assets";
 import { useGetFetchedRequests, useGetRequestDetails } from "./queries";
 import { columns, columns_requestDetail } from "./constants/responseColumns";
+import { before, next } from "@assets";
+import { LeftOutlined } from "@ant-design/icons";
 import "./arstyle.scss";
 
 const AnsweredResponse = () => {
@@ -20,19 +21,20 @@ const AnsweredResponse = () => {
   const [notification, setNotification] = useState("");
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  const { 
-    data: answeredRequests = [], 
-    isLoading, 
+  // Sorgular
+  const {
+    data: answeredRequests = [],
+    isLoading,
     error: fetchError,
-    refetch 
+    refetch,
   } = useGetFetchedRequests(pharmacyId);
 
   const { data: answeredRequestDetails = [] } = useGetRequestDetails(
-    selectedRequest?.request_id, 
+    selectedRequest?.request_id,
     selectedRequest?.id
   );
 
-  // Yeniden veri çekme
+  // Veriyi yeniden çek
   useEffect(() => {
     if (pharmacyId) refetch();
   }, [pharmacyId, refetch]);
@@ -44,7 +46,7 @@ const AnsweredResponse = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Önceki talep navigasyonu
+  // Önceki talep
   const openPrevRequest = () => {
     const currentIndex = answeredRequests.findIndex(
       (item) => item.request_id === selectedRequest?.request_id
@@ -54,7 +56,7 @@ const AnsweredResponse = () => {
     }
   };
 
-  // Sonraki talep navigasyonu
+  // Sonraki talep
   const openNextRequest = () => {
     const currentIndex = answeredRequests.findIndex(
       (item) => item.request_id === selectedRequest?.request_id
@@ -64,18 +66,19 @@ const AnsweredResponse = () => {
     }
   };
 
-  // Talep silme işlemi
+  // Talep silme (Verilen yanıtı geri alma)
   const handleDeleteRequest = async (responseId) => {
     setLoading(true);
     setNotification("");
-    
+
     try {
       const { error } = await supabase.from("response").delete().eq("id", responseId);
       if (error) throw error;
-      
-      setNotification("Talep başarıyla silindi.");
+
+      setNotification("Yanıt başarıyla geri alındı.");
       refetch();
-      
+
+      // Bir sonrakine geç
       const currentIndex = answeredRequests.findIndex(
         (item) => item.request_id === selectedRequest?.request_id
       );
@@ -92,7 +95,7 @@ const AnsweredResponse = () => {
     }
   };
 
-  // Navigasyon butonlarının aktifliğini güncelleme
+  // Navigasyon butonlarının aktifliğini güncelle
   useEffect(() => {
     const currentIndex = answeredRequests.findIndex(
       (item) => item.request_id === selectedRequest?.request_id
@@ -102,8 +105,7 @@ const AnsweredResponse = () => {
   }, [selectedRequest, answeredRequests]);
 
   return (
-    <>
-      <br />
+    <div className="answered-content">
       <Row>
         {(!isMobile || !selectedRequest) && (
           <Col xs={12} md={6} className="answered-table-container">
@@ -130,61 +132,87 @@ const AnsweredResponse = () => {
 
         {selectedRequest && (
           <Col xs={12} md={6} className="answered-request-table">
-            {isMobile && (
-              <div className="answered-mobile-header">
-                <INButton
-                  flex={true}
-                  onClick={() => setSelectedRequest(null)}
-                  text="Geri Dön"
-                />
+            {/* Artık geri butonu yukarıda değil, alt buton grubuna eklenecek */}
+            <div className="right-panel">
+              <div className="right-header">
+                <div className="request-info">
+                  <span>Talep Numarası: {selectedRequest?.request_id}</span>
+                  <span>Mesaj: {selectedRequest?.message_text}</span>
+                </div>
               </div>
-            )}
 
-            <div className="answered-request-info">
-              <span>Talep Numarası: {selectedRequest?.request_id}</span>
-              <span>Mesaj: {selectedRequest?.message_text}</span>
-            </div>
-
-            <INDataTable
-              key={`${selectedRequest?.id}-${selectedRequest?.request_id}`}
-              data={answeredRequestDetails}
-              columns={columns_requestDetail}
-              rowHoverStyle={{ border: true }}
-              emptyText="Detay bulunamadı"
-            />
-
-            <div className="answered-request-footer">
-              <img
-                src={before}
-                className={`answered-nav-icon ${isPrevDisabled ? "disabled" : "enabled"}`}
-                onClick={!isPrevDisabled ? openPrevRequest : undefined}
-                alt="Önceki Talep"
-              />
-              
-              <INButton
-                className="answered-delete-button"
-                onClick={() => handleDeleteRequest(selectedRequest?.id)}
-                text="Verilen Yanıtı Geri Al"
-                disabled={loading}
-              />
-              
-              <img
-                src={next}
-                className={`answered-nav-icon ${isNextDisabled ? "disabled" : "enabled"}`}
-                onClick={!isNextDisabled ? openNextRequest : undefined}
-                alt="Sonraki Talep"
-              />
-            </div>
-
-            {notification && (
-              <div className={`answered-notification ${notification.includes("başarı") ? "success" : "error"}`}>
-                {notification}
+              <div className="table-scroll-container">
+                {answeredRequestDetails.length > 0 ? (
+                  <INDataTable
+                    key={`${selectedRequest?.id}-${selectedRequest?.request_id}`}
+                    data={answeredRequestDetails}
+                    columns={columns_requestDetail}
+                    rowHoverStyle={{ border: true }}
+                    emptyText="Detay bulunamadı"
+                  />
+                ) : isLoading ? (
+                  <div className="answered-spin-container center-content pulse">
+                    <Spin size="large" />
+                  </div>
+                ) : (
+                  <div className="answered-empty-container fade-in pulse">
+                    <Empty description="Detay bulunamadı." />
+                  </div>
+                )}
               </div>
-            )}
+
+              <div className="bottom-footer">
+  <div className="footer-row">
+    <INButton
+      onClick={!isPrevDisabled ? openPrevRequest : undefined}
+      text="Önceki Talep"
+      disabled={isPrevDisabled}
+      className="nav-button"
+    />
+    <INButton
+      className="answered-delete-button"
+      onClick={() => handleDeleteRequest(selectedRequest?.id)}
+      text="Verilen Yanıtı Geri Al"
+      disabled={loading}
+    />
+    <INButton
+      onClick={!isNextDisabled ? openNextRequest : undefined}
+      text="Sonraki Talep"
+      disabled={isNextDisabled}
+      className="nav-button"
+    />
+  </div>
+  {isMobile && (
+    <div className="footer-row back-button-row">
+      <INButton
+        onClick={() => setSelectedRequest(null)}
+        text={
+          <>
+            <LeftOutlined style={{ marginRight: 4 }} />
+            Geri
+          </>
+        }
+        className="nav-button"
+      />
+    </div>
+  )}
+</div>
+
+
+              {notification && (
+                <div
+                  className={`answered-notification ${
+                    notification.includes("başarı") ? "success" : "error"
+                  }`}
+                >
+                  {notification}
+                </div>
+              )}
+            </div>
           </Col>
         )}
       </Row>
-    </>
+    </div>
   );
 };
 

@@ -1,148 +1,117 @@
-.main-content {
-  min-height: 100vh;
-  height: auto;
-  padding-top: 80px; /* Header yüksekliği kadar */
-  box-sizing: border-box;
+/* frstyle.scss */
+
+/* Ana kapsayıcı */
+.finished-content {
+  margin-top: 80px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Soldaki tablo alanı */
+.finished-table-container {
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* Boş tablo veya spin alanında ortalama */
+.finished-spin-container,
+.finished-empty-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+}
+
+/* Sağ taraf (detay) alanı */
+.finished-request-table {
+  background: none !important;
+  box-shadow: none !important;
+  width: 100%;
+}
+
+/* Genel animasyonlar (fade, pulse) */
+.fade-in {
+  animation: fadein 0.4s;
+}
+@keyframes fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.pulse {
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { transform: scale(1); }
+  70% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+/* Sağ panel ve header */
+.right-panel {
   display: flex;
   flex-direction: column;
-  overflow: visible; /* Varsayılan değer */
-  z-index: 1; /* Header'dan daha düşük bir değer */
-}
-
-@media (max-width: 768px) {
-  .main-content {
-    padding-bottom: 1px; /* Mobilde footer için alt boşluk */
-  }
-}
-//Önceki stiller aynı kalabilir
-.request-table {
   width: 100%;
-  overflow: auto;
-  background-color: #fafafa;
-  border-radius: 40px;
-  max-height: 60vh;
-  .request-accept-footer {
+  background: transparent;
+}
+.right-header {
+  padding: 0.5rem;
+  .request-info {
     display: flex;
-    justify-content: center;
-
-    .prev-or-next {
-      &:is(.enabled) {
-        opacity: 1;
-        width: 30px;
-        height: 30px;
-        padding: 5px;
-        cursor: pointer;
-      }
-      &:is(.disabled) {
-        width: 30px;
-        height: 30px;
-        padding: 5px;
-        transition: opacity 0.3s ease;
-        opacity: 0.5;
-      }
+    flex-direction: column;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    span {
+      margin: 2px 0;
     }
   }
 }
 
-.request-info {
+/* Scroll edilebilir tablo alanı */
+.table-scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  background: transparent;
+}
+
+/* Alt butonlar */
+.bottom-footer-finished {
   display: flex;
   flex-direction: column;
-  padding: 10px 15px;
-  background-color: #fafafa;
-  border-radius: 40px;
-  max-height: 60vh;
-}
+  align-items: center;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
 
-// .tick-icon {
-//   width: 16px; /* Adjust the size as needed */
-//   height:16px;
-//   fill: green;
-//   display: inline-block;
-// }
+  .footer-row {
+    display: flex;
+    justify-content: center;
+    margin: 0.5rem 0;
+
+    .nav-button {
+      margin: 0 5px;
+    }
+  }
+
+  /* Mobildeki geri butonunu ayrı row'a aldık */
+  .back-button-row {
+    justify-content: center;
+  }
+}
+// frstyle.scss
 
 .icon {
-  position: relative;
   display: inline-block;
-  width: 16px; /* Adjust size as needed */
+  width: 16px;
   height: 16px;
-  left: 17px;
-  top: 5px;
-}
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin: 0 4px;
 
-.tick-icon::before {
-  content: '';
-  position: absolute;
-  width: 6px; /* Adjust thickness as needed */
-  height: 12px; /* Adjust length as needed */
-  border-right: 2px solid green; /* Color of the tick */
-  border-bottom: 2px solid green; /* Color of the tick */
-  transform: rotate(45deg);
-  top: 1px; /* Adjust position as needed */
-  left: 4px; /* Adjust position as needed */
-}
-
-.cross-icon::before {
-  content: '';
-  position: absolute;
-  width: 2px; /* Adjust thickness as needed */
-  height: 12px; /* Adjust length as needed */
-  background-color: red; /* Color of the cross */
-  transform: rotate(45deg);
-  top: 2px; /* Adjust position as needed */
-  left: 7px; /* Adjust position as needed */
-}
-
-.cross-icon::after {
-  content: '';
-  position: absolute;
-  width: 2px; /* Adjust thickness as needed */
-  height: 12px; /* Adjust length as needed */
-  background-color: red; /* Color of the cross */
-  transform: rotate(-45deg);
-  top: 2px; /* Adjust position as needed */
-  left: 7px; /* Adjust position as needed */
-}
-
-// Eklenen yeni sınıflar:
-.spin-container,
-.center-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  width:100%;
-  min-height: 200px;
-}
-
-.fade-in {
-  animation: fadeInAnimation ease 0.6s;
-  animation-iteration-count: 1;
-  animation-fill-mode: forwards;
-}
-
-.pulse {
-  animation: pulseAnimation ease 1.5s;
-  animation-iteration-count: infinite;
-}
-
-@keyframes fadeInAnimation {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+  &.tick-icon {
+    background-image: url("/icons/tick.png");
+    /* Ya da bir FontAwesome / inline svg kullanabilirsiniz */
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  &.cross-icon {
+    background-image: url("/icons/cross.png");
   }
 }
 
-@keyframes pulseAnimation {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 0.8;
-  }
-}

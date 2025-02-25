@@ -1,5 +1,4 @@
-import { INCheckbox } from "@components";
-import "../style.scss";
+import "../frstyle.scss";
 
 const columns = [
   {
@@ -12,6 +11,7 @@ const columns = [
   },
 ];
 
+// Aşağıdaki 'status' sütunu TRUE => tik, FALSE => çarpı ikonu kullanır
 const columns_requestDetail = [
   {
     header: "Barkod No",
@@ -28,7 +28,18 @@ const columns_requestDetail = [
   {
     header: "Durum",
     accessor: "status",
-    cell: ({ row }) => <div>{row.original.status ? <span className="icon tick-icon"></span> : <span className="icon cross-icon"></span>}</div>,
+    cell: ({ row }) => {
+      const st = row.original.status; // st: true/false
+      return (
+        <div>
+          {st ? (
+            <span className="icon tick-icon"></span>
+          ) : (
+            <span className="icon cross-icon"></span>
+          )}
+        </div>
+      );
+    },
   },
 ];
 

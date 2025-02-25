@@ -1,191 +1,147 @@
-// style.scss (AnsweredResponse için)
+/* arstyle.scss */
 
-// Header yüksekliği
-$header-height: 80px;
+/* Ana kapsayıcı: header altında kalmaması için üstten boşluk veriyoruz */
+.answered-content {
+  margin-top: 80px; /* Header varsa, içerik altta kalmasın diye */
+  position: relative;
+  z-index: 1;
+}
 
-// Genel fadeIn animasyonu
-@keyframes fadeIn {
+/* Soldaki tablo alanı */
+.answered-table-container {
+  /* Beyaz arkaplanı kaldırıyoruz */
+  background: none !important;
+  box-shadow: none !important;
+}
+
+/* Sağdaki detay alanı */
+.answered-request-table {
+  background: none !important;
+  box-shadow: none !important;
+  width: 100%;
+}
+
+/* Spin ve Empty center düzen */
+.answered-spin-container,
+.answered-empty-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+}
+
+/* Mobilde geri butonu için header benzeri alan */
+.answered-mobile-header {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+/* Right panel: sağ taraftaki tüm içeriği tutar */
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background: transparent;
+}
+
+/* Üst kısım (talep bilgileri vb.) */
+.right-header {
+  padding: 0.5rem;
+  .request-info {
+    display: flex;
+    flex-direction: column;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    span {
+      margin: 2px 0;
+    }
+  }
+}
+
+/* Tablo scroll alanı */
+.table-scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  background: transparent;
+}
+
+/* Alt butonların olduğu kısım */
+.bottom-footer {
+  .footer-row {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  .back-button-row {
+    margin-top: 5px; // Üst satır ile arasında boşluk
+    justify-content: left; // Geri butonunu ortalamak için
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-button {
+    white-space: normal; // Yazının sarmalamasını sağlar
+    font-size: 16px; // Gerekirse font boyutunu küçültebilirsiniz
+  }
+}
+
+
+/* Bildirim alanı */
+.answered-notification {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-weight: 500;
+  &.success {
+    background-color: #e6ffed;
+    color: #4caf50;
+  }
+  &.error {
+    background-color: #ffe6e6;
+    color: #f44336;
+  }
+}
+
+/* Animasyonlar, geçiş efektleri vs. */
+.fade-in {
+  animation: fadein 0.4s;
+}
+
+@keyframes fadein {
   from {
     opacity: 0;
-    transform: translateY(20px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
-.fade-in {
-  animation: fadeIn 0.5s ease-out;
+.pulse {
+  animation: pulse 2s infinite;
 }
 
-/* Ana Container */
-.answered-table-container {
-  .answered-table-wrapper {
-    width: 100%;
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  70% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
   }
 }
-
-/* Spinner Container */
-.answered-spin-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-}
-
-/* Boş Durum Container */
-.answered-empty-container {
-  height: calc(100vh - #{$header-height});
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Sağ Panel - Answered Request Table */
-.answered-request-table {
-  width: 100%;
-  overflow: auto;
-  background-color: #fafafa;
-  border-radius: 20px; // Modern, yuvarlatılmış kenarlar
-  margin-top: $header-height;
-  padding: 15px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Mobil Header */
-.answered-mobile-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: $header-height;
-  padding: 10px;
-}
-
-/* Talep Bilgileri */
-.answered-request-info {
-  display: flex;
-  flex-direction: column;
-  padding: 10px 15px;
-  background-color: #fff;
-  border-radius: 10px;
-  margin-bottom: 15px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  
-  span {
-    font-size: 14px;
-    color: #333;
-    margin-bottom: 5px;
-  }
-}
-
-/* Footer (Navigasyon & Buton) */
-.answered-request-footer {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  margin-top: 15px;
-  padding: 10px 0;
-  border-top: 1px solid #e0e0e0;
-}
-
-/* Navigasyon İkonları */
-.answered-nav-icon {
-  width: 30px;
-  height: 30px;
-  padding: 5px;
-  cursor: pointer;
-  transition: opacity 0.3s ease;
-  
-  &.enabled {
-    opacity: 1;
-  }
-  
-  &.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
-
-/* Silme Butonu */
-.answered-delete-button {
-  background-color: #e74c3c;
-  color: #fff;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.3s ease;
-  
-  &:hover {
-    background-color: #c0392b;
-  }
-  
-  &:disabled {
-    background-color: #95a5a6;
-    cursor: not-allowed;
-  }
-}
-
-/* Bildirim */
-.answered-notification {
-  margin-top: 15px;
-  padding: 10px;
-  border-radius: 5px;
-  text-align: center;
-  font-size: 14px;
-  
-  &.success {
-    background-color: #dff0d8;
-    color: #3c763d;
-  }
-  
-  &.error {
-    background-color: #f2dede;
-    color: #a94442;
-  }
-}
-
-/* İkon Stilleri (Tik & Çarpı) */
 .answered-icon {
-  position: relative;
-  display: inline-block;
-  width: 16px; /* İkon boyutu */
+  width: 16px;
   height: 16px;
-}
-
-.answered-tick-icon::before {
-  content: '';
-  position: absolute;
-  width: 6px;
-  height: 12px;
-  border-right: 2px solid green;
-  border-bottom: 2px solid green;
-  transform: rotate(45deg);
-  top: 1px;
-  left: 4px;
-}
-
-.answered-cross-icon::before {
-  content: '';
-  position: absolute;
-  width: 2px;
-  height: 12px;
-  background-color: red;
-  transform: rotate(45deg);
-  top: 2px;
-  left: 7px;
-}
-
-.answered-cross-icon::after {
-  content: '';
-  position: absolute;
-  width: 2px;
-  height: 12px;
-  background-color: red;
-  transform: rotate(-45deg);
-  top: 2px;
-  left: 7px;
+  display: inline-block;
+  &.answered-tick-icon {
+    background: url('/icons/tick.png') no-repeat center center;
+    background-size: contain;
+  }
+  &.answered-cross-icon {
+    background: url('/icons/cross.png') no-repeat center center;
+    background-size: contain;
+  }
 }

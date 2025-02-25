@@ -1,6 +1,7 @@
 // responseColumns.jsx
-import "../style.scss";
+import "../arstyle.scss";
 
+// Ana tablo sütunları
 const columns = [
   {
     header: "Talep No",
@@ -12,6 +13,7 @@ const columns = [
   },
 ];
 
+// Detay tablo sütunları
 const columns_requestDetail = [
   {
     header: "Barkod No",
@@ -28,15 +30,18 @@ const columns_requestDetail = [
   {
     header: "Durum",
     accessor: "status",
-    cell: ({ row }) => (
-      <div>
-        {row.original.status ? (
-          <span className="answered-icon answered-tick-icon"></span>
-        ) : (
-          <span className="answered-icon answered-cross-icon"></span>
-        )}
-      </div>
-    ),
+    // TRUE -> yeşil tik, FALSE -> kırmızı çarpı
+    cell: ({ row }) => {
+      const currentStatus = row.original.status;
+      return (
+        <div>
+          {currentStatus
+            ? <span className="answered-icon answered-tick-icon" />
+            : <span className="answered-icon answered-cross-icon" />
+          }
+        </div>
+      );
+    },
   },
 ];
 

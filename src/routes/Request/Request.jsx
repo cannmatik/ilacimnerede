@@ -20,70 +20,89 @@ function Request() {
   const [selectedRows, setSelectedRows] = useState([]);
   const [progress, setProgress] = useState(-1);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const pharmacyId = useSelector(selectUserPharmacyId);
-  const touchTime = useRef(0);
+
   const [messageText, setMessageText] = useState("");
+  const touchTime = useRef(0);
 
-  // Bildirim izni sorulacak modal
+  // Bildirim izniyle ilgili popup ve buton state'leri
   const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [showPermissionButton, setShowPermissionButton] = useState(false);
 
+  const pharmacyId = useSelector(selectUserPharmacyId);
+
+  // Queries
   const { data: requests, isLoading } = useGetRequest();
   const { data: requestDetail } = useGetRequestDetails(selectedRequest?.id);
   const { mutate: responseRequestMutation } = useResponseRequest();
 
-  // (1) Ekran ilk kez açıldığında bildirim izni sorgulamak istiyoruz
-  useEffect(() => {
-    // Tarayıcı Notification API destekli mi?
-    if ("Notification" in window) {
-      // Eğer henüz "default" ise izin sorulmamış demektir
-      if (Notification.permission === "default") {
-        setShowPermissionModal(true);
-      }
-      // "granted" veya "denied" ise modal açmayacağız
-    }
-  }, []);
-
-  // (2) Modal'da "Evet" (OK) tıklanırsa
-  const handlePermissionOk = () => {
-    setShowPermissionModal(false);
-    Notification.requestPermission().then((permission) => {
-      if (permission === "granted") {
-        console.log("Bildirim izni verildi!");
-        // İsteğe bağlı: Test amaçlı anında örnek bir bildirim gösterebilirsiniz:
-        new Notification("Bildirim Testi", {
-          body: "Başarılı! Artık yeni talep geldiğinde bildirim alacaksınız.",
-        });
-      } else {
-        console.log("Kullanıcı bildirim iznini reddetti veya kapattı.");
-      }
-    });
-  };
-
-  // (3) Modal'da "Hayır" (Cancel) tıklanırsa
-  const handlePermissionCancel = () => {
-    setShowPermissionModal(false);
-    console.log("Kullanıcı bildirim izni istemedi.");
-  };
-
-  // (4) Seçilen talep değiştiğinde row selection ve messageText sıfırla
-  useEffect(() => {
-    setSelectedRows([]);
-    setMessageText("");
-  }, [selectedRequest?.id]);
-
-  // (5) Ekran boyutu değişimini takip
+  // Ekran boyutu değişimi
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // (6) Mobilde double-tap seçme
+  // Seçili request değişince row selection reset
+  useEffect(() => {
+    setSelectedRows([]);
+    setMessageText("");
+  }, [selectedRequest?.id]);
+
+  // Sadece bir kez => bildirim izni sormak
+  useEffect(() => {
+    const askedBefore = localStorage.getItem("notificationAsked");
+    if ("Notification" in window) {
+      if (!askedBefore && Notification.permission === "default") {
+        // Mobil => buton göster, Masaüstü => modal göster
+        if (isMobile) {
+          setShowPermissionButton(true);
+        } else {
+          setShowPermissionModal(true);
+        }
+      }
+    }
+  }, [isMobile]);
+
+  // Masaüstü modal: "Evet" deyince requestPermission
+  const handlePermissionOk = () => {
+    setShowPermissionModal(false);
+    localStorage.setItem("notificationAsked", "true");
+    Notification.requestPermission().then((permission) => {
+      if (permission === "granted") {
+        console.log("Bildirim izni verildi (masaüstü)!");
+      } else {
+        console.log("Bildirim izni reddedildi (masaüstü)!");
+      }
+    });
+  };
+
+  // Masaüstü modal: "Hayır" deyince kapat
+  const handlePermissionCancel = () => {
+    setShowPermissionModal(false);
+    localStorage.setItem("notificationAsked", "true");
+  };
+
+  // Mobil buton: tıklayınca requestPermission
+  const handleMobilePermission = () => {
+    Notification.requestPermission().then((permission) => {
+      localStorage.setItem("notificationAsked", "true");
+      setShowPermissionButton(false);
+      if (permission === "granted") {
+        console.log("Bildirim izni verildi (mobil)!");
+      } else {
+        console.log("Bildirim izni reddedildi (mobil)!");
+      }
+    });
+  };
+
+  // Mobil double-tap logic
   const handleDoubleTap = (row) => {
     const now = new Date().getTime();
     const doubleTapDelay = 300;
     if (touchTime.current + doubleTapDelay > now) {
-      const isSelected = selectedRows.some((item) => item.id === row.original.id);
+      const isSelected = selectedRows.some(
+        (item) => item.id === row.original.id
+      );
       setSelectedRows((prev) =>
         isSelected
           ? prev.filter((item) => item.id !== row.original.id)
@@ -95,7 +114,7 @@ function Request() {
     }
   };
 
-  // (7) Önceki/sonraki talep butonları
+  // Önceki talep butonu
   const openPrevRequest = () => {
     const currentIndex = requests?.findIndex(
       (item) => item.id === selectedRequest?.id
@@ -109,6 +128,7 @@ function Request() {
     }
   };
 
+  // Sonraki talep butonu
   const openNextRequest = () => {
     const currentIndex = requests?.findIndex(
       (item) => item.id === selectedRequest?.id
@@ -122,7 +142,7 @@ function Request() {
     }
   };
 
-  // (8) Prev/Next disabled ayarı
+  // Prev/Next disabled ayarı
   useEffect(() => {
     const currentIndex = requests?.findIndex(
       (item) => item.id === selectedRequest?.id
@@ -131,7 +151,7 @@ function Request() {
     setIsNextDisabled(currentIndex >= requests?.length - 1);
   }, [selectedRequest, requests]);
 
-  // (9) Talebi Yanıtla butonu
+  // Talebi Yanıtla
   const handleConfirmRequest = async () => {
     setProgress(0);
     setMessageText("");
@@ -142,9 +162,8 @@ function Request() {
       request_item_id: id,
       status: true,
     }));
-
     const uncheckedRequestDetails = requestDetail
-      .filter(({ id }) => !selectedRowsIds.includes(id))
+      ?.filter(({ id }) => !selectedRowsIds.includes(id))
       .map(({ id }) => ({
         request_item_id: id,
         status: false,
@@ -159,14 +178,13 @@ function Request() {
 
     const finalData = [...checkedRequestDetails, ...uncheckedRequestDetails];
 
-    // Yanıt gönderilme işlemi sırasında progress bar doldurma
     const interval = setInterval(() => {
-      setProgress((prevProgress) => {
-        if (prevProgress >= 100) {
+      setProgress((prev) => {
+        if (prev >= 100) {
           clearInterval(interval);
-          return prevProgress;
+          return prev;
         }
-        return prevProgress + 5;
+        return prev + 5;
       });
     }, 500);
 
@@ -187,13 +205,11 @@ function Request() {
       setProgress(-1);
     } finally {
       clearInterval(interval);
-      setTimeout(() => {
-        setProgress(-1);
-      }, 2000);
+      setTimeout(() => setProgress(-1), 2000);
     }
   };
 
-  // (10) Seçili talep yoksa row seçimini sıfırla
+  // Seçili request yoksa row selection reset
   useEffect(() => {
     if (!selectedRequest) {
       setSelectedRows([]);
@@ -202,40 +218,19 @@ function Request() {
 
   return (
     <div className="main-content">
-      {/* Bildirim İzni Sorma Modalı */}
+      {/* Masaüstü => bildirim izni modal */}
       <Modal
         open={showPermissionModal}
         onOk={handlePermissionOk}
         onCancel={handlePermissionCancel}
         okText="Evet"
         cancelText="Hayır"
-        title={
-          <span style={{ color: "#333333", fontWeight: 600 }}>
-            Önemli Taleplerden Anında Haberdar Olmak İster misin?
-          </span>
-        }
-        bodyStyle={{
-          backgroundColor: "#f1ecec",
-        }}
-        okButtonProps={{
-          style: {
-            backgroundColor: "#25b597",
-            borderColor: "#25b597",
-            color: "#f1ecec",
-          },
-        }}
-        cancelButtonProps={{
-          style: {
-            backgroundColor: "#333333",
-            borderColor: "#333333",
-            color: "#f1ecec",
-          },
-        }}
+        title="Önemli Taleplerden Haberdar Olmak İster Misiniz?"
       >
-        <div style={{ color: "#333333" }}>
-          Yeni talepler geldiğinde tarayıcı bildirimleri aracılığıyla haberdar olmak
-          ister misiniz?
-        </div>
+        <p>
+          Yeni talepler geldiğinde tarayıcı bildirimi aracılığıyla anında
+          haberdar olmak ister misiniz?
+        </p>
       </Modal>
 
       <Row>
@@ -335,6 +330,7 @@ function Request() {
         )}
       </Row>
 
+      {/* Progress bar */}
       {progress > -1 && (
         <div className="progress-container">
           <Progress
@@ -342,6 +338,13 @@ function Request() {
             status={progress === 100 ? "success" : "active"}
             style={{ marginTop: "20px", height: "30px" }}
           />
+        </div>
+      )}
+
+      {/* Mobil => "Bildirimlere İzin Ver" butonu */}
+      {showPermissionButton && (
+        <div className="permission-button-container">
+          <INButton onClick={handleMobilePermission} text="Bildirimlere İzin Ver" />
         </div>
       )}
     </div>

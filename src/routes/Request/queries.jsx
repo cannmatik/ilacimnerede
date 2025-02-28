@@ -188,6 +188,9 @@ export const useGetRequest = () => {
     fetchRequests({ city_id, neighbourhood_id, district_id, pharmacy_id })
   );
 
+  // Yeni eklenen request'leri highlight etmek için ID listesini tutacak state
+  const [highlightedRequestIds, setHighlightedRequestIds] = useState([]);
+
   // Realtime subscription
   useEffect(() => {
     const subscription = supabase
@@ -199,6 +202,16 @@ export const useGetRequest = () => {
         // YENİ talep geldi mi?
         if (payload.eventType === "INSERT") {
           showNewRequestNotification(payload.new);
+
+          // Highlight edilecek listeye ekle
+          setHighlightedRequestIds((prev) => [...prev, payload.new.id]);
+
+          // 2 saniye sonra highlight’tan çıkar
+          setTimeout(() => {
+            setHighlightedRequestIds((prev) =>
+              prev.filter((id) => id !== payload.new.id)
+            );
+          }, 2000);
         }
       })
       .subscribe();
@@ -239,7 +252,7 @@ export const useGetRequest = () => {
     );
   }, [allRequests, hiddenDistrictIds]);
 
-  // Örnek: Belirli ilçe taleplerini gizle/göster
+  // Belirli ilçe taleplerini gizle/göster
   const toggleDistrictVisibility = (districtId) => {
     setHiddenDistrictIds((prevHiddenDistrictIds) =>
       prevHiddenDistrictIds.includes(districtId)
@@ -256,6 +269,7 @@ export const useGetRequest = () => {
     toggleDistrictVisibility,
     districts,
     cities,
+    highlightedRequestIds, // tablo tarafında kullanabilmek için dışarı veriyoruz
   };
 };
 

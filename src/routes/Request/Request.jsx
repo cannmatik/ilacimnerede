@@ -1,3 +1,4 @@
+// Request.jsx
 import React, { useEffect, useState, useRef } from "react";
 import { Col, Row } from "react-grid-system";
 import { INButton, INDataTable } from "@components";
@@ -24,7 +25,11 @@ function Request() {
   const touchTime = useRef(0);
   const [messageText, setMessageText] = useState("");
 
-  const { data: requests, isLoading } = useGetRequest();
+  const {
+    data: requests,
+    isLoading,
+    highlightedRequestIds, // useGetRequest'ten gelen highlight listesi
+  } = useGetRequest();
   const { data: requestDetail } = useGetRequestDetails(selectedRequest?.id);
   const { mutate: responseRequestMutation } = useResponseRequest();
 
@@ -80,7 +85,7 @@ function Request() {
   useEffect(() => {
     const currentIndex = requests?.findIndex((item) => item.id === selectedRequest?.id);
     setIsPrevDisabled(currentIndex <= 0);
-    setIsNextDisabled(currentIndex >= requests?.length - 1);
+    setIsNextDisabled(currentIndex >= (requests?.length || 0) - 1);
   }, [selectedRequest, requests]);
 
   const handleConfirmRequest = async () => {
@@ -94,7 +99,7 @@ function Request() {
       status: true,
     }));
 
-    const uncheckedRequestDetails = requestDetail
+    const uncheckedRequestDetails = (requestDetail || [])
       .filter(({ id }) => !selectedRowsIds.includes(id))
       .map(({ id }) => ({
         request_item_id: id,
@@ -125,7 +130,7 @@ function Request() {
       setProgress(100);
       setSelectedRows([]);
       const currentIndex = requests?.findIndex((item) => item.id === selectedRequest?.id);
-      if (currentIndex < requests?.length - 1) {
+      if (currentIndex < (requests?.length || 0) - 1) {
         setSelectedRequest(requests[currentIndex + 1]);
       } else {
         setSelectedRequest(null);
@@ -163,6 +168,12 @@ function Request() {
                   columns={columns}
                   rowHoverStyle={{ border: true }}
                   setSelectedRows={setSelectedRows}
+                  // Burada highlight kontrolü
+                  rowClassName={(row) =>
+                    highlightedRequestIds.includes(row.original.id)
+                      ? "blink-row"
+                      : ""
+                  }
                   onRowClick={(row) => setSelectedRequest(row.original)}
                 />
               </div>

@@ -5,7 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 import Layout from "./layout";
 import { privateRoutes } from "@routes/private";
 
-// Opsiyonel AdBlock Popup tasarımı için basit stiller
+// Opsiyonel AdBlock Popup tasarımı için örnek stiller
 const styles = {
   overlay: {
     position: "fixed",
@@ -39,27 +39,27 @@ const styles = {
     justifyContent: "space-between",
   },
   primaryButton: {
-    backgroundColor: "#25b597", // buton
+    backgroundColor: "#25b597", 
     border: "none",
     padding: "0.75rem 1.5rem",
-    color: "#f1ecec", // metin
+    color: "#f1ecec",
     borderRadius: "4px",
     cursor: "pointer",
     fontWeight: 600,
     marginRight: "1rem",
   },
   secondaryButton: {
-    backgroundColor: "#333333", // koyu buton
+    backgroundColor: "#333333",
     border: "none",
     padding: "0.75rem 1.5rem",
-    color: "#f1ecec", // metin
+    color: "#f1ecec",
     borderRadius: "4px",
     cursor: "pointer",
     fontWeight: 600,
   },
 };
 
-// Basit popup bileşeni (modal gibi)
+// Popup bileşeni
 function AdBlockPopup({ onClose, onDisableForever }) {
   return (
     <div style={styles.overlay}>
@@ -67,8 +67,8 @@ function AdBlockPopup({ onClose, onDisableForever }) {
         <h2 style={styles.title}>AdBlock Tespit Edildi</h2>
         <p style={styles.message}>
           Görünüşe göre reklam engelleyici kullanıyorsunuz. Bu durum site
-          analitiği ve bazı servislerin çalışmasını engelleyebilir. Lütfen
-          devre dışı bırakmayı veya bu siteyi istisnaya eklemeyi düşünün.
+          analitiği ve bazı servislerin çalışmasını engelleyebilir.
+          Lütfen devre dışı bırakmayı veya bu siteyi istisnaya eklemeyi düşünün.
         </p>
         <div style={styles.buttonRow}>
           <button style={styles.primaryButton} onClick={onClose}>
@@ -86,21 +86,19 @@ function AdBlockPopup({ onClose, onDisableForever }) {
 export default function App() {
   const location = useLocation();
 
-  // AdBlock tespiti state'i
+  // AdBlock tespiti
   const [adBlockDetected, setAdBlockDetected] = useState(false);
-  // Popup görünür mü?
   const [showAdBlockPopup, setShowAdBlockPopup] = useState(false);
 
-  // Sayfa görüntüleme, route geçişlerinde analytics tetikleme
   useEffect(() => {
-    // Kullanıcı daha önce "Bir Daha Gösterme" demişse tekrar attempt etmiyoruz
+    // Kullanıcı "Bir Daha Gösterme" demişse pop-up hiç açmayalım
     const dismissed = localStorage.getItem("adBlockDismissed") === "forever";
     if (dismissed) return;
 
-    // Dinamik import ile Vercel Analytics'i çekiyoruz
+    // Vercel Analytics'i dinamik (runtime) import ediyoruz
     import("@vercel/analytics")
       .then(({ track }) => {
-        // track fonksiyonunu başarıyla aldık, sayfa görüntüleme
+        // track fonksiyonunu alıp sayfa görüntüleme kaydediyoruz
         track("page_view", { page: location.pathname });
 
         // privateRoutes ile localStorage'a path yazma örneği
@@ -112,13 +110,13 @@ export default function App() {
         }
       })
       .catch((err) => {
-        // Eğer AdBlock veya başka bir sebepten dolayı engellendiyse
+        // AdBlock engellemesi vb. durum
         console.warn("Analytics import edilemedi, muhtemelen AdBlock etkin:", err);
         setAdBlockDetected(true);
       });
   }, [location]);
 
-  // AdBlock tespit edildiğinde popup aç
+  // AdBlock tespit edilirse ve kullanıcı "Bir Daha Gösterme" demediyse popup aç
   useEffect(() => {
     const dismissed = localStorage.getItem("adBlockDismissed") === "forever";
     if (adBlockDetected && !dismissed) {
@@ -126,63 +124,28 @@ export default function App() {
     }
   }, [adBlockDetected]);
 
-  // Analytics'e gönderilecek diğer event'ler
-  const handleButtonClick = () => {
-    import("@vercel/analytics")
-      .then(({ track }) => {
-        track("button_click", {
-          category: "User Interaction",
-          label: "Custom Event Button",
-          value: 1,
-        });
-      })
-      .catch((err) => {
-        console.warn("AdBlock engeli yüzünden track fonksiyonu yok:", err);
-        setAdBlockDetected(true);
-      });
-  };
-
-  const handleLinkClick = () => {
-    import("@vercel/analytics")
-      .then(({ track }) => {
-        track("link_click", {
-          category: "Navigation",
-          label: "Special Link",
-        });
-      })
-      .catch((err) => {
-        console.warn("AdBlock engeli yüzünden track fonksiyonu yok:", err);
-        setAdBlockDetected(true);
-      });
-  };
-
-  // Popup düğmeleri
+  // Kullanıcı Popup "Kapat" dediğinde sadece bu oturum için kapatıyoruz
   const handleClosePopup = () => {
-    // Yalnızca bu oturum için kapat
     setShowAdBlockPopup(false);
   };
 
+  // Kullanıcı "Bir Daha Gösterme" derse localStorage'a "forever" kaydedip tamamen kapatıyoruz
   const handleDismissForever = () => {
-    // Bir daha gösterme
     localStorage.setItem("adBlockDismissed", "forever");
     setShowAdBlockPopup(false);
   };
 
   return (
     <>
-      {/* İsterseniz SpeedInsights'i bu şekilde de kullanabilirsiniz */}
       <SpeedInsights projectId="prj_XlxS1b6hBbV76nFQLGQ6ehRriEPS" />
 
+      {/* Sayfa içeriği */}
       <Layout />
 
-      <button onClick={handleButtonClick}>Tıklayın</button>
-      <a href="#!" onClick={handleLinkClick}>
-        Özel Link
-      </a>
-
-      {/* Analytics bileşeni yine duruyor, engellense bile site çökmez */}
+      {/* Vercel Analytics bileşeni – eğer AdBlock engellerse yine de siteyi çökertmez */}
       <Analytics />
 
+      {/* AdBlock uyarısı */}
       {showAdBlockPopup && (
         <AdBlockPopup
           onClose={handleClosePopup}

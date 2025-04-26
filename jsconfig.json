@@ -1,19 +1,18 @@
 {
-    "compilerOptions": {
-      "baseUrl": "/home/sercanse/ReactProjects/IlacimNerede/IlacimNerede",
-      "paths": {
-        "@api": ["src/api/index.js"],
-        "@assets": ["src/assets/index.js"],
-        "@icons": ["src/assets/icons/index.js"],
-        "@components": ["src/components/index.js"],
-        "@routes/*": ["src/routes/*"],
-        "@enums": ["src/enums/index"],
-        "@hooks": ["src/hooks/index.js"],
-        "@services/*": ["src/services/*"],
-        "@store/*": ["src/store/*"],
-        "@utils": ["src/utils/index"],
-        "@validations/*": ["src/validations/*"]
-      }
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@api": ["src/api/index.js"],
+      "@assets": ["src/assets/index.js"],
+      "@icons": ["src/assets/icons/index.js"],
+      "@components": ["src/components/index.js"],
+      "@routes/*": ["src/routes/*"],
+      "@enums": ["src/enums/index"],
+      "@hooks": ["src/hooks/index.js"],
+      "@services/*": ["src/services/*"],
+      "@store/*": ["src/store/*"],
+      "@utils": ["src/utils/index"],
+      "@validations/*": ["src/validations/*"]
     }
+  }
 }
-  

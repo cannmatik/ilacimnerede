@@ -1,0 +1,151 @@
+/* 1) Ana içerik yüksekliği ve üst/bottom padding */
+.main-content {
+  min-height: 100vh;          /* ⬅︎ 1: tam ekran doldur */
+  padding-top: 80px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 2) Orta Kısım */
+.duty-request-container {
+  flex: 1;
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: #f5f7fa;
+  box-sizing: border-box;
+}
+
+/* 3) Sol Panel: Takvim */
+.duty-table-container .duty-calendar {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  max-width: 360px;
+  margin: 0 auto 40px;
+  overflow: hidden;
+
+  .flatpickr-day {
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    border-radius: 50%;
+    text-align: center;
+    transition: all 0.2s ease;
+  }
+  .flatpickr-day:hover {
+    background: #1abc9c;
+    color: #fff;
+  }
+  .flatpickr-day.selected,
+  .flatpickr-day.selected:focus {
+    background: #1abc9c !important;
+    color: #fff !important;
+    font-weight: 600;
+  }
+  .flatpickr-day.duty-marker {
+    background: transparent !important;
+    border: 2px solid #1abc9c !important;
+    color: #1abc9c !important;
+    font-weight: 600;
+  }
+  .flatpickr-day.duty-marker:hover {
+    background: rgba(26, 188, 156, 0.1) !important;
+  }
+
+  /* ⬅︎ 4: diğer aya ait günler gri */
+  .flatpickr-day.prevMonthDay,
+  .flatpickr-day.nextMonthDay {
+    color: #ccc !important;
+  }
+
+  .flatpickr-input {
+    display: none !important;
+  }
+
+  .duty-month-duties {
+    margin-top: 20px;
+    h3 {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 12px;
+    }
+    p {
+      color: #666;
+      font-size: 14px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      font-size: 14px;
+      color: #333;
+    }
+    .duty-remove-icon {
+      color: #e74c3c;
+      &:hover   { color: #c0392b; }
+      &.Mui-disabled { color: #ccc; }
+    }
+  }
+}
+
+/* 4) Sağ Panel: Seçili tarih */
+.duty-request-table .duty-list {            /* ⬅︎ 2: boşluk eklendi */
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  max-width: 400px;
+  margin: 0 auto;
+
+  .duty-empty {
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+    padding: 20px 0;
+    margin-bottom: 20px;
+  }
+
+  .duty-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+
+    span {
+      font-weight: 500;
+      color: #333;
+      margin-right: 12px;         /* ⬅︎ 3: tarih-buton arası */
+    }
+    .duty-action-btn { color: #fff !important; }
+  }
+}
+
+/* Animasyonlar */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.duty-fade-in { animation: fadeIn 0.5s ease-out; }
+
+/* Spinner */
+.duty-spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+/* Mobilde footer boşluğu */
+@media (max-width: 768px) {
+  .main-content { padding-bottom: 1px; }
+}

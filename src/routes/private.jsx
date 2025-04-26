@@ -6,6 +6,7 @@ const Request = React.lazy(() => import("./Request"));
 const AnsweredResponse = React.lazy(() => import("./AnsweredResponse"));
 const FinishedResponse = React.lazy(() => import("./FinishedResponse"));
 const Home = React.lazy(() => import("./HomePage"));
+const DutySelection = React.lazy(() => import("./duty-selection"));
 
 const privateRoutes = [
   {
@@ -33,7 +34,14 @@ const privateRoutes = [
     path: "/finished-request",
     element: FinishedResponse,
     title: "Tamamlanan Talepler",
-    pageName: "FinishedResponse", // Burası da güncellendi
+    pageName: "FinishedResponse",
+    checkRole: true,
+  },
+  {
+    path: "/duty-selection",
+    element: DutySelection,
+    title: "Nöbet Seçimi",
+    pageName: "DutySelection",
     checkRole: true,
   },
 ];

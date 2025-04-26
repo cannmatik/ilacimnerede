@@ -79,6 +79,13 @@ function Header() {
         >
           Kapanan Talepler
         </NavLink>
+        <NavLink
+          to="/duty-selection"
+          style={({ isActive }) => (isActive ? activeStyle : inactiveStyle)}
+          onClick={() => setIsMenuOpen(false)}
+        >
+          Nöbet Seçimi
+        </NavLink>
         
         <INButton 
           text="Çıkış Yap" 

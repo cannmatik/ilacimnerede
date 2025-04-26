@@ -1,137 +1,325 @@
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
+import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setSession, setUser } from "./slice";
 import { supabase } from "./useCreateClient";
 import "./style.scss";
-import { message, Button } from "antd";
+
+// Ant Design ikon ve mesaj
+import { Button as AntIconBtn, message } from "antd";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
-import { useState } from "react";
+
+// MUI bileşenleri
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import Typography from "@mui/material/Typography";
+import Link from "@mui/material/Link";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import TextField from "@mui/material/TextField";
+import InputAdornment from "@mui/material/InputAdornment";
+
+// Logo
+import curanodusLogo from "../../assets/curanoduslogo.png";
 
 function Login() {
   const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
+  const [registerOpen, setRegisterOpen] = useState(false);
+  const [authView, setAuthView] = useState("sign_in"); // "sign_in" veya "forgotten_password"
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
 
-  /* --------- Yardımcı: eczane kaydını çek --------- */
-  const getPharmacyId = async (uuid) => {
+  // Splash screen timeout
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 3000); // 3 seconds (0.5s fade-in + 2.5s fade-out)
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Eczane bilgisini çekme
+  const getPharmacyInfo = async (userId) => {
     const { data, error } = await supabase
       .from("pharmacy_user")
-      .select(
-        "uuid,id, pharmacy (name,city_id,district_id,neighbourhood_id)"
-      )
-      .eq("uuid", uuid);
-
+      .select("id, pharmacy (name, city_id, district_id, neighbourhood_id)")
+      .eq("uuid", userId)
+      .single();
     if (error) {
-      console.error("error getting pharmacy id", error);
-      message.error("Eczane bilgileri alınırken bir hata oluştu.");
+      console.error("Eczane bilgisi alınamadı:", error);
+      message.error("Eczane bilgileri alınırken hata oluştu.");
+      return null;
     }
     return data;
   };
 
-  /* --------- Auth dinleyicisi --------- */
-  supabase.auth.onAuthStateChange(async (event, session) => {
-    if (event === "SIGNED_IN") {
-      const pharmacyInfo = await getPharmacyId(session.user.id);
-
-      if (pharmacyInfo?.length) {
-        const updatedSession = {
-          ...session,
-          user: {
+  // Auth state listener
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_IN") {
+        const info = await getPharmacyInfo(session.user.id);
+        if (info) {
+          const updatedUser = {
             ...session.user,
-            pharmacyId: pharmacyInfo[0].id,
-            pharmacyName: pharmacyInfo[0].pharmacy.name,
-            pharmacyCityId: pharmacyInfo[0].pharmacy.city_id,
-            pharmacyDistrictId: pharmacyInfo[0].pharmacy.district_id,
-            pharmacyNeighbourhoodId: pharmacyInfo[0].pharmacy.neighbourhood_id,
-          },
-        };
-        dispatch(setSession(updatedSession));
-        dispatch(setUser(updatedSession.user));
-        location.replace("/home");
-      } else {
-        message.error(
-          "Bu sayfa sadece eczane girişi içindir. Kullanıcı girişi için mobil uygulamayı kullanınız."
-        );
-        await supabase.auth.signOut();
+            pharmacyId: info.id,
+            pharmacyName: info.pharmacy.name,
+            pharmacyCityId: info.pharmacy.city_id,
+            pharmacyDistrictId: info.pharmacy.district_id,
+            pharmacyNeighbourhoodId: info.pharmacy.neighbourhood_id,
+          };
+          const updatedSession = { ...session, user: updatedUser };
+          dispatch(setSession(updatedSession));
+          dispatch(setUser(updatedUser));
+          window.location.replace("/home");
+        } else {
+          message.error(
+            "Bu sayfa sadece eczacılara özeldir. Lütfen mobil uygulamayı kullanın."
+          );
+          supabase.auth.signOut();
+        }
       }
-    } else if (event === "SIGNED_OUT") {
-      localStorage.clear();
-      dispatch({ type: "CLEAR_STORE" });
+      if (event === "SIGNED_OUT") {
+        localStorage.clear();
+        dispatch({ type: "CLEAR_STORE" });
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [dispatch]);
+
+  // Handle login
+  const handleLogin = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) {
+      message.error("Giriş başarısız: " + error.message);
     }
-  });
+    setLoading(false);
+  };
 
-  /* --------- UI --------- */
+  // Handle password reset
+  const handlePasswordReset = async () => {
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    if (error) {
+      message.error("Şifre sıfırlama başarısız: " + error.message);
+    } else {
+      message.success("Şifre sıfırlama bağlantısı e-postanıza gönderildi.");
+      setAuthView("sign_in");
+    }
+    setLoading(false);
+  };
+
+  // MUI buton stili
+  const primaryBtn = {
+    backgroundColor: "#07a5c3",
+    "&:hover": {
+      backgroundColor: "#fff",
+      color: "#07a5c3",
+      border: "1px solid #07a5c3",
+    },
+    padding: "12px 24px",
+    fontSize: "1rem",
+  };
+
   return (
-    <div className="App-header">
-      <h1 className="page-title">İlacım Nerede · Eczacı Paneli</h1>
+    <>
+      {showSplash && (
+        <div className="splash-screen">
+          <img src={curanodusLogo} alt="Curanodus Logo" className="splash-logo" />
+        </div>
+      )}
+      <div className="App-header">
+        <img src={curanodusLogo} alt="Curanodus Logo" className="top-logo" />
+        <h1 className="page-title">İlacım Nerede · Eczacı Paneli</h1>
 
-      <Auth
-        supabaseClient={supabase}
-        view="sign_in"
-        providers={[]}
-        /* Renkler burada ayarlanıyor */
-        appearance={{
-          theme: ThemeSupa,
-          extend: true,
-          variables: {
-            default: {
-              colors: {
-                brand: "#07a5c3",
-                brandAccent: "#058aa3",
-                brandButtonText: "#ffffff",
-                anchorTextColor: "#07a5c3",
-                anchorTextHoverColor: "#058aa3",
-              },
-            },
-          },
-        }}
-        localization={{
-          variables: {
-            sign_in: {
-              email_label: "E-posta adresinizi girin",
-              password_label: "Şifrenizi girin",
-              email_input_placeholder: "E-posta adresiniz",
-              password_input_placeholder: "Şifreniz",
-              button_label: "Giriş Yap",
-              loading_button_label: "Giriş Yapılıyor...",
-              link_text: "Hesabınız zaten varsa giriş yapın",
-              confirmation_text:
-                "Şifrenizi sıfırlamak için e-postanızı kontrol edin",
-            },
-            forgotten_password: {
-              email_label: "E-posta adresiniz",
-              email_input_placeholder: "E-posta adresiniz",
-              button_label: "Şifre sıfırlama talimatlarını gönder",
-              link_text: "Parolamı Unuttum",
-              confirmation_text:
-                "Şifre sıfırlama bağlantısı için e-postanızı kontrol edin",
-            },
-            errors: {
-              default: "Bir hata oluştu. Lütfen tekrar deneyin.",
-              "Invalid login credentials":
-                "Geçersiz giriş bilgileri. Lütfen bilgilerinizi kontrol edin.",
-              "Missing email or phone":
-                "E-posta veya telefon numarası eksik. Lütfen bilgilerinizi girin.",
-            },
-          },
-        }}
-        passwordInputProps={{
-          suffix: (
+        <div className="auth-wrapper">
+          {authView === "sign_in" ? (
+            <>
+              <TextField
+                fullWidth
+                label="E-posta adresiniz"
+                placeholder="E-posta adresiniz"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                margin="normal"
+                variant="outlined"
+                sx={{
+                  backgroundColor: "#fff",
+                  "& .MuiInputBase-root": {
+                    fontSize: "1.1rem",
+                    padding: "12px",
+                  },
+                  "& .MuiInputLabel-root": {
+                    fontSize: "1.1rem",
+                  },
+                }}
+              />
+              <TextField
+                fullWidth
+                label="Şifreniz"
+                placeholder="Şifreniz"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                margin="normal"
+                variant="outlined"
+                sx={{
+                  backgroundColor: "#fff",
+                  "& .MuiInputBase-root": {
+                    fontSize: "1.1rem",
+                    padding: "12px",
+                  },
+                  "& .MuiInputLabel-root": {
+                    fontSize: "1.1rem",
+                  },
+                }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <AntIconBtn
+                        icon={showPassword ? <EyeTwoTone /> : <EyeInvisibleOutlined />}
+                        onClick={() => setShowPassword((v) => !v)}
+                        style={{ fontSize: "1.2rem" }}
+                      />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <Button
+                variant="contained"
+                fullWidth
+                sx={{ ...primaryBtn, mt: 2 }}
+                onClick={handleLogin}
+                disabled={loading}
+              >
+                {loading ? "Giriş Yapılıyor..." : "Giriş Yap"}
+              </Button>
+              <Button
+                variant="contained"
+                fullWidth
+                sx={{ ...primaryBtn, mt: 1 }}
+                onClick={() => setRegisterOpen(true)}
+              >
+                Eczacı Kaydı
+              </Button>
+              <Button
+                variant="contained"
+                fullWidth
+                sx={{ ...primaryBtn, mt: 1 }}
+                onClick={() => setAuthView("forgotten_password")}
+              >
+                Parolamı Unuttum
+              </Button>
+            </>
+          ) : (
+            <>
+              <TextField
+                fullWidth
+                label="E-posta adresiniz"
+                placeholder="E-posta adresiniz"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                margin="normal"
+                variant="outlined"
+                sx={{
+                  backgroundColor: "#fff",
+                  "& .MuiInputBase-root": {
+                    fontSize: "1.1rem",
+                    padding: "12px",
+                  },
+                  "& .MuiInputLabel-root": {
+                    fontSize: "1.1rem",
+                  },
+                }}
+              />
+              <Button
+                variant="contained"
+                fullWidth
+                sx={{ ...primaryBtn, mt: 2 }}
+                onClick={handlePasswordReset}
+                disabled={loading}
+              >
+                {loading ? "Gönderiliyor..." : "Şifre sıfırlama talimatları gönder"}
+              </Button>
+              <Button
+                variant="outlined"
+                fullWidth
+                sx={{
+                  borderColor: "#07a5c3",
+                  color: "#07a5c3",
+                  "&:hover": { backgroundColor: "#07a5c3", color: "#fff" },
+                  mt: 1,
+                  padding: "12px 24px",
+                  fontSize: "1rem",
+                }}
+                onClick={() => setAuthView("sign_in")}
+              >
+                Giriş Ekranına Dön
+              </Button>
+            </>
+          )}
+        </div>
+
+        <Dialog
+          open={registerOpen}
+          onClose={() => setRegisterOpen(false)}
+          fullWidth
+          maxWidth="xs"
+        >
+          <DialogTitle>Eczane Kaydı</DialogTitle>
+          <DialogContent dividers>
+            <Typography gutterBottom>
+              Eczacı kaydı online olarak gerçekleştirilememektedir.Platformumuza ücret ödemeden eczacı olarak katılmak için lütfen bizimle iletişime geçin.
+            </Typography>
+            <List dense>
+              <ListItem disableGutters>
+                <ListItemText
+                  primary={
+                    <>
+                      E-posta: 
+                      <Link href="mailto:ilacimnerede@curanodus.com">
+                        ilacimnerede@curanodus.com
+                      </Link>
+                    </>
+                  }
+                />
+              </ListItem>
+              <ListItem disableGutters>
+                <ListItemText primary="WhatsApp: +90 545 519 11 99" />
+              </ListItem>
+            </List>
+          </DialogContent>
+          <DialogActions>
             <Button
-              type="text"
-              icon={showPassword ? <EyeTwoTone /> : <EyeInvisibleOutlined />}
-              onClick={() => setShowPassword(!showPassword)}
-            />
-          ),
-          type: showPassword ? "text" : "password",
-        }}
-      />
+              variant="contained"
+              fullWidth
+              sx={primaryBtn}
+              onClick={() => setRegisterOpen(false)}
+            >
+              Kapat
+            </Button>
+          </DialogActions>
+        </Dialog>
 
-      <p className="info-text">
-        Bu panel yalnızca İlacım Nerede eczaneleri içindir. Eğer ilacını arayan bir kullanıcıysanız 
-        lütfen işlemlerinize Appstore & Playstore üzerinden indirdiğiniz uygulamadan devam edin.
-      </p>
-    </div>
+        <p className="info-text">
+          Bu panel sadece eczacılar içindir. İlaç arayan kullanıcılar lütfen www.ilacimnerede.com web sitesinden bilgi alıp indirebileceğiniz
+          mobil uygulamamızı kullanın.
+        </p>
+      </div>
+    </>
   );
 }
 

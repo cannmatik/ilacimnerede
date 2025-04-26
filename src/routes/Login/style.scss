@@ -1,107 +1,118 @@
+/* Genel kapsayıcı */
 .App-header {
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
-  height: 100vh;
-  background: url("../../assets/ilacimNerede.jpg");
-  background-size: cover;
-  overflow: auto;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: rgba(245, 245, 245, 0.95);
   padding: 20px;
+  overflow-y: auto;
 }
 
+/* Splash screen */
+.splash-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeInOut 3s ease-in-out forwards;
+  overflow: hidden;
+}
+
+.splash-logo {
+  max-width: 500px;
+  max-height: 500px;
+  width: auto;
+  height: auto;
+}
+
+/* Top-left logo */
+.top-logo {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  max-width: 300px;
+  max-height: 300px;
+  width: auto;
+  height: auto;
+  z-index: 1000;
+}
+
+/* Fade-in and fade-out animation */
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+  }
+  16.67% {
+    opacity: 1; /* Fade-in complete at 0.5s (0.5/3) */
+  }
+  83.33% {
+    opacity: 1; /* Stay visible until 2.5s (2.5/3) */
+  }
+  100% {
+    opacity: 0; /* Fade-out complete at 3s */
+  }
+}
+
+/* Başlık */
 .page-title {
   color: #07a5c3;
   font-size: 2.5rem;
-  margin-bottom: 20px;
-
-}
-
-.info-text {
-  color: #07a5c3;
-  font-size: 1rem;
-  text-align: center;
-  max-width: 400px;
-  margin-top: 20px;
+  margin-bottom: 30px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.supabase-auth-ui {
+/* Form ve butonlar */
+.auth-wrapper {
   width: 100%;
   max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   background: rgba(255, 255, 255, 0.9);
-  padding: 20px;
+  padding: 24px;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
 
-  .auth-form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+/* Alt bilgi metni */
+.info-text {
+  margin-top: 20px;
+  max-width: 400px;
+  text-align: center;
+  color: #07a5c3;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  font-size: 1rem;
+}
 
-    .auth-input {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      outline: none;
+/* Mobil duyarlılık */
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 2rem;
+  }
 
-      &:focus {
-        border-color: #07a5c3;
-        box-shadow: 0 0 0 2px rgba(7, 165, 195, 0.2);
-      }
-    }
+  .auth-wrapper {
+    padding: 16px;
+    max-width: 90%;
+  }
 
-    .auth-password-input {
-      position: relative;
+  .info-text {
+    font-size: 0.9rem;
+  }
 
-      .password-toggle-button {
-        position: absolute;
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: #07a5c3;
+  .splash-logo {
+    max-width: 300px;
+    max-height: 300px;
+  }
 
-        &:hover {
-          color: #058aa3;
-        }
-      }
-    }
-
-    .auth-button {
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      background-color: #07a5c3;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-
-      &:hover {
-        background-color: #058aa3;
-      }
-
-      &:disabled {
-        background-color: #cccccc;
-        cursor: not-allowed;
-      }
-    }
-
-    .auth-forgot-password {
-      text-align: center;
-      color: #07a5c3;
-      text-decoration: none;
-      font-size: 14px;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
+  .top-logo {
+    display: none; /* Hide logo on mobile */
   }
 }

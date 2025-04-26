@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   min-height: 100vh;
   background: rgba(245, 245, 245, 0.95);
   padding: 20px;
@@ -33,18 +33,6 @@
   height: auto;
 }
 
-/* Top-left logo */
-.top-logo {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  max-width: 300px;
-  max-height: 300px;
-  width: auto;
-  height: auto;
-  z-index: 1000;
-}
-
 /* Fade-in and fade-out animation */
 @keyframes fadeInOut {
   0% {
@@ -64,9 +52,10 @@
 /* Başlık */
 .page-title {
   color: #07a5c3;
-  font-size: 2.5rem;
-  margin-bottom: 30px;
+  font-size: 2rem; /* Ensures single line */
+  margin-bottom: 20px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  white-space: nowrap; /* Force single line */
 }
 
 /* Form ve butonlar */
@@ -92,10 +81,24 @@
   font-size: 1rem;
 }
 
+/* Footer */
+.footer {
+  margin-top: 20px;
+  text-align: center;
+  color: #07a5c3;
+  font-size: 0.9rem;
+  max-width: 600px;
+  line-height: 1.5;
+}
+
+.footer p {
+  margin: 5px 0;
+}
+
 /* Mobil duyarlılık */
-@media (max-width: 480px) {
+@media (max-device-width: 480px), (max-device-height: 480px) {
   .page-title {
-    font-size: 2rem;
+    font-size: 1.8rem; /* Slightly smaller for mobile */
   }
 
   .auth-wrapper {
@@ -112,7 +115,8 @@
     max-height: 300px;
   }
 
-  .top-logo {
-    display: none; /* Hide logo on mobile */
+  .footer {
+    font-size: 0.8rem;
+    max-width: 90%;
   }
 }

@@ -142,7 +142,6 @@ function Login() {
         </div>
       )}
       <div className="App-header">
-        <img src={curanodusLogo} alt="Curanodus Logo" className="top-logo" />
         <h1 className="page-title">İlacım Nerede · Eczacı Paneli</h1>
 
         <div className="auth-wrapper">
@@ -282,7 +281,9 @@ function Login() {
           <DialogTitle>Eczane Kaydı</DialogTitle>
           <DialogContent dividers>
             <Typography gutterBottom>
-              Eczacı kaydı online olarak gerçekleştirilememektedir.Platformumuza ücret ödemeden eczacı olarak katılmak için lütfen bizimle iletişime geçin.
+              Eczacı kaydı online olarak gerçekleştirilememektedir. Platformumuza
+              ücret ödemeden eczacı olarak katılmak için lütfen bizimle iletişime
+              geçin.
             </Typography>
             <List dense>
               <ListItem disableGutters>
@@ -315,9 +316,23 @@ function Login() {
         </Dialog>
 
         <p className="info-text">
-          Bu panel sadece eczacılar içindir. İlaç arayan kullanıcılar lütfen www.ilacimnerede.com web sitesinden bilgi alıp indirebileceğiniz
-          mobil uygulamamızı kullanın.
+          Bu panel sadece eczacılar içindir. İlaç arayan kullanıcılar lütfen mobil uygulamamızı kullanın.{" "}
+          <Link href="https://www.ilacimnerede.com">
+            www.ilacimnerede.com
+          </Link>{" "}
+          Web sitesi üzerinden uygulamamız ile ilgili bilgi alıp uygulamamızı indirebilirsiniz.
         </p>
+
+        <footer className="footer">
+          <p>
+            ©2025, CuraNodus Yazılım Teknolojileri Limited Şirketi. Tüm Hakları
+            Saklıdır.
+          </p>
+          <p>
+            Esentepe Mahallesi Talatpaşa Caddesi No: 5 / 1 Levent,
+            İstanbul, Esentepe, Talatpaşa Cd. No: 5/1, 34394 Şişli/İstanbul
+          </p>
+        </footer>
       </div>
     </>
   );

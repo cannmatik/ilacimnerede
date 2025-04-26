@@ -324,15 +324,16 @@ function Login() {
         </p>
 
         <footer className="footer">
-          <p>
-            ©2025, CuraNodus Yazılım Teknolojileri Limited Şirketi. Tüm Hakları
-            Saklıdır.
-          </p>
-          <p>
-            Esentepe Mahallesi Talatpaşa Caddesi No: 5 / 1 Levent,
-            İstanbul, Esentepe, Talatpaşa Cd. No: 5/1, 34394 Şişli/İstanbul
-          </p>
-        </footer>
+  <p>
+    <Link href="https://www.google.com/maps?saddr=My%20Location&daddr=41.080013336027,29.009160314659">
+      Esentepe Mah. Talatpaşa Cad. No: 5/1 (Harman Sok. Girişi) Şişli / İstanbul
+    </Link>
+  </p>
+  <p>
+    ©2025, CuraNodus Yazılım Teknolojileri Limited Şirketi. Tüm Hakları
+    Saklıdır.
+  </p>
+</footer>
       </div>
     </>
   );

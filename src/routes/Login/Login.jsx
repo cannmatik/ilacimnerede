@@ -151,8 +151,10 @@ function Login() {
         </div>
       )}
       <div className="app-header">
-        <h1 className="page-title">İlacım Nerede · Eczacı Paneli</h1>
-
+      <div className="page-title-wrapper">
+         <h1 className="page-title">İlacım Nerede</h1>
+         <h1 className="page-title">Eczacı Paneli</h1>
+      </div>
         <form onSubmit={handleSubmit} className="auth-wrapper">
           {authView === "sign_in" ? (
             <>

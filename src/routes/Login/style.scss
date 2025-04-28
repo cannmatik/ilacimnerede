@@ -49,13 +49,22 @@
   }
 }
 
+/* Page title wrapper */
+.page-title-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px; /* Space between the two lines */
+}
+
 /* Page title */
 .page-title {
   color: #07a5c3;
   font-size: 2rem;
-  margin-bottom: 20px;
+  margin: 0; /* Remove default margin to control spacing via wrapper */
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   white-space: nowrap;
+  line-height: 1.2; /* Ensure consistent line height */
 }
 
 /* Auth form wrapper */
@@ -206,7 +215,11 @@
 /* Mobile responsiveness */
 @media (max-device-width: 480px), (max-device-height: 480px) {
   .page-title {
-    font-size: 1.8rem;
+    font-size: 1.4rem; /* Slightly smaller to fit better */
+  }
+
+  .page-title-wrapper {
+    gap: 6px; /* Slightly smaller gap on mobile */
   }
 
   .auth-wrapper {

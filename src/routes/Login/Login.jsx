@@ -184,8 +184,8 @@ function Login() {
               </div>
               <Button
                 type="primary"
+                htmlType="submit"
                 className="auth-button"
-                onClick={handleLogin}
                 loading={loading}
                 block
               >
@@ -222,8 +222,8 @@ function Login() {
               </div>
               <Button
                 type="primary"
+                htmlType="submit"
                 className="auth-button"
-                onClick={handlePasswordReset}
                 loading={loading}
                 block
               >

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Col, Row } from "react-grid-system";
 import { INButton, INDataTable } from "@components";
 import "./rstyle.scss";
-import { Spin, Progress, Empty, Collapse, List } from "antd";
+import { Spin, Progress, Empty, Collapse } from "antd";
 import {
   useGetRequest,
   useGetRequestDetails,
@@ -13,9 +13,41 @@ import {
 import { columns_requestDetail, columns } from "./constants/requestColumns";
 import { useSelector } from "react-redux";
 import { selectUserPharmacyId } from "@store/selectors";
-import { Button } from "@mui/material";
-import { ArrowBack, ArrowForward, Check, ArrowBackIos } from "@mui/icons-material";
-import { Delete } from "@mui/icons-material";
+import { Button, IconButton } from "@mui/material";
+import { ArrowBack, ArrowForward, Check, ArrowBackIos, Delete } from "@mui/icons-material";
+
+// Geçici Stok Listesi için sütun tanımları
+const bufferColumns = [
+  {
+    header: "İlaç Adı",
+    accessor: "medicine_name",
+  },
+  {
+    header: "ID",
+    accessor: "medicine_id",
+  },
+  {
+    header: "Sil",
+    accessor: "action",
+    Cell: ({ row, deleteFromResponseBuffer, pharmacyId }) => (
+      <IconButton
+        onClick={() => {
+          console.log("Geçici stoktan manuel silme:", {
+            pharmacy_id: pharmacyId,
+            medicine_id: row.medicine_id,
+          });
+          deleteFromResponseBuffer({
+            pharmacy_id: pharmacyId,
+            medicine_id: row.medicine_id,
+          });
+        }}
+        color="error"
+      >
+        <Delete />
+      </IconButton>
+    ),
+  },
+];
 
 // Talep ekranı bileşeni
 function Request() {
@@ -25,6 +57,7 @@ function Request() {
   const [selectedRows, setSelectedRows] = useState([]);
   const [progress, setProgress] = useState(-1);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [notification, setNotification] = useState(""); // Bildirim için state
   const pharmacyId = useSelector(selectUserPharmacyId);
   const touchTime = useRef(0);
   const [messageText, setMessageText] = useState("");
@@ -50,7 +83,8 @@ function Request() {
     console.log("Request.jsx - requestDetailError:", requestDetailError);
     console.log("Request.jsx - bufferedMedicines:", bufferedMedicines);
     console.log("Request.jsx - selectedRequest:", selectedRequest);
-  }, [requests, requestDetail, requestDetailError, bufferedMedicines, selectedRequest]);
+    console.log("Request.jsx - notification:", notification);
+  }, [requests, requestDetail, requestDetailError, bufferedMedicines, selectedRequest, notification]);
 
   // Talep değiştiğinde seçimi ve mesajı sıfırla
   useEffect(() => {
@@ -118,6 +152,7 @@ function Request() {
   const handleConfirmRequest = async () => {
     setProgress(0);
     setMessageText("");
+    setNotification(""); // Bildirimi sıfırla
 
     const selectedRowsIds = selectedRows.map(({ id }) => id);
     const checkedRequestDetails = selectedRows.map(({ id, medicine_id }) => ({
@@ -139,6 +174,7 @@ function Request() {
       pharmacy_id: pharmacyId,
       create_date: new Date().toISOString(),
       message_text: messageText,
+      status: 1, // Status 1: Yanıtlandı
     };
 
     const finalData = [...checkedRequestDetails, ...uncheckedRequestDetails];
@@ -178,6 +214,7 @@ function Request() {
     try {
       await responseRequestMutation({ finalData, response });
       setProgress(100);
+      setNotification("Talep başarıyla yanıtlandı!"); // Başarı bildirimi
       setSelectedRows([]);
       const currentIndex = requests?.findIndex((item) => item.id === selectedRequest?.id);
       if (currentIndex < (requests?.length || 0) - 1) {
@@ -187,6 +224,7 @@ function Request() {
       }
     } catch (error) {
       console.error("Talep yanıtlanırken hata:", error);
+      setNotification("Talep yanıtlanırken hata oluştu: " + error.message); // Hata bildirimi
       setProgress(-1);
     } finally {
       clearInterval(interval);
@@ -205,6 +243,17 @@ function Request() {
 
   return (
     <div className="req_main-content">
+      {/* Bildirim sayfanın üst kısmında gösteriliyor */}
+      {notification && (
+        <div
+          className={`req_notification ${
+            notification.includes("başarı") ? "success" : "error"
+          }`}
+        >
+          {notification}
+        </div>
+      )}
+
       <Row>
         {(!isMobile || !selectedRequest) && (
           <Col xs={12} md={6} className="req_table-container">
@@ -220,31 +269,15 @@ function Request() {
                       key: "1",
                       label: "Geçici Stok Listesi",
                       children: (
-                        <List
-                          style={{ backgroundColor: "#e6f7e6" }}
-                          dataSource={bufferedMedicines || []}
-                          renderItem={(item) => (
-                            <List.Item
-                              actions={[
-                                <Delete
-                                  style={{ cursor: "pointer", color: "red" }}
-                                  onClick={() => {
-                                    console.log("Geçici stoktan manuel silme:", {
-                                      pharmacy_id: pharmacyId,
-                                      medicine_id: item.hmedicine_id,
-                                    });
-                                    deleteFromResponseBuffer({
-                                      pharmacy_id: pharmacyId,
-                                      medicine_id: item.medicine_id,
-                                    });
-                                  }}
-                                />,
-                              ]}
-                            >
-                              {item.medicine_name} (ID: {item.medicine_id})
-                            </List.Item>
+                        <INDataTable
+                          data={bufferedMedicines || []}
+                          columns={bufferColumns.map((col) =>
+                            col.header === "Sil"
+                              ? { ...col, deleteFromResponseBuffer, pharmacyId }
+                              : col
                           )}
-                          locale={{ emptyText: <span className="req_empty-list-text">Geçici stok listesinde ilaç yok.</span> }}
+                          rowHoverStyle={{ border: true }}
+                          emptyText={<span className="req_empty-list-text">Geçici stok listesinde ilaç yok.</span>}
                         />
                       ),
                     },
@@ -269,7 +302,7 @@ function Request() {
               </div>
             ) : (
               <div className="req_empty-container req_fade-in req_pulse">
-                <Empty description="Şu an bekleyen talebiniz yok." />
+                <Empty description={<span className="empty-list-text">Şu an bekleyen talebiniz yok.</span>} />
               </div>
             )}
           </Col>
@@ -375,4 +408,4 @@ function Request() {
   );
 }
 
-export default Request;
+export default Request; 

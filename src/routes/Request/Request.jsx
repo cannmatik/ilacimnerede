@@ -13,9 +13,11 @@ import {
 import { columns_requestDetail, columns } from "./constants/requestColumns";
 import { useSelector } from "react-redux";
 import { selectUserPharmacyId } from "@store/selectors";
-import { LeftOutlined } from "@ant-design/icons";
+import { Button } from "@mui/material";
+import { ArrowBack, ArrowForward, Check, ArrowBackIos } from "@mui/icons-material";
 import { Delete } from "@mui/icons-material";
 
+// Talep ekranı bileşeni
 function Request() {
   const [isPrevDisabled, setIsPrevDisabled] = useState(true);
   const [isNextDisabled, setIsNextDisabled] = useState(false);
@@ -35,32 +37,37 @@ function Request() {
   const {
     data: requestDetail,
     isLoading: isRequestDetailLoading,
+    error: requestDetailError,
   } = useGetRequestDetails(selectedRequest?.id);
   const { data: bufferedMedicines } = useGetResponseBuffer();
   const { mutate: responseRequestMutation } = useResponseRequest();
   const { mutate: deleteFromResponseBuffer } = useDeleteFromResponseBuffer();
 
-  // Log data for debugging
+  // Verileri ve hataları konsola yazdır (hata ayıklama için)
   useEffect(() => {
-    console.log("requestDetail:", requestDetail);
-    console.log("bufferedMedicines:", bufferedMedicines);
-  }, [requestDetail, bufferedMedicines]);
+    console.log("Request.jsx - requests:", requests);
+    console.log("Request.jsx - requestDetail:", requestDetail);
+    console.log("Request.jsx - requestDetailError:", requestDetailError);
+    console.log("Request.jsx - bufferedMedicines:", bufferedMedicines);
+    console.log("Request.jsx - selectedRequest:", selectedRequest);
+  }, [requests, requestDetail, requestDetailError, bufferedMedicines, selectedRequest]);
 
-  // Clear selection and message when request changes
+  // Talep değiştiğinde seçimi ve mesajı sıfırla
   useEffect(() => {
     setSelectedRows([]);
     setMessageText("");
   }, [selectedRequest?.id]);
 
-  // Handle window resize for mobile detection
+  // Pencere boyutunu izle (mobil tespit için)
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Handle double-tap for mobile selection
+  // Mobil cihazlarda çift dokunma ile seçim
   const handleDoubleTap = (row) => {
+    console.log("handleDoubleTap - row:", row);
     const now = new Date().getTime();
     const doubleTapDelay = 300;
     if (touchTime.current + doubleTapDelay > now) {
@@ -76,7 +83,7 @@ function Request() {
     }
   };
 
-  // Navigate to previous request
+  // Önceki talebe geçiş
   const openPrevRequest = () => {
     const currentIndex = requests?.findIndex((item) => item.id === selectedRequest?.id);
     if (currentIndex > 0) {
@@ -88,7 +95,7 @@ function Request() {
     }
   };
 
-  // Navigate to next request
+  // Sonraki talebe geçiş
   const openNextRequest = () => {
     const currentIndex = requests?.findIndex((item) => item.id === selectedRequest?.id);
     if (currentIndex < requests?.length - 1) {
@@ -100,14 +107,14 @@ function Request() {
     }
   };
 
-  // Update navigation button states
+  // Navigasyon butonlarının durumunu güncelle
   useEffect(() => {
     const currentIndex = requests?.findIndex((item) => item.id === selectedRequest?.id);
     setIsPrevDisabled(currentIndex <= 0);
     setIsNextDisabled(currentIndex >= (requests?.length || 0) - 1);
   }, [selectedRequest, requests]);
 
-  // Handle request submission
+  // Talep yanıtını gönder
   const handleConfirmRequest = async () => {
     setProgress(0);
     setMessageText("");
@@ -136,22 +143,24 @@ function Request() {
 
     const finalData = [...checkedRequestDetails, ...uncheckedRequestDetails];
 
-    // Identify medicines to remove from response_buffer (deselected items)
+    // response_buffer'dan kaldırılacak ilaçları belirle (seçilmemiş olanlar)
     const selectedMedicineIds = selectedRows.map((row) => row.medicine_id);
     const medicinesToRemove = bufferedMedicines
-      .filter((item) => !selectedMedicineIds.includes(item.medicine_id))
-      .map((item) => item.medicine_id);
+      ? bufferedMedicines
+          .filter((item) => !selectedMedicineIds.includes(item.medicine_id))
+          .map((item) => item.medicine_id)
+      : [];
 
-    console.log("Medicines to remove from response_buffer:", medicinesToRemove);
+    console.log("response_buffer'dan kaldırılacak ilaçlar:", medicinesToRemove);
 
-    // Remove deselected medicines from response_buffer
+    // Seçilmemiş ilaçları response_buffer'dan sil
     if (medicinesToRemove.length > 0 && pharmacyId) {
       for (const medicine_id of medicinesToRemove) {
         try {
-          console.log("Removing from response_buffer:", { pharmacy_id, medicine_id });
+          console.log("response_buffer'dan kaldırılıyor:", { pharmacy_id, medicine_id });
           await deleteFromResponseBuffer({ pharmacy_id: pharmacyId, medicine_id });
         } catch (error) {
-          console.error("Failed to remove from response_buffer:", error);
+          console.error("response_buffer'dan silme başarısız:", error);
         }
       }
     }
@@ -177,7 +186,7 @@ function Request() {
         setSelectedRequest(null);
       }
     } catch (error) {
-      console.error("Error responding to request:", error);
+      console.error("Talep yanıtlanırken hata:", error);
       setProgress(-1);
     } finally {
       clearInterval(interval);
@@ -187,7 +196,7 @@ function Request() {
     }
   };
 
-  // Clear selection when no request is selected
+  // Talep seçili değilse seçimi sıfırla
   useEffect(() => {
     if (!selectedRequest) {
       setSelectedRows([]);
@@ -195,16 +204,16 @@ function Request() {
   }, [selectedRequest]);
 
   return (
-    <div className="main-content">
+    <div className="req_main-content">
       <Row>
         {(!isMobile || !selectedRequest) && (
-          <Col xs={12} md={6} className="table-container">
+          <Col xs={12} md={6} className="req_table-container">
             {isRequestsLoading ? (
-              <div className="spin-container center-content pulse">
+              <div className="req_spin-container req_center-content req_pulse">
                 <Spin size="large" />
               </div>
             ) : requests && requests.length > 0 ? (
-              <div className="list-scroll-container">
+              <div className="req_list-scroll-container">
                 <Collapse
                   items={[
                     {
@@ -212,16 +221,17 @@ function Request() {
                       label: "Geçici Stok Listesi",
                       children: (
                         <List
-                          dataSource={bufferedMedicines}
+                          style={{ backgroundColor: "#e6f7e6" }}
+                          dataSource={bufferedMedicines || []}
                           renderItem={(item) => (
                             <List.Item
                               actions={[
                                 <Delete
                                   style={{ cursor: "pointer", color: "red" }}
                                   onClick={() => {
-                                    console.log("Manual delete from buffer:", {
+                                    console.log("Geçici stoktan manuel silme:", {
                                       pharmacy_id: pharmacyId,
-                                      medicine_id: item.medicine_id,
+                                      medicine_id: item.hmedicine_id,
                                     });
                                     deleteFromResponseBuffer({
                                       pharmacy_id: pharmacyId,
@@ -234,7 +244,7 @@ function Request() {
                               {item.medicine_name} (ID: {item.medicine_id})
                             </List.Item>
                           )}
-                          locale={{ emptyText: "Geçici stok listesinde ilaç yok." }}
+                          locale={{ emptyText: <span className="req_empty-list-text">Geçici stok listesinde ilaç yok.</span> }}
                         />
                       ),
                     },
@@ -248,14 +258,17 @@ function Request() {
                   isLoading={isRequestsLoading}
                   rowClassName={(row) =>
                     highlightedRequestIds.includes(row.original.id)
-                      ? "blink-row"
+                      ? "req_blink-row"
                       : ""
                   }
-                  onRowClick={(row) => setSelectedRequest(row.original)}
+                  onRowClick={(row) => {
+                    console.log("onRowClick - row:", row);
+                    setSelectedRequest(row);
+                  }}
                 />
               </div>
             ) : (
-              <div className="empty-container fade-in pulse">
+              <div className="req_empty-container req_fade-in req_pulse">
                 <Empty description="Şu an bekleyen talebiniz yok." />
               </div>
             )}
@@ -263,77 +276,85 @@ function Request() {
         )}
 
         {selectedRequest && (
-          <Col xs={12} md={6} className="request-table">
-            <div className="right-panel">
-              <div className="right-header">
-                <div className="request-info">
-                  <span>Talep Numarası: {selectedRequest?.id}</span>
-                  <span>Mesaj: {selectedRequest?.message_text}</span>
+          <Col xs={12} md={6} className="req_request-table">
+            <div className="req_right-panel">
+              <div className="req_right-header">
+                <div className="req_request-info">
+                  <span>Talep Numarası: {selectedRequest?.id || "Bilinmeyen"}</span>
+                  <span>Mesaj: {selectedRequest?.message_text || "Mesaj yok"}</span>
                   <input
                     type="text"
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
                     placeholder="Mesajınızı yazın..."
-                    className="message-input"
+                    className="req_message-input"
                   />
                 </div>
               </div>
 
-              <div className="table-scroll-container">
+              <div className="req_table-scroll-container">
                 {isRequestDetailLoading ? (
                   <Spin size="large" />
+                ) : requestDetailError ? (
+                  <div>Hata: Talep detayları yüklenemedi. {requestDetailError.message}</div>
+                ) : !requestDetail || requestDetail.length === 0 ? (
+                  <div>Talep detayları bulunamadı.</div>
                 ) : (
                   <INDataTable
                     key={selectedRequest?.id || "request-detail-table"}
-                    data={requestDetail || []}
+                    data={requestDetail}
                     columns={columns_requestDetail}
                     rowHoverStyle={{ border: true, background: !isMobile }}
                     checkboxed={true}
                     setSelectedRows={setSelectedRows}
-                    unSelectAllOnTabChange={selectedRequest?.id || ""}
-                    bufferedMedicines={bufferedMedicines}
+                    unSelectAllOnTabChange={String(selectedRequest?.id || "")}
+                    bufferedMedicines={bufferedMedicines || []}
                     deleteFromResponseBuffer={deleteFromResponseBuffer}
                     isLoading={isRequestDetailLoading}
-                    rowClassName={(row) =>
-                      `${
-                        row.getIsSelected() ? "selected-row" : "unselected-row"
-                      } ${isMobile ? "mobile-row" : ""}`
-                    }
                     onRowClick={(row) => isMobile && handleDoubleTap(row)}
                   />
                 )}
               </div>
 
-              <div className="bottom-footer-req">
-                <INButton
+              <div className="req_bottom-footer-req">
+                <Button
+                  variant="outlined"
+                  startIcon={<ArrowBack />}
                   onClick={openPrevRequest}
-                  text="Önceki Talep"
                   disabled={isPrevDisabled}
-                  className="nav-button"
-                />
-                <INButton
+                  sx={{ margin: "0 8px" }}
+                >
+                  Önceki Talep
+                </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<Check />}
                   onClick={handleConfirmRequest}
-                  text="Talebi Yanıtla"
                   disabled={!selectedRequest || (progress > -1 && progress < 100)}
-                  className="nav-button"
-                />
-                <INButton
+                  sx={{ margin: "0 8px" }}
+                  aria-label="respond-request"
+                >
+                  Talebi Yanıtla
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<ArrowForward />}
                   onClick={openNextRequest}
-                  text="Sonraki Talep"
                   disabled={isNextDisabled}
-                  className="nav-button"
-                />
+                  sx={{ margin: "0 8px" }}
+                >
+                  Sonraki Talep
+                </Button>
                 {isMobile && (
-                  <INButton
+                  <Button
+                    variant="outlined"
+                    startIcon={<ArrowBackIos />}
                     onClick={() => setSelectedRequest(null)}
-                    text={
-                      <>
-                        <LeftOutlined style={{ marginRight: 4 }} />
-                        Geri
-                      </>
-                    }
-                    className="mobileBack"
-                  />
+                    sx={{ margin: "0 8px", width: "100%" }}
+                    aria-label="mobile-back"
+                  >
+                    Geri
+                  </Button>
                 )}
               </div>
             </div>
@@ -342,7 +363,7 @@ function Request() {
       </Row>
 
       {progress > -1 && (
-        <div className="progress-container">
+        <div className="req_progress-container">
           <Progress
             percent={progress}
             status={progress === 100 ? "success" : "active"}

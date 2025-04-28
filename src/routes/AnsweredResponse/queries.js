@@ -1,110 +1,130 @@
-  import { supabase } from "@routes/Login/useCreateClient";
-  import {
-    selectUserCityId,
-    selectUserDistrictId,
-    selectUserNeighbourhoodId,
-    selectUserPharmacyId,
-  } from "@store/selectors";
-  import { useMutation, useQuery } from "@tanstack/react-query";
-  import { useSelector } from "react-redux";
-  import moment from "moment";
-  import "moment/locale/tr";
+import { supabase } from "@routes/Login/useCreateClient";
+import { selectUserPharmacyId } from "@store/selectors";
+import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
 
-  const ANSWERED_REQUEST_KEYS = {
-    ALL: ["Answered-Request", "AnswredRequests"],
-    DETAIL: (request_id, id, pharmacy_id) => [
-      "Answered-Request",
-      "answeredRequestDetails",
-      request_id,
-      id,
-    ],
-  };
+const ANSWERED_REQUEST_KEYS = {
+  ALL: ["Answered-Request", "AnsweredRequests"],
+  DETAIL: (request_id, id, pharmacy_id) => [
+    "Answered-Request",
+    "answeredRequestDetails",
+    request_id,
+    id,
+  ],
+};
 
-  
-  
-  moment.locale("tr"); // Türkçe dil ayarını aktif et
-  
-  const fetchAnsweredRequests = async ({ pharmacy_id }) => {
-    const { data: responses, error } = await supabase
-      .from("response")
-      .select("id,request_id, pharmacy_id, create_date")
-      .eq("status", 1)
-      .eq("pharmacy_id", pharmacy_id);
-  
-    if (error) return [];
-  
-    const requestIds = responses.map(({ request_id }) => request_id);
-  
-    const { data: userInfo, error: userInfoError } = await supabase
-      .from("request")
-      .select("id, message_text")
-      .in("id", requestIds);
-  
-    if (userInfoError) return [];
-  
-    const userInfoMap = new Map(
-      userInfo.map(({ id, message_text }) => [id, { message_text }])
-    );
-  
-    return responses.map((response) => {
-      const { message_text } = userInfoMap.get(response.request_id) || {};
-  
-      return { 
-        ...response, 
-        message_text,
-        create_date: moment(response.create_date).locale("tr").format("DD MM YYYY HH:mm") // İngilizce ay isimlerini kaldırdık
+const fetchAnsweredRequests = async ({ pharmacy_id }) => {
+  console.log("fetchAnsweredRequests - pharmacy_id:", pharmacy_id);
+  const { data: responses, error } = await supabase
+    .from("response")
+    .select("id, request_id, pharmacy_id, create_date")
+    .eq("status", 1)
+    .eq("pharmacy_id", pharmacy_id);
+
+  if (error) {
+    console.error("Yanıtlanmış talepler getirme hatası:", error);
+    return [];
+  }
+  console.log("fetchAnsweredRequests - responses:", responses);
+
+  const requestIds = responses.map(({ request_id }) => request_id);
+
+  const { data: userInfo, error: userInfoError } = await supabase
+    .from("request")
+    .select("id, message_text")
+    .in("id", requestIds);
+
+  if (userInfoError) {
+    console.error("Kullanıcı bilgisi getirme hatası:", userInfoError);
+    return [];
+  }
+  console.log("fetchAnsweredRequests - userInfo:", userInfo);
+
+  const userInfoMap = new Map(
+    userInfo.map(({ id, message_text }) => [id, { message_text }])
+  );
+
+  return responses.map((response) => {
+    const { message_text } = userInfoMap.get(response.request_id) || {};
+
+    return { 
+      ...response, 
+      message_text,
+      // create_date ham haliyle bırakılacak, formatlama responseColumns.jsx içinde yapılacak
+    };
+  });
+};
+
+async function getRequestDetails({ queryKey }) {
+  const request_id = queryKey[2];
+  const response_id = queryKey[3];
+  console.log("getRequestDetails - request_id:", request_id, "response_id:", response_id);
+  const { data, error } = await supabase
+    .from("request_item")
+    .select(
+      "id, request_id, position_no, medicine_id, medicine_qty, medicine (name)"
+    )
+    .eq("request_id", request_id);
+  if (error) {
+    console.error("Talep detayları getirme hatası:", error);
+    return [];
+  }
+  console.log("getRequestDetails ham verisi:", data);
+
+  if (data) {
+    const { data: itemsStatus, error: itemsError } = await supabase
+      .from("response_item")
+      .select("request_item_id, response_id, status")
+      .eq("response_id", response_id);
+    if (itemsError) {
+      console.error("Response item getirme hatası:", itemsError);
+      return data;
+    }
+    console.log("itemsStatus:", itemsStatus);
+
+    const finalData = data.map((item) => {
+      const statusItem = itemsStatus.find(
+        (itemStatus) => itemStatus.request_item_id === item.id
+      );
+      const status = statusItem ? statusItem.status : false; // Varsayılan değer
+      console.log("Item eşleşmesi - item.id:", item.id, "status:", status);
+      return {
+        ...item,
+        status,
+        medicine: {
+          name: item.medicine?.name || "Bilinmeyen İlaç", // Varsayılan değer
+        },
       };
     });
-  };
-  
-  async function getRequestDetails({ queryKey }) {
-    debugger;
-    const request_id = queryKey[2];
-    const response_id = queryKey[3];
-    const { data, error } = await supabase
-      .from("request_item")
-      .select(
-        "id,request_id,position_no,medicine_id, medicine_qty, medicine (name)"
-      )
-      .eq("request_id", request_id);
-    if (error) {
-      // console.log("error");
-    }
-    if (data) {
-      debugger;
-      const { data: itemsStatus, error: itemsError } = await supabase
-        .from("response_item")
-        .select("request_item_id,response_id,status")
-        .eq("response_id", response_id);
-      const finalData = data.map((item) => {
-        debugger;
-        const { status } = itemsStatus.find(
-          (itemStatus) => itemStatus.request_item_id === item.id
-        );
-        return { ...item, status };
-      });
-      return finalData;
-    }
+
+    console.log("getRequestDetails formatlanmış verisi:", finalData);
+    return finalData;
   }
+  return [];
+}
 
-  const useGetFetchedRequests = () => {
-    // Call `useSelector` at the top level
-    const pharmacy_id = useSelector(selectUserPharmacyId);
+const useGetFetchedRequests = () => {
+  const pharmacy_id = useSelector(selectUserPharmacyId);
+  console.log("useGetFetchedRequests - pharmacy_id:", pharmacy_id);
+  return useQuery(ANSWERED_REQUEST_KEYS.ALL, () =>
+    fetchAnsweredRequests({ pharmacy_id }),
+    {
+      enabled: !!pharmacy_id,
+    }
+  );
+};
 
-    // Pass the Redux values to the asynchronous function
-    return useQuery(ANSWERED_REQUEST_KEYS.ALL, () =>
-      fetchAnsweredRequests({ pharmacy_id })
-    );
-  };
+const useGetRequestDetails = (request_id, id) => {
+  console.log("useGetRequestDetails - request_id:", request_id, "id:", id);
+  return useQuery(
+    ANSWERED_REQUEST_KEYS.DETAIL(request_id, id),
+    getRequestDetails,
+    {
+      enabled: !!id && !!request_id, // id ve request_id mevcutsa çalışır
+      retry: 1, // Hata durumunda 1 kez yeniden dene
+      staleTime: 5 * 60 * 1000, // 5 dakika boyunca veriyi taze tut
+    }
+  );
+};
 
-  const useGetRequestDetails = (request_id, id) => {
-    return useQuery(
-      ANSWERED_REQUEST_KEYS.DETAIL(request_id, id),
-      getRequestDetails,
-      {
-        enabled: !!id,
-      }
-    );
-  };
-
-  export { useGetFetchedRequests, useGetRequestDetails };
+export { useGetFetchedRequests, useGetRequestDetails };

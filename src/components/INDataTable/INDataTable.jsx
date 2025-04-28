@@ -2,63 +2,34 @@ import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import "./style.scss";
 import {
-  useReactTable,
-  createColumnHelper,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
-  flexRender,
-} from "@tanstack/react-table";
-import { Checkbox, Input, Select } from "antd";
-import classNames from "classnames";
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Checkbox,
+  TextField,
+  MenuItem,
+  Select,
+  Paper,
+  Box,
+  CircularProgress,
+} from "@mui/material";
 import { useSelector } from "react-redux";
 import { selectUserPharmacyId } from "@store/selectors";
 
-// Helper to create column definitions
-const columnHelper = createColumnHelper();
+// İç içe nesneler için değer alma (örneğin, medicine.name)
+const getNestedValue = (obj, path) => {
+  try {
+    return path.split(".").reduce((acc, part) => acc && acc[part], obj);
+  } catch (error) {
+    console.error("getNestedValue hatası:", error, "obj:", obj, "path:", path);
+    return null;
+  }
+};
 
-// Checkbox column definition
-const checkboxObj = [
-  {
-    accessor: "checkbox",
-    id: "checkbox",
-    header: "Mevcut",
-    cell: ({ row, deleteFromResponseBuffer }) => {
-      const pharmacy_id = useSelector(selectUserPharmacyId);
-      return (
-        <Checkbox
-          onClick={(e) => e.stopPropagation()}
-          checked={row.getIsSelected()}
-          onChange={(e) => {
-            const isChecked = e.target.checked;
-            console.log("Checkbox change:", {
-              rowId: row.id,
-              isChecked,
-              medicine_id: row.original.medicine_id,
-              pharmacy_id,
-            });
-            row.toggleSelected(isChecked);
-            if (!isChecked && row.original.medicine_id && pharmacy_id) {
-              console.log("Triggering deleteFromResponseBuffer:", {
-                pharmacy_id,
-                medicine_id: row.original.medicine_id,
-              });
-              try {
-                deleteFromResponseBuffer({
-                  pharmacy_id,
-                  medicine_id: row.original.medicine_id,
-                });
-              } catch (error) {
-                console.error("Failed to delete from response_buffer:", error);
-              }
-            }
-          }}
-        />
-      );
-    },
-  },
-];
-
+// MUI Table bileşeniyle tablo oluştur
 function INDataTable({
   data,
   columns,
@@ -77,183 +48,264 @@ function INDataTable({
   const [selectedFilterColumn, setSelectedFilterColumn] = useState(
     columns[0]?.accessor || ""
   );
-  const [columnFilters, setColumnFilters] = useState([]);
+  const [selectedRowIds, setSelectedRowIds] = useState([]);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+  const pharmacy_id = useSelector(selectUserPharmacyId);
 
-  // Place checkbox column on the right if checkboxed is true
-  const $columns = checkboxed ? [...columns, ...checkboxObj] : columns;
-
-  // Map columns to react-table format
-  const tableColumns = $columns.map((column) =>
-    columnHelper.accessor(column.accessor, {
-      ...column,
-      id: column.id || column.accessor,
-      filterFn: column.filterFn || "includesString",
-      cell: column.cell || ((info) => info.getValue()),
-    })
-  );
-
-  const table = useReactTable({
-    data,
-    columns: tableColumns,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    state: {
-      columnFilters,
-    },
-    onColumnFiltersChange: setColumnFilters,
-  });
-
-  const {
-    getHeaderGroups,
-    getRowModel,
-    getSelectedRowModel,
-    toggleAllPageRowsSelected,
-  } = table;
-
-  // Update selected rows
+  // Veri ve sütun logları (hata ayıklama için)
   useEffect(() => {
-    const checkedRows = getSelectedRowModel().rows.map((item) => item.original);
-    console.log("Selected rows updated:", checkedRows);
+    console.log("INDataTable - veri:", data);
+    console.log("INDataTable - sütunlar:", columns);
+    console.log("INDataTable - checkboxed:", checkboxed);
+    console.log("INDataTable - bufferedMedicines:", bufferedMedicines);
+  }, [data, columns, checkboxed, bufferedMedicines]);
+
+  // Seçili satırları güncelle
+  useEffect(() => {
+    const checkedRows = data.filter((row) => selectedRowIds.includes(row.id));
+    console.log("Seçili satırlar güncellendi:", checkedRows);
     setSelectedRows(checkedRows);
-  }, [getSelectedRowModel().rows, setSelectedRows]);
+  }, [selectedRowIds, data, setSelectedRows]);
 
-  // Clear selection when unSelectAllOnTabChange changes
+  // unSelectAllOnTabChange değiştiğinde seçimi sıfırla
   useEffect(() => {
-    toggleAllPageRowsSelected(false);
-  }, [unSelectAllOnTabChange, toggleAllPageRowsSelected]);
+    setSelectedRowIds([]);
+  }, [unSelectAllOnTabChange]);
 
-  // Pre-select rows based on bufferedMedicines
+  // bufferedMedicines'e göre satırları önceden seç
   useEffect(() => {
     if (bufferedMedicines && checkboxed) {
-      getRowModel().rows.forEach((row) => {
-        if (bufferedMedicines.some((item) => item.medicine_id === row.original.medicine_id)) {
-          row.toggleSelected(true);
-        }
-      });
+      const preSelectedIds = data
+        .filter((row) =>
+          bufferedMedicines.some((item) => item.medicine_id === row.medicine_id)
+        )
+        .map((row) => row.id);
+      console.log("Önceden seçilen satır ID'leri:", preSelectedIds);
+      setSelectedRowIds(preSelectedIds);
     }
-  }, [bufferedMedicines, data, getRowModel]);
+  }, [bufferedMedicines, data, checkboxed]);
 
-  // Update column filters based on global filter
-  useEffect(() => {
-    if (globalFilter) {
-      setColumnFilters([{ id: selectedFilterColumn, value: globalFilter }]);
-    } else {
-      setColumnFilters([]);
-    }
-  }, [globalFilter, selectedFilterColumn]);
+  // Filtreleme mantığı
+  const filteredData = data.filter((row) => {
+    if (!globalFilter) return true;
+    const value = getNestedValue(row, selectedFilterColumn);
+    return value?.toString().toLowerCase().includes(globalFilter.toLowerCase());
+  });
 
+  // Sıralama mantığı
+  const sortedData = [...filteredData].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    const aValue = getNestedValue(a, sortConfig.key);
+    const bValue = getNestedValue(b, sortConfig.key);
+    if (!aValue || !bValue) return 0;
+    if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+    if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  // Sıralama işleyici
+  const handleSort = (key) => {
+    console.log("Sıralama tetiklendi:", key);
+    setSortConfig((prev) => ({
+      key,
+      direction:
+        prev.key === key && prev.direction === "asc" ? "desc" : "asc",
+    }));
+  };
+
+  // Satır tıklama işleyici
   const handleRowClick = (row) => {
+    console.log("handleRowClick - row:", row);
     if (checkboxed) {
-      row.toggleSelected();
+      toggleRowSelection(row.id);
     } else {
       onRowClick(row);
     }
   };
 
+  // Checkbox seçimi işleyici
+  const toggleRowSelection = (id) => {
+    setSelectedRowIds((prev) => {
+      const isSelected = prev.includes(id);
+      console.log("toggleRowSelection - id:", id, "isSelected:", isSelected);
+      if (!isSelected) {
+        return [...prev, id];
+      }
+      return prev.filter((rowId) => rowId !== id);
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!data || data.length === 0) {
+    return <Box sx={{ p: 2, textAlign: "center" }}>Veri bulunamadı.</Box>;
+  }
+
   return (
-    <div className="ilacimNerede-data-table-container">
-      <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+    <Box className="ilacimNerede-data-table-container">
+      {/* Filtreleme alanı */}
+      <Box sx={{ display: "flex", gap: 1, mb: 2, flexWrap: "wrap" }}>
         <Select
-          style={{ width: "200px" }}
           value={selectedFilterColumn}
-          onChange={setSelectedFilterColumn}
+          onChange={(e) => setSelectedFilterColumn(e.target.value)}
+          size="small"
+          sx={{ minWidth: 120, maxWidth: 200 }}
         >
           {columns.map((col) => (
-            <Select.Option key={col.accessor} value={col.accessor}>
+            <MenuItem key={col.accessor} value={col.accessor}>
               {col.header}
-            </Select.Option>
+            </MenuItem>
           ))}
         </Select>
-        <Input
+        <TextField
           placeholder="Tabloda Ara..."
           value={globalFilter}
           onChange={(e) => setGlobalFilter(e.target.value)}
-          style={{ flex: 1 }}
+          size="small"
+          sx={{ flex: 1, minWidth: 200 }}
         />
-      </div>
+      </Box>
 
-      <div className="table-wrapper">
-        <table>
-          <thead>
-            {getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header, index) => (
-                  <th
-                    key={header.id}
-                    onClick={header.column.getToggleSortingHandler()}
-                    className={classNames({
-                      "sortable-header": true,
-                      "left-corner": index === 0,
-                      "right-corner": index === headerGroup.headers.length - 1,
-                      [header.column.columnDef.headerClassName]:
-                        header.column.columnDef.headerClassName !== undefined,
-                    })}
-                    style={header.column.columnDef.headerStyle}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                    {header.column.getIsSorted()
-                      ? header.column.getIsSorted() === "desc"
-                        ? " 🔽"
-                        : " 🔼"
-                      : null}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-
-          <tbody>
-            {getRowModel().rows.map((row) => (
-              <tr
+      {/* Tablo */}
+      <TableContainer component={Paper} sx={{ boxShadow: 0, border: "1px solid #dde1e7", borderRadius: 2 }}>
+        <Table stickyHeader sx={{ tableLayout: "auto" }}>
+          <TableHead>
+            <TableRow>
+              {columns.map((column) => (
+                <TableCell
+                  key={column.accessor}
+                  onClick={() => handleSort(column.accessor)}
+                  sx={{
+                    backgroundColor: "#f4f7fb",
+                    fontWeight: 600,
+                    fontSize: { xs: 12, sm: 14 },
+                    color: "#333",
+                    padding: { xs: "6px 8px", sm: "10px 15px" },
+                    border: "1px solid #dde1e7",
+                    cursor: "pointer",
+                    "&:hover": {
+                      backgroundColor: "#e9eff6",
+                      borderColor: "#a7b1c2",
+                    },
+                    whiteSpace: "normal",
+                    wordBreak: "break-word",
+                    maxWidth: { xs: 100, sm: 150 },
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                  data-column={column.accessor}
+                >
+                  {column.header}
+                  {sortConfig.key === column.accessor &&
+                    (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
+                </TableCell>
+              ))}
+              {checkboxed && (
+                <TableCell
+                  sx={{
+                    backgroundColor: "#f4f7fb",
+                    fontWeight: 600,
+                    fontSize: { xs: 12, sm: 14 },
+                    color: "#333",
+                    padding: { xs: "6px 8px", sm: "10px 15px" },
+                    border: "1px solid #dde1e7",
+                    textAlign: "center",
+                  }}
+                >
+                  Mevcut
+                </TableCell>
+              )}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {sortedData.map((row) => (
+              <TableRow
                 key={row.id}
                 onClick={() => handleRowClick(row)}
-                onDoubleClick={() => row.toggleSelected()}
-                className={classNames({
-                  "selected-row": row.getIsSelected() && checkboxed,
-                  "unselected-row": !row.getIsSelected() && checkboxed,
-                  "no-hover-bg": !rowHoverStyle.background,
-                  "no-hover-border": !rowHoverStyle.border,
-                })}
+                onDoubleClick={() => toggleRowSelection(row.id)}
+                className={selectedRowIds.includes(row.id) && checkboxed ? "selected-row" : checkboxed ? "unselected-row" : ""}
+                sx={{
+                  cursor: "pointer",
+                  backgroundColor: selectedRowIds.includes(row.id) && checkboxed
+                    ? "#25b597"
+                    : !selectedRowIds.includes(row.id) && checkboxed
+                    ? "#f8d7da"
+                    : "inherit",
+                  "&:hover": {
+                    backgroundColor: rowHoverStyle.background
+                      ? "#f0f4f8"
+                      : "inherit",
+                  },
+                }}
               >
-                {row.getVisibleCells().map((cell, index) => (
-                  <td
-                    key={cell.id}
-                    className={classNames({
-                      "left-corner": index === 0,
-                      "right-corner":
-                        index === row.getVisibleCells().length - 1,
-                      [typeof cell.column.columnDef.cellClassName === "function"
-                        ? cell.column.columnDef.cellClassName(
-                            cell.row.original
-                          )
-                        : cell.column.columnDef.cellClassName]:
-                        cell.column.columnDef.cellClassName !== undefined,
-                      "show-on-hover": cell.column.columnDef.showOnRowHover,
-                    })}
-                    style={
-                      typeof cell.column.columnDef.cellStyle === "function"
-                        ? cell.column.columnDef.cellStyle(cell.row.original)
-                        : cell.column.columnDef.cellStyle
-                    }
+                {columns.map((column) => {
+                  let cellContent;
+                  if (column.Cell) {
+                    const cellResult = column.Cell({ row, value: getNestedValue(row, column.accessor) });
+                    cellContent = cellResult !== undefined && cellResult !== null ? cellResult : "-";
+                  } else {
+                    cellContent = getNestedValue(row, column.accessor) || "-";
+                  }
+                  console.log(`Hücre içeriği - column.accessor: ${column.accessor}, cellContent:`, cellContent);
+                  return (
+                    <TableCell
+                      key={column.accessor}
+                      sx={{
+                        fontSize: { xs: 12, sm: 14 },
+                        padding: { xs: "6px 8px", sm: "8px 15px" },
+                        border: rowHoverStyle.border
+                          ? "1px solid #dde1e7"
+                          : "none",
+                        color: selectedRowIds.includes(row.id) && checkboxed ? "#fff" : "#333",
+                        whiteSpace: "normal",
+                        wordBreak: "break-word",
+                        maxWidth: { xs: 100, sm: 150 },
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                      data-column={column.accessor}
+                    >
+                      {cellContent}
+                    </TableCell>
+                  );
+                })}
+                {checkboxed && (
+                  <TableCell
+                    sx={{
+                      fontSize: { xs: 12, sm: 14 },
+                      padding: { xs: "6px 8px", sm: "8px 15px" },
+                      border: rowHoverStyle.border
+                        ? "1px solid #dde1e7"
+                        : "none",
+                      textAlign: "center",
+                    }}
                   >
-                    {flexRender(cell.column.columnDef.cell, {
-                      ...cell.getContext(),
-                      deleteFromResponseBuffer,
-                    })}
-                  </td>
-                ))}
-              </tr>
+                    <Checkbox
+                      checked={selectedRowIds.includes(row.id)}
+                      onChange={() => toggleRowSelection(row.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      className={selectedRowIds.includes(row.id) ? "selected-row-checkbox" : "unselected-row-checkbox"}
+                      sx={{
+                        color: "#333 !important",
+                        "&.Mui-checked": {
+                          color: "#333 !important",
+                        },
+                      }}
+                    />
+                  </TableCell>
+                )}
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 }
 

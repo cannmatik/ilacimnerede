@@ -3,12 +3,13 @@ import { Spin, Empty } from "antd";
 import { supabase } from "@routes/Login/useCreateClient";
 import { selectUserPharmacyId } from "@store/selectors";
 import { useSelector } from "react-redux";
-import { INDataTable, INButton } from "@components";
+import { INDataTable } from "@components";
 import { Col, Row } from "react-grid-system";
 import { useGetFetchedRequests, useGetRequestDetails } from "./queries";
 import { columns, columns_requestDetail } from "./constants/responseColumns";
 import "./arstyle.scss";
-import { LeftOutlined } from "@ant-design/icons";
+import { Button } from "@mui/material";
+import { ArrowBack, ArrowForward, Delete, ArrowBackIos } from "@mui/icons-material";
 
 const AnsweredResponse = () => {
   const pharmacyId = useSelector(selectUserPharmacyId);
@@ -22,14 +23,29 @@ const AnsweredResponse = () => {
   // Sorgular
   const {
     data: answeredRequests = [],
-    isLoading,
+    isLoading: isRequestsLoading,
     refetch,
   } = useGetFetchedRequests(pharmacyId);
 
-  const { data: answeredRequestDetails = [] } = useGetRequestDetails(
+  const {
+    data: answeredRequestDetails = [],
+    isLoading: isDetailsLoading,
+    error: detailsError,
+    isFetching: isDetailsFetching,
+  } = useGetRequestDetails(
     selectedRequest?.request_id,
     selectedRequest?.id
   );
+
+  // Hata ayıklama logları
+  useEffect(() => {
+    console.log("AnsweredResponse.jsx - answeredRequests:", answeredRequests);
+    console.log("AnsweredResponse.jsx - answeredRequestDetails:", answeredRequestDetails);
+    console.log("AnsweredResponse.jsx - detailsError:", detailsError);
+    console.log("AnsweredResponse.jsx - isDetailsLoading:", isDetailsLoading);
+    console.log("AnsweredResponse.jsx - isDetailsFetching:", isDetailsFetching);
+    console.log("AnsweredResponse.jsx - selectedRequest:", selectedRequest);
+  }, [answeredRequests, answeredRequestDetails, detailsError, isDetailsLoading, isDetailsFetching, selectedRequest]);
 
   // Yeniden veri çekme
   useEffect(() => {
@@ -105,7 +121,7 @@ const AnsweredResponse = () => {
       <Row>
         {(!isMobile || !selectedRequest) && (
           <Col xs={12} md={6} className="answered-table-container">
-            {isLoading ? (
+            {isRequestsLoading ? (
               <div className="answered-spin-container center-content pulse">
                 <Spin size="large" />
               </div>
@@ -115,12 +131,15 @@ const AnsweredResponse = () => {
                   data={answeredRequests}
                   columns={columns}
                   rowHoverStyle={{ border: true }}
-                  onRowClick={(row) => setSelectedRequest(row.original)}
+                  onRowClick={(row) => {
+                    console.log("onRowClick - row:", row);
+                    setSelectedRequest(row); // row.original yerine row kullanılıyor, INDataTable doğrudan row nesnesini geçiriyor
+                  }}
                 />
               </div>
             ) : (
               <div className="answered-empty-container fade-in pulse">
-                <Empty description="Henüz hiçbir talebi cevaplamadınız." />
+                <Empty description={<span className="empty-list-text">Henüz hiçbir talebi cevaplamadınız.</span>} />
               </div>
             )}
           </Col>
@@ -137,61 +156,74 @@ const AnsweredResponse = () => {
               </div>
 
               <div className="table-scroll-container">
-                {answeredRequestDetails.length > 0 ? (
+                {isDetailsLoading || isDetailsFetching ? (
+                  <div className="answered-spin-container center-content pulse">
+                    <Spin size="large" />
+                  </div>
+                ) : detailsError ? (
+                  <div className="answered-empty-container fade-in pulse">
+                    <Empty description={`Hata: Detaylar yüklenemedi. ${detailsError.message}`} />
+                  </div>
+                ) : !answeredRequestDetails || answeredRequestDetails.length === 0 ? (
+                  <div className="answered-empty-container fade-in pulse">
+                    <Empty description={<span className="empty-list-text">Detay bulunamadı. Seçilen talep ID: {selectedRequest?.request_id}</span>} />
+                  </div>
+                ) : (
                   <INDataTable
                     key={`${selectedRequest?.id}-${selectedRequest?.request_id}`}
                     data={answeredRequestDetails}
                     columns={columns_requestDetail}
                     rowHoverStyle={{ border: true }}
-                    emptyText="Detay bulunamadı"
+                    emptyText={<span className="empty-list-text">Detay bulunamadı</span>}
                   />
-                ) : isLoading ? (
-                  <div className="answered-spin-container center-content pulse">
-                    <Spin size="large" />
-                  </div>
-                ) : (
-                  <div className="answered-empty-container fade-in pulse">
-                    <Empty description="Detay bulunamadı." />
-                  </div>
                 )}
               </div>
 
               <div className="bottom-footer">
                 <div className="footer-row">
-                  <INButton
-                    onClick={!isPrevDisabled ? openPrevRequest : undefined}
-                    text="Önceki Talep"
+                  <Button
+                    variant="outlined"
+                    startIcon={<ArrowBack />}
+                    onClick={openPrevRequest}
                     disabled={isPrevDisabled}
-                    className="nav-button"
-                  />
+                    sx={{ margin: "0 8px" }}
+                  >
+                    Önceki Talep
+                  </Button>
 
-                  <INButton
-                    className="answered-delete-button"
+                  <Button
+                    variant="contained"
+                    startIcon={<Delete />}
                     onClick={() => handleDeleteRequest(selectedRequest?.id)}
-                    text="Verilen Yanıtı Geri Al"
                     disabled={loading}
-                  />
+                    sx={{ margin: "0 8px" }}
+                    aria-label="delete-request"
+                  >
+                    Verilen Yanıtı Geri Al
+                  </Button>
 
-                  <INButton
-                    onClick={!isNextDisabled ? openNextRequest : undefined}
-                    text="Sonraki Talep"
+                  <Button
+                    variant="outlined"
+                    startIcon={<ArrowForward />}
+                    onClick={openNextRequest}
                     disabled={isNextDisabled}
-                    className="nav-button"
-                  />
+                    sx={{ margin: "0 8px" }}
+                  >
+                    Sonraki Talep
+                  </Button>
                 </div>
 
                 {isMobile && (
                   <div className="footer-row back-button-row">
-                    <INButton
+                    <Button
+                      variant="outlined"
+                      startIcon={<ArrowBackIos />}
                       onClick={() => setSelectedRequest(null)}
-                      text={
-                        <>
-                          <LeftOutlined style={{ marginRight: 4 }} />
-                          Geri
-                        </>
-                      }
-                      className="nav-button"
-                    />
+                      sx={{ margin: "0 8px", width: "100%" }}
+                      aria-label="mobile-back"
+                    >
+                      Geri
+                    </Button>
                   </div>
                 )}
               </div>

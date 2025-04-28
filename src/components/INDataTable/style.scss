@@ -1,137 +1,210 @@
-/* style.scss */
-table:not(.ant-picker-content) {
+/* MUI Table için temel stiller */
+.ilacimNerede-data-table-container {
   width: 100%;
-  border-spacing: 4px 8px;  /* Satırlar ve sütunlar arasında boşluk, ancak çok geniş değil */
-  border-collapse: separate;  /* Hücreler arasındaki boşluğu kontrol etmek için separate kullanıyoruz */
+  overflow-x: auto;
+  padding: 20px 0;
+  @media (max-width: 768px) {
+    padding: 10px 0; /* Mobilde daha az dolgu */
+  }
+}
 
-  thead tr th {
-    background-color: #f4f7fb;  /* Başlıklar için daha açık bir renk */
-    height: 50px;
-    text-align: left;
-    padding: 10px 15px;  /* Hücre içindeki boşluğu artırdık */
-    border: 1px solid #dde1e7;  /* Daha soft sınırlar */
-    font-size: 14px;
-    font-weight: 600;
-    color: #333;
-    cursor: pointer;
-    min-width: 100px;  /* Minimum genişlik, yazının rahatça okunmasını sağlar */
-    transition: all 0.3s ease-in-out;
+/* Tablo genel stilleri */
+.MuiTable-root {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 6px 10px; /* Hücreler arası boşluk artırıldı */
+}
 
-    /* Yazı taşmasını sağla */
-    white-space: normal;
-    word-wrap: break-word;
-    text-overflow: clip;
+/* Başlık hücreleri */
+.MuiTableCell-head {
+  background-color: #f4f7fb; /* Başlıklar için açık gri */
+  height: 50px;
+  text-align: left;
+  padding: 10px 15px; /* Hücre içindeki boşluk */
+  border: 1px solid #dde1e7; /* İnce çerçeve */
+  font-size: 14px;
+  font-weight: 600;
+  color: #333; /* Firma metin rengi */
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  white-space: normal;
+  word-break: break-word;
+  text-overflow: clip;
+  max-width: 150px; /* Sabit maksimum genişlik, sol ve sağ tablo için aynı */
+  overflow: hidden;
+  text-overflow: ellipsis;
 
-    &:hover {
-      background-color: #e9eff6;
-      border-color: #a7b1c2;
-    }
-
-    &:not(.right-corner) {
-      border-right: 1px solid #dde1e7;
-    }
+  @media (max-width: 768px) {
+    font-size: 12px; /* Mobilde daha küçük font */
+    padding: 6px 8px;
+    max-width: 100px; /* Mobilde daha dar */
   }
 
-  tbody {
-    tr {
-      cursor: pointer;
-
-      &.selected-row {
-        background-color: #25b597 !important;
-        color: #fff !important;
-        
-        td {
-          background-color: transparent !important;
-          border-color: #25b597 !important;
-        }
-      }
-
-      &.unselected-row {
-        background-color: #f8d7da !important;
-        color: #333 !important;
-        
-        td {
-          background-color: transparent !important;
-          border-color: #f8d7da !important;
-        }
-      }
-
-      &:hover {
-        background-color: #f0f4f8;
-        
-        td {
-          border-top: 1px solid #dde1e7;
-          border-bottom: 1px solid #dde1e7;
-        }
-        
-        .right-corner {
-          border-right: 1px solid #dde1e7;
-        }
-        
-        .left-corner {
-          border-left: 1px solid #dde1e7;
-        }
-      }
-    }
+  &:hover {
+    background-color: #e9eff6; /* Hover'da açık gri */
+    border-color: #a7b1c2;
   }
 
-  .left-corner {
+  &.left-corner {
     border-top-left-radius: 15px;
     border-bottom-left-radius: 15px;
     border-left: 1px solid #dde1e7;
   }
 
-  .right-corner {
+  &.right-corner {
     border-top-right-radius: 15px;
     border-bottom-right-radius: 15px;
     border-right: 1px solid #dde1e7;
   }
 
-  .show-on-hover * {
-    visibility: hidden;
+  /* Talep No sütunu için daha geniş alan */
+  &[data-column="id"] {
+    min-width: 120px; /* Talep No için daha geniş */
+    @media (max-width: 768px) {
+      min-width: 80px;
+    }
+  }
+
+  /* Miktar sütunu için ortalanmış metin */
+  &[data-column="medicine_qty"] {
+    text-align: center;
   }
 }
 
-.ilacimNerede-data-table-container {
-  width: 100%;
-  overflow-x: auto;
-  padding: 20px 0;
+/* Satır hücreleri */
+.MuiTableCell-body {
+  padding: 8px 15px; /* Hücre içindeki boşluk */
+  border: 1px solid #dde1e7; /* İnce çerçeve */
+  font-size: 14px;
+  color: #333; /* Firma metin rengi */
+  white-space: normal;
+  word-break: break-word;
+  max-width: 150px; /* Sabit maksimum genişlik, sol ve sağ tablo için aynı */
+  overflow: hidden;
+  text-overflow: ellipsis;
 
-  table {
-    width: 100%;
-    border-spacing: 4px 8px;  /* Satırlar ve sütunlar arasına belirgin boşluk ekledik */
-    border-collapse: separate;
+  @media (max-width: 768px) {
+    font-size: 12px; /* Mobilde daha küçük font */
+    padding: 6px 8px;
+    max-width: 100px; /* Mobilde daha dar */
   }
 
-  thead tr th,
-  tbody td {
-    padding: 12px 15px;  /* Hücre içindeki boşluk */
-    white-space: normal;
-    word-wrap: break-word;
-    text-overflow: clip;
-    overflow: visible;
-    border-radius: 8px;
-    border: 1px solid #dde1e7;  /* Her hücre için ince bir sınır ekledik */
+  /* Miktar sütunu için ortalanmış metin */
+  &[data-column="medicine_qty"] {
+    text-align: center;
+  }
+}
+
+/* Seçili satırların tüm hücreleri için stil */
+.MuiTableRow-root.selected-row {
+  background-color: #25b597 !important; /* Seçili satır için yeşilimsi arka plan */
+  .MuiTableCell-root {
+    background-color: transparent !important;
+    color: #fff !important; /* Beyaz metin */
+    border-color: #25b597 !important;
+  }
+}
+
+/* Seçilmemiş satırların tüm hücreleri için stil */
+.MuiTableRow-root.unselected-row {
+  background-color: #f8d7da !important; /* Seçilmemiş satır için kırmızımsı arka plan */
+  .MuiTableCell-root {
+    background-color: transparent !important;
+    color: #333 !important; /* Koyu gri metin */
+    border-color: #f8d7da !important;
+  }
+}
+
+/* Hover efekti */
+.MuiTableRow-root:hover:not(.selected-row):not(.unselected-row) {
+  background-color: #f0f4f8; /* Hover'da açık gri */
+  .MuiTableCell-root {
+    border-top: 1px solid #dde1e7;
+    border-bottom: 1px solid #dde1e7;
+  }
+  .right-corner {
+    border-right: 1px solid #dde1e7;
+  }
+  .left-corner {
+    border-left: 1px solid #dde1e7;
+  }
+}
+
+/* Checkbox stilleri */
+.MuiCheckbox-root {
+  color: #333 !important; /* Siyah checkbox */
+  &.Mui-checked {
+    color: #333 !important; /* Seçili checkbox siyah */
+  }
+  /* Hover efektleri */
+  &.selected-row-checkbox:hover {
+    color: #1b7a66 !important; /* Seçili satırda koyu yeşil */
+  }
+  &.unselected-row-checkbox:hover {
+    color: #d32f2f !important; /* Seçilmemiş satırda koyu kırmızı */
+  }
+}
+
+/* Arama alanı ve sütun seçimi */
+.MuiTextField-root,
+.MuiSelect-root {
+  min-width: 200px !important; /* Aynı genişlik */
+  max-width: 200px !important; /* Maksimum genişlik */
+  height: 40px !important; /* Aynı yükseklik */
+  font-size: 14px !important; /* Aynı font boyutu */
+  box-sizing: border-box; /* Padding ve border'ı hesaba kat */
+  display: flex;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    min-width: 150px !important;
+    max-width: 150px !important;
+    height: 36px !important; /* Mobilde biraz daha küçük */
+    font-size: 12px !important;
   }
 
-  tbody tr {
-    &:hover:not(.selected-row):not(.unselected-row) {
-      td {
-        background-color: #f9fafb;
-      }
+  /* TextField içindeki input için ek ayarlar */
+  .MuiInputBase-root {
+    height: 100% !important;
+    font-size: inherit !important;
+    padding: 0 12px !important; /* Tutarlı iç boşluk */
+  }
+
+  /* Select için ek ayarlar */
+  &.MuiSelect-root {
+    padding: 0 12px !important; /* Tutarlı iç boşluk */
+    line-height: 40px !important; /* Metni dikey ortala */
+    @media (max-width: 768px) {
+      line-height: 36px !important;
     }
   }
 }
 
+/* Talebi Yanıtla butonu */
+.MuiButton-root[aria-label="respond-request"] {
+  background-color: #333 !important; /* Siyah arka plan */
+  color: #fff !important; /* Beyaz metin */
+  &:hover {
+    background-color: #25b597 !important; /* Hover'da yeşilimsi */
+  }
+}
+
+/* Tablo aksiyon çubuğu */
 .ilacimNerede-table-action-bar {
   display: flex;
   align-items: center;
-  background-color: #ffffff;
+  background-color: #ffffff; /* Beyaz arka plan */
   height: 70px;
   border-radius: 15px;
   padding-left: 15px;
   margin-top: 10px;
   flex-wrap: wrap;
   border: 1px solid #dde1e7;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Hafif gölge */
+  @media (max-width: 768px) {
+    height: auto; /* Mobilde esnek yükseklik */
+    padding: 10px;
+    flex-direction: column; /* Mobilde dikey hizala */
+    align-items: flex-start;
+  }
 }

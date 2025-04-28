@@ -12,10 +12,10 @@ import React, { useState, useMemo, useEffect } from "react";
 import moment from "moment";
 import "moment/locale/tr";
 
-// Path to logo for notifications
+// Bildirimler için logo yolu
 const LOGO_PATH = "/src/assets/ilacimNeredeLogo.svg";
 
-// Query keys for React Query
+// React Query için sorgu anahtarları
 const REQUEST_KEYS = {
   ALL: ["Request", "requests"],
   DETAIL: (id) => ["Request", "requestDetails", id],
@@ -23,9 +23,10 @@ const REQUEST_KEYS = {
 };
 
 /**
- * Fetch requests from Supabase based on city, neighborhood, district, and pharmacy filters
+ * Supabase'ten talepleri şehir, mahalle, ilçe ve eczane filtrelerine göre getir
  */
 async function fetchRequests({ city_id, neighbourhood_id, district_id, pharmacy_id }) {
+  console.log("fetchRequests - parametreler:", { city_id, neighbourhood_id, district_id, pharmacy_id });
   const { data, error } = await supabase
     .from("request")
     .select("id, create_date, message_text, district_id, city_id, response_count, status")
@@ -35,19 +36,24 @@ async function fetchRequests({ city_id, neighbourhood_id, district_id, pharmacy_
     .or(`district_id.is.null,district_id.eq.${district_id}`);
 
   if (error) {
-    console.error("Request fetch error:", error);
+    console.error("Talep getirme hatası:", error);
     return [];
   }
   if (!data || data.length === 0) {
+    console.log("Talep verisi yok:", data);
     return [];
   }
 
+  console.log("fetchRequests ham verisi:", data);
+
   let formattedData = data.map((item) => ({
     ...item,
-    create_date: moment(item.create_date).locale("tr").format("DD MM YYYY HH:mm"),
+    create_date: item.create_date ? moment(item.create_date).toISOString() : null,
     response_count: item.response_count ?? 0,
     status: item.status,
   }));
+
+  console.log("fetchRequests formatlanmış verisi:", formattedData);
 
   const { data: unFinishedRequests, error: unfinishedError } = await supabase
     .from("response")
@@ -55,7 +61,7 @@ async function fetchRequests({ city_id, neighbourhood_id, district_id, pharmacy_
     .eq("pharmacy_id", pharmacy_id);
 
   if (unfinishedError) {
-    console.log("Error filtering requests:", unfinishedError);
+    console.log("Talepleri filtreleme hatası:", unfinishedError);
     return formattedData;
   }
 
@@ -72,21 +78,22 @@ async function fetchRequests({ city_id, neighbourhood_id, district_id, pharmacy_
 }
 
 /**
- * Fetch request details (request_item) from Supabase
+ * Supabase'ten talep detaylarını (request_item) getir
  */
 async function getRequestDetails({ queryKey }) {
   const id = queryKey[2];
+  console.log("getRequestDetails - request_id:", id);
   const { data, error } = await supabase
     .from("request_item")
     .select("request_id, id, position_no, medicine_id, medicine_qty, medicine (name)")
     .eq("request_id", id);
 
   if (error) {
-    console.error("getRequestDetails error:", error);
+    console.error("Talep detayları getirme hatası:", error);
     return [];
   }
 
-  console.log("getRequestDetails data:", data);
+  console.log("getRequestDetails ham verisi:", data);
 
   const formattedData = data.map((item) => ({
     ...item,
@@ -95,25 +102,28 @@ async function getRequestDetails({ queryKey }) {
     },
   }));
 
+  console.log("getRequestDetails formatlanmış verisi:", formattedData);
+
   return formattedData || [];
 }
 
 /**
- * Fetch medicines in response_buffer for a pharmacy
+ * Eczanenin response_buffer'daki ilaçlarını getir
  */
 async function getResponseBuffer({ queryKey }) {
   const pharmacy_id = queryKey[2];
+  console.log("getResponseBuffer - pharmacy_id:", pharmacy_id);
   const { data, error } = await supabase
     .from("response_buffer")
     .select("medicine_id, medicine (name)")
     .eq("pharmacy_id", pharmacy_id);
 
   if (error) {
-    console.error("getResponseBuffer error:", error);
+    console.error("response_buffer getirme hatası:", error);
     return [];
   }
 
-  console.log("getResponseBuffer data:", data);
+  console.log("getResponseBuffer verisi:", data);
 
   return data.map((item) => ({
     medicine_id: item.medicine_id,
@@ -122,10 +132,10 @@ async function getResponseBuffer({ queryKey }) {
 }
 
 /**
- * Delete a specific medicine from response_buffer
+ * response_buffer'dan belirli bir ilacı sil
  */
 async function deleteFromResponseBuffer({ pharmacy_id, medicine_id }) {
-  console.log("deleteFromResponseBuffer called:", { pharmacy_id, medicine_id });
+  console.log("deleteFromResponseBuffer çağrıldı:", { pharmacy_id, medicine_id });
   const { error } = await supabase
     .from("response_buffer")
     .delete()
@@ -133,14 +143,14 @@ async function deleteFromResponseBuffer({ pharmacy_id, medicine_id }) {
     .eq("medicine_id", medicine_id);
 
   if (error) {
-    console.error("deleteFromResponseBuffer error:", error);
+    console.error("deleteFromResponseBuffer hatası:", error);
     throw new Error(`response_buffer silme hatası: ${error.message}`);
   }
-  console.log("Successfully deleted from response_buffer:", { pharmacy_id, medicine_id });
+  console.log("response_buffer'dan başarıyla silindi:", { pharmacy_id, medicine_id });
 }
 
 /**
- * Show browser notification for new requests
+ * Yeni talepler için tarayıcı bildirimi göster
  */
 function showNewRequestNotification(newRow) {
   if (!("Notification" in window)) {
@@ -156,11 +166,11 @@ function showNewRequestNotification(newRow) {
 }
 
 /**
- * Handle request response, updating response, response_item, and response_buffer tables
+ * Talep yanıtını işle, response, response_item ve response_buffer tablolarını güncelle
  */
 async function responseRequest(finalData, response) {
   try {
-    // Insert into response table
+    // response tablosuna ekle
     const { data: responseData, error: responseError } = await supabase
       .from("response")
       .insert({
@@ -180,7 +190,7 @@ async function responseRequest(finalData, response) {
       throw new Error("Response kaydı oluşturulamadı veya ID bulunamadı.");
     }
 
-    // Insert into response_item table
+    // response_item tablosuna ekle
     const responseItems = finalData.map((item) => ({
       response_id: responseId,
       request_item_id: item.request_item_id,
@@ -195,7 +205,7 @@ async function responseRequest(finalData, response) {
       throw new Error(`Response_item kaydı hatası: ${responseItemsError.message}`);
     }
 
-    // Update request_item statuses
+    // request_item durumlarını güncelle
     const updatePromises = finalData.map((item) =>
       supabase
         .from("request_item")
@@ -209,7 +219,7 @@ async function responseRequest(finalData, response) {
       }
     }
 
-    // Insert selected medicines into response_buffer, avoiding duplicates
+    // Seçilen ilaçları response_buffer'a ekle, kopyaları önle
     const selectedItems = finalData
       .filter((item) => item.status)
       .map((item) => ({
@@ -253,7 +263,7 @@ async function responseRequest(finalData, response) {
 }
 
 /**
- * Hook: Fetch all requests and subscribe to real-time updates
+ * Hook: Tüm talepleri getir ve gerçek zamanlı güncellemeler için abone ol
  */
 export const useGetRequest = () => {
   const city_id = useSelector(selectUserCityId);
@@ -341,7 +351,7 @@ export const useGetRequest = () => {
 };
 
 /**
- * Hook: Fetch details for a single request
+ * Hook: Tek bir talebin detaylarını getir
  */
 export const useGetRequestDetails = (id) => {
   const pharmacy_id = useSelector(selectUserPharmacyId);
@@ -355,7 +365,7 @@ export const useGetRequestDetails = (id) => {
 };
 
 /**
- * Hook: Fetch medicines in response_buffer for a pharmacy
+ * Hook: Eczanenin response_buffer'daki ilaçlarını getir
  */
 export const useGetResponseBuffer = () => {
   const pharmacy_id = useSelector(selectUserPharmacyId);
@@ -369,7 +379,7 @@ export const useGetResponseBuffer = () => {
 };
 
 /**
- * Hook: Mutation to handle request response
+ * Hook: Talep yanıtlama mutasyonu
  */
 export const useResponseRequest = () => {
   const queryClient = useQueryClient();
@@ -389,7 +399,7 @@ export const useResponseRequest = () => {
 };
 
 /**
- * Hook: Mutation to delete a medicine from response_buffer
+ * Hook: response_buffer'dan ilaç silme mutasyonu
  */
 export const useDeleteFromResponseBuffer = () => {
   const queryClient = useQueryClient();

@@ -32,10 +32,7 @@ const AnsweredResponse = () => {
     isLoading: isDetailsLoading,
     error: detailsError,
     isFetching: isDetailsFetching,
-  } = useGetRequestDetails(
-    selectedRequest?.request_id,
-    selectedRequest?.id
-  );
+  } = useGetRequestDetails(selectedRequest?.request_id, selectedRequest?.id);
 
   // Hata ayıklama logları
   useEffect(() => {
@@ -118,6 +115,17 @@ const AnsweredResponse = () => {
 
   return (
     <div className="answered-content">
+      {/* Bildirim sayfanın üst kısmında gösteriliyor */}
+      {notification && (
+        <div
+          className={`answered-notification ${
+            notification.includes("başarı") ? "success" : "error"
+          }`}
+        >
+          {notification}
+        </div>
+      )}
+
       <Row>
         {(!isMobile || !selectedRequest) && (
           <Col xs={12} md={6} className="answered-table-container">
@@ -227,16 +235,6 @@ const AnsweredResponse = () => {
                   </div>
                 )}
               </div>
-
-              {notification && (
-                <div
-                  className={`answered-notification ${
-                    notification.includes("başarı") ? "success" : "error"
-                  }`}
-                >
-                  {notification}
-                </div>
-              )}
             </div>
           </Col>
         )}

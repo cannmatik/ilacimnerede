@@ -15,9 +15,15 @@ import {
   Paper,
   Box,
   CircularProgress,
+  IconButton,
 } from "@mui/material";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { useSelector } from "react-redux";
 import { selectUserPharmacyId } from "@store/selectors";
+import { Clear as ClearIcon } from "@mui/icons-material";
+import dayjs from "dayjs";
 
 // İç içe nesneler için değer alma (örneğin, medicine.name)
 const getNestedValue = (obj, path) => {
@@ -50,6 +56,7 @@ function INDataTable({
   );
   const [selectedRowIds, setSelectedRowIds] = useState([]);
   const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+  const [dateFilter, setDateFilter] = useState(null); // Tarih filtresi için state
   const pharmacy_id = useSelector(selectUserPharmacyId);
 
   // Veri ve sütun logları (hata ayıklama için)
@@ -58,7 +65,9 @@ function INDataTable({
     console.log("INDataTable - sütunlar:", columns);
     console.log("INDataTable - checkboxed:", checkboxed);
     console.log("INDataTable - bufferedMedicines:", bufferedMedicines);
-  }, [data, columns, checkboxed, bufferedMedicines]);
+    console.log("INDataTable - globalFilter:", globalFilter);
+    console.log("INDataTable - dateFilter:", dateFilter);
+  }, [data, columns, checkboxed, bufferedMedicines, globalFilter, dateFilter]);
 
   // Seçili satırları güncelle
   useEffect(() => {
@@ -87,9 +96,22 @@ function INDataTable({
 
   // Filtreleme mantığı
   const filteredData = data.filter((row) => {
-    if (!globalFilter) return true;
-    const value = getNestedValue(row, selectedFilterColumn);
-    return value?.toString().toLowerCase().includes(globalFilter.toLowerCase());
+    // Metin bazlı arama
+    if (globalFilter && !dateFilter) {
+      const value = getNestedValue(row, selectedFilterColumn);
+      return value?.toString().toLowerCase().includes(globalFilter.toLowerCase());
+    }
+
+    // Tarih bazlı arama (create_date sütunu için)
+    if (dateFilter && selectedFilterColumn === "create_date") {
+      const selectedDate = dayjs(dateFilter).format("YYYY-MM-DD");
+      const rowDate = dayjs(row.create_date).format("YYYY-MM-DD");
+      console.log("Tarih filtresi - selectedDate:", selectedDate, "rowDate:", rowDate);
+      return rowDate === selectedDate;
+    }
+
+    // Filtre yoksa tüm veriyi döndür
+    return true;
   });
 
   // Sıralama mantığı
@@ -135,6 +157,11 @@ function INDataTable({
     });
   };
 
+  // Tarih filtresi sıfırlama işleyici
+  const clearDateFilter = () => {
+    setDateFilter(null);
+  };
+
   if (isLoading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
@@ -150,12 +177,16 @@ function INDataTable({
   return (
     <Box className="ilacimNerede-data-table-container">
       {/* Filtreleme alanı */}
-      <Box sx={{ display: "flex", gap: 1, mb: 2, flexWrap: "wrap" }}>
+      <Box className="table-filter-container">
         <Select
           value={selectedFilterColumn}
-          onChange={(e) => setSelectedFilterColumn(e.target.value)}
+          onChange={(e) => {
+            setSelectedFilterColumn(e.target.value);
+            setGlobalFilter(""); // Sütun değiştiğinde metin filtresini sıfırla
+            setDateFilter(null); // Sütun değiştiğinde tarih filtresini sıfırla
+          }}
           size="small"
-          sx={{ minWidth: 120, maxWidth: 200 }}
+          className="table-filter-select"
         >
           {columns.map((col) => (
             <MenuItem key={col.accessor} value={col.accessor}>
@@ -163,13 +194,38 @@ function INDataTable({
             </MenuItem>
           ))}
         </Select>
-        <TextField
-          placeholder="Tabloda Ara..."
-          value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-          size="small"
-          sx={{ flex: 1, minWidth: 200 }}
-        />
+        {selectedFilterColumn === "create_date" ? (
+          <Box display="flex" alignItems="center" gap={1}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                value={dateFilter}
+                onChange={(newValue) => setDateFilter(newValue)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    size="small"
+                    className="table-filter-textfield"
+                    placeholder="Tarih Seçin"
+                  />
+                )}
+                format="DD/MM/YYYY"
+              />
+            </LocalizationProvider>
+            {dateFilter && (
+              <IconButton onClick={clearDateFilter} size="small">
+                <ClearIcon />
+              </IconButton>
+            )}
+          </Box>
+        ) : (
+          <TextField
+            placeholder="Tabloda Ara..."
+            value={globalFilter}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            size="small"
+            className="table-filter-textfield"
+          />
+        )}
       </Box>
 
       {/* Tablo */}

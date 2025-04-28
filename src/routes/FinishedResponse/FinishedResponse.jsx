@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Spin, Empty } from "antd";
-import { INDataTable, INButton } from "@components";
+import { INDataTable } from "@components";
 import { Col, Row } from "react-grid-system";
 import { useGetFinishedRequests, useGetRequestDetails } from "./queries";
 import { columns, columns_requestDetail } from "./constants/responseColumns";
 import { selectUserPharmacyId } from "@store/selectors";
 import { useSelector } from "react-redux";
-import { LeftOutlined } from "@ant-design/icons";
+import { Button } from "@mui/material";
+import { ArrowBack, ArrowForward, ArrowBackIos } from "@mui/icons-material";
 import "./frstyle.scss";
 
 function FinishedResponse() {
@@ -17,11 +18,23 @@ function FinishedResponse() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   // Sorgular
-  const { data: answeredRequests = [], isLoading } = useGetFinishedRequests(pharmacyId);
+  const { data: answeredRequests = [], isLoading: isRequestsLoading } = useGetFinishedRequests(pharmacyId);
   const {
     data: answeredRequestDetails = [],
-    isLoading: isLoadingDetails,
+    isLoading: isDetailsLoading,
+    error: detailsError,
+    isFetching: isDetailsFetching,
   } = useGetRequestDetails(selectedRequest?.request_id, selectedRequest?.id, pharmacyId);
+
+  // Hata ayıklama logları
+  useEffect(() => {
+    console.log("FinishedResponse.jsx - answeredRequests:", answeredRequests);
+    console.log("FinishedResponse.jsx - answeredRequestDetails:", answeredRequestDetails);
+    console.log("FinishedResponse.jsx - detailsError:", detailsError);
+    console.log("FinishedResponse.jsx - isDetailsLoading:", isDetailsLoading);
+    console.log("FinishedResponse.jsx - isDetailsFetching:", isDetailsFetching);
+    console.log("FinishedResponse.jsx - selectedRequest:", selectedRequest);
+  }, [answeredRequests, answeredRequestDetails, detailsError, isDetailsLoading, isDetailsFetching, selectedRequest]);
 
   // Responsive kontrol
   useEffect(() => {
@@ -64,7 +77,7 @@ function FinishedResponse() {
       <Row>
         {(!isMobile || !selectedRequest) && (
           <Col xs={12} md={6} className="finished-table-container">
-            {isLoading ? (
+            {isRequestsLoading ? (
               <div className="finished-spin-container center-content pulse">
                 <Spin size="large" />
               </div>
@@ -74,12 +87,15 @@ function FinishedResponse() {
                   data={answeredRequests}
                   columns={columns}
                   rowHoverStyle={{ border: true }}
-                  onRowClick={(row) => setSelectedRequest(row.original)}
+                  onRowClick={(row) => {
+                    console.log("onRowClick - row:", row);
+                    setSelectedRequest(row);
+                  }}
                 />
               </div>
             ) : (
               <div className="finished-empty-container fade-in pulse">
-                <Empty description="Kapatılan talebiniz yok." />
+                <Empty description={<span className="empty-list-text">Kapatılan talebiniz yok.</span>} />
               </div>
             )}
           </Col>
@@ -96,52 +112,63 @@ function FinishedResponse() {
               </div>
 
               <div className="table-scroll-container">
-                {isLoadingDetails ? (
+                {isDetailsLoading || isDetailsFetching ? (
                   <div className="finished-spin-container center-content pulse">
                     <Spin size="large" />
                   </div>
-                ) : answeredRequestDetails.length > 0 ? (
+                ) : detailsError ? (
+                  <div className="finished-empty-container fade-in pulse">
+                    <Empty description={`Hata: Detaylar yüklenemedi. ${detailsError.message}`} />
+                  </div>
+                ) : !answeredRequestDetails || answeredRequestDetails.length === 0 ? (
+                  <div className="finished-empty-container fade-in pulse">
+                    <Empty description={<span className="empty-list-text">Talep detayı bulunamadı.</span>} />
+                  </div>
+                ) : (
                   <INDataTable
+                    key={`${selectedRequest?.id}-${selectedRequest?.request_id}`}
                     data={answeredRequestDetails}
                     columns={columns_requestDetail}
                     rowHoverStyle={{ border: true }}
-                    emptyText="Talep detayı bulunamadı."
+                    emptyText={<span className="empty-list-text">Talep detayı bulunamadı.</span>}
                   />
-                ) : (
-                  <div className="finished-empty-container fade-in pulse">
-                    <Empty description="Talep detayı bulunamadı." />
-                  </div>
                 )}
               </div>
 
               {/* Alt butonların yerleşimi */}
               <div className="bottom-footer-finished">
                 <div className="footer-row">
-                  <INButton
-                    onClick={!isPrevDisabled ? openPrevRequest : undefined}
-                    text="Önceki Talep"
+                  <Button
+                    variant="outlined"
+                    startIcon={<ArrowBack />}
+                    onClick={openPrevRequest}
                     disabled={isPrevDisabled}
-                    className="nav-button"
-                  />
-                  <INButton
-                    onClick={!isNextDisabled ? openNextRequest : undefined}
-                    text="Sonraki Talep"
+                    sx={{ margin: "0 8px" }}
+                  >
+                    Önceki Talep
+                  </Button>
+
+                  <Button
+                    variant="outlined"
+                    startIcon={<ArrowForward />}
+                    onClick={openNextRequest}
                     disabled={isNextDisabled}
-                    className="nav-button"
-                  />
+                    sx={{ margin: "0 8px" }}
+                  >
+                    Sonraki Talep
+                  </Button>
                 </div>
                 {isMobile && (
                   <div className="footer-row back-button-row">
-                    <INButton
+                    <Button
+                      variant="outlined"
+                      startIcon={<ArrowBackIos />}
                       onClick={() => setSelectedRequest(null)}
-                      text={
-                        <>
-                          <LeftOutlined style={{ marginRight: 4 }} />
-                          Geri
-                        </>
-                      }
-                      className="nav-button"
-                    />
+                      sx={{ margin: "0 8px", width: "100%" }}
+                      aria-label="mobile-back"
+                    >
+                      Geri
+                    </Button>
                   </div>
                 )}
               </div>

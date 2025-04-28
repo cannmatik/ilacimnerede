@@ -11,20 +11,51 @@ import {
 } from "@tanstack/react-table";
 import { Checkbox, Input, Select } from "antd";
 import classNames from "classnames";
+import { useSelector } from "react-redux";
+import { selectUserPharmacyId } from "@store/selectors";
 
+// Helper to create column definitions
 const columnHelper = createColumnHelper();
 
+// Checkbox column definition
 const checkboxObj = [
   {
     accessor: "checkbox",
+    id: "checkbox",
     header: "Mevcut",
-    cell: ({ row }) => (
-      <Checkbox
-        onClick={(e) => e.stopPropagation()} // Checkbox tıklamasını engellemek için
-        checked={row.getIsSelected()}
-        onChange={row.getToggleSelectedHandler()}
-      />
-    ),
+    cell: ({ row, deleteFromResponseBuffer }) => {
+      const pharmacy_id = useSelector(selectUserPharmacyId);
+      return (
+        <Checkbox
+          onClick={(e) => e.stopPropagation()}
+          checked={row.getIsSelected()}
+          onChange={(e) => {
+            const isChecked = e.target.checked;
+            console.log("Checkbox change:", {
+              rowId: row.id,
+              isChecked,
+              medicine_id: row.original.medicine_id,
+              pharmacy_id,
+            });
+            row.toggleSelected(isChecked);
+            if (!isChecked && row.original.medicine_id && pharmacy_id) {
+              console.log("Triggering deleteFromResponseBuffer:", {
+                pharmacy_id,
+                medicine_id: row.original.medicine_id,
+              });
+              try {
+                deleteFromResponseBuffer({
+                  pharmacy_id,
+                  medicine_id: row.original.medicine_id,
+                });
+              } catch (error) {
+                console.error("Failed to delete from response_buffer:", error);
+              }
+            }
+          }}
+        />
+      );
+    },
   },
 ];
 
@@ -39,23 +70,25 @@ function INDataTable({
   onRowClick,
   rowHoverStyle,
   isLoading,
+  bufferedMedicines,
+  deleteFromResponseBuffer,
 }) {
-  // Arama kutusuna girilen değeri saklar
   const [globalFilter, setGlobalFilter] = useState("");
-  // Hangi sütun üzerinden filtreleme yapılacağını belirler
   const [selectedFilterColumn, setSelectedFilterColumn] = useState(
     columns[0]?.accessor || ""
   );
-  // Sütun bazlı filtre değerlerini saklar
   const [columnFilters, setColumnFilters] = useState([]);
 
+  // Place checkbox column on the right if checkboxed is true
   const $columns = checkboxed ? [...columns, ...checkboxObj] : columns;
 
-  // Her sütuna varsayılan filterFn ekleniyor (zaten tanımlı değilse)
+  // Map columns to react-table format
   const tableColumns = $columns.map((column) =>
     columnHelper.accessor(column.accessor, {
       ...column,
+      id: column.id || column.accessor,
       filterFn: column.filterFn || "includesString",
+      cell: column.cell || ((info) => info.getValue()),
     })
   );
 
@@ -78,16 +111,30 @@ function INDataTable({
     toggleAllPageRowsSelected,
   } = table;
 
+  // Update selected rows
   useEffect(() => {
     const checkedRows = getSelectedRowModel().rows.map((item) => item.original);
+    console.log("Selected rows updated:", checkedRows);
     setSelectedRows(checkedRows);
-  }, [getSelectedRowModel().rows]);
+  }, [getSelectedRowModel().rows, setSelectedRows]);
 
+  // Clear selection when unSelectAllOnTabChange changes
   useEffect(() => {
     toggleAllPageRowsSelected(false);
-  }, [unSelectAllOnTabChange]);
+  }, [unSelectAllOnTabChange, toggleAllPageRowsSelected]);
 
-  // Global filtre değeri veya seçilen sütun değiştiğinde sütun filtrelerini günceller
+  // Pre-select rows based on bufferedMedicines
+  useEffect(() => {
+    if (bufferedMedicines && checkboxed) {
+      getRowModel().rows.forEach((row) => {
+        if (bufferedMedicines.some((item) => item.medicine_id === row.original.medicine_id)) {
+          row.toggleSelected(true);
+        }
+      });
+    }
+  }, [bufferedMedicines, data, getRowModel]);
+
+  // Update column filters based on global filter
   useEffect(() => {
     if (globalFilter) {
       setColumnFilters([{ id: selectedFilterColumn, value: globalFilter }]);
@@ -98,15 +145,14 @@ function INDataTable({
 
   const handleRowClick = (row) => {
     if (checkboxed) {
-      row.toggleSelected(); // Checkbox varsa satırı seç
+      row.toggleSelected();
     } else {
-      onRowClick(row); // Yoksa satır seçimini çalıştır
+      onRowClick(row);
     }
   };
 
   return (
     <div className="ilacimNerede-data-table-container">
-      {/* 🔎 Filtreleme Alanı */}
       <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
         <Select
           style={{ width: "200px" }}
@@ -196,7 +242,10 @@ function INDataTable({
                         : cell.column.columnDef.cellStyle
                     }
                   >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    {flexRender(cell.column.columnDef.cell, {
+                      ...cell.getContext(),
+                      deleteFromResponseBuffer,
+                    })}
                   </td>
                 ))}
               </tr>
@@ -221,7 +270,14 @@ INDataTable.propTypes = {
     background: PropTypes.bool,
     border: PropTypes.bool,
   }),
-  isLoading: PropTypes.bool.isRequired,
+  isLoading: PropTypes.bool,
+  bufferedMedicines: PropTypes.arrayOf(
+    PropTypes.shape({
+      medicine_id: PropTypes.number,
+      medicine_name: PropTypes.string,
+    })
+  ),
+  deleteFromResponseBuffer: PropTypes.func,
 };
 
 INDataTable.defaultProps = {
@@ -236,6 +292,9 @@ INDataTable.defaultProps = {
     background: true,
     border: true,
   },
+  isLoading: false,
+  bufferedMedicines: [],
+  deleteFromResponseBuffer: () => {},
 };
 
 export default INDataTable;

@@ -759,6 +759,27 @@
     prop-types "^15.8.1"
     react-is "^19.1.0"
 
+"@mui/x-data-grid@^8.1.0":
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/@mui/x-data-grid/-/x-data-grid-8.1.0.tgz#1013bd7017137b86f42b48b4e9b2f1c08d9fccef"
+  integrity sha512-jt64FTMRKg9xUOUQkHY+VDbgpLWGssgvTti9n2BNbA4wuOl9r0C44OzYsPMXR0BxgUoWWREUBaeA7x5uwaArnQ==
+  dependencies:
+    "@babel/runtime" "^7.27.0"
+    "@mui/utils" "^7.0.2"
+    "@mui/x-internals" "8.0.0"
+    clsx "^2.1.1"
+    prop-types "^15.8.1"
+    reselect "^5.1.1"
+    use-sync-external-store "^1.5.0"
+
+"@mui/x-internals@8.0.0":
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/@mui/x-internals/-/x-internals-8.0.0.tgz#4c8c3fa5a7ccf1b2afc4a86477077f41347148e5"
+  integrity sha512-yQOWABTEAIW0wiAwpjAJ6uM47rG1cxrfRtL2WsIdje8F9JdCXO6/jAu7ROAiezw4EqhGYYU7DMrK5svn5tdZpQ==
+  dependencies:
+    "@babel/runtime" "^7.27.0"
+    "@mui/utils" "^7.0.2"
+
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
   resolved "https://registry.npmjs.org/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz"
@@ -1119,6 +1140,18 @@
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@vercel/speed-insights/-/speed-insights-1.2.0.tgz#1656c3596d4ec02d93d301ca45944c1b9b245186"
   integrity sha512-y9GVzrUJ2xmgtQlzFP2KhVRoCglwfRQgjyfY607aU0hh0Un6d0OUyrJkjuAlsV18qR4zfoFPs/BiIj9YDS6Wzw==
+
+"@virtuoso.dev/react-urx@^0.2.12":
+  version "0.2.13"
+  resolved "https://registry.yarnpkg.com/@virtuoso.dev/react-urx/-/react-urx-0.2.13.tgz#e2cfc42d259d2a002695e7517d34cb97b64ee9c4"
+  integrity sha512-MY0ugBDjFb5Xt8v2HY7MKcRGqw/3gTpMlLXId2EwQvYJoC8sP7nnXjAxcBtTB50KTZhO0SbzsFimaZ7pSdApwA==
+  dependencies:
+    "@virtuoso.dev/urx" "^0.2.13"
+
+"@virtuoso.dev/urx@^0.2.12", "@virtuoso.dev/urx@^0.2.13":
+  version "0.2.13"
+  resolved "https://registry.yarnpkg.com/@virtuoso.dev/urx/-/urx-0.2.13.tgz#a65e7e8d923cb03397ac876bfdd45c7f71c8edf1"
+  integrity sha512-iirJNv92A1ZWxoOHHDYW/1KPoi83939o83iUBQHIim0i3tMeSKEh+bxhJdTHQ86Mr4uXx9xGUTq69cp52ZP8Xw==
 
 "@vitejs/plugin-react@^4.0.0":
   version "4.2.1"
@@ -1728,7 +1761,7 @@ delayed-stream@~1.0.0:
   resolved "https://registry.npmjs.org/delayed-stream/-/delayed-stream-1.0.0.tgz"
   integrity sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==
 
-dequal@^2.0.3:
+dequal@^2.0.2, dequal@^2.0.3:
   version "2.0.3"
   resolved "https://registry.npmjs.org/dequal/-/dequal-2.0.3.tgz"
   integrity sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA==
@@ -2184,6 +2217,11 @@ fast-levenshtein@^2.0.6:
   resolved "https://registry.npmjs.org/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz"
   integrity sha512-DCXu6Ifhqcks7TZKY3Hxp3y6qphY5SJZmrWMDrKcERSOXWQdMhU9Ig/PYrzyw/ul9jOIyh0N4M0tbC5hodg8dw==
 
+fast-sort@^3.1.1:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/fast-sort/-/fast-sort-3.4.1.tgz#837e1abaafdc6c6c077b632913a7ec2dda283cb6"
+  integrity sha512-76uvGPsF6So53sZAqenP9UVT3p5l7cyTHkLWVCMinh41Y8NDrK1IYXJgaBMfc1gk7nJiSRZp676kddFG2Aa5+A==
+
 fastq@^1.6.0:
   version "1.17.1"
   resolved "https://registry.npmjs.org/fastq/-/fastq-1.17.1.tgz"
@@ -2493,7 +2531,7 @@ ignore@^5.2.0:
   resolved "https://registry.npmjs.org/ignore/-/ignore-5.3.1.tgz"
   integrity sha512-5Fytz/IraMjqpwfd34ke28PTVMjZjJG2MPn5t7OE4eUCUNf8BAa7b5WUS9/Qvr6mwOQS7Mk6vdsMno5he+T8Xw==
 
-immer@^9.0.21:
+immer@^9.0.21, immer@^9.0.7:
   version "9.0.21"
   resolved "https://registry.npmjs.org/immer/-/immer-9.0.21.tgz"
   integrity sha512-bc4NBHqOqSfRW7POMkHd51LvClaeMXpm8dx0e8oE2GORbq5aRK7Bxl4FyzVLdGtLmvLKL7BTDBG5ACQm4HWjTA==
@@ -2959,6 +2997,19 @@ ms@^2.1.3:
   version "2.1.3"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
   integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
+
+mui-data-grid@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/mui-data-grid/-/mui-data-grid-1.0.6.tgz#94de160c81bd5b409ccaad8f78b80ecc45811163"
+  integrity sha512-km2czbg1TPzR0Y1VvruKWSAEe61+vOQ1if2hmcM0pfBkHTCULqZIfUcxoOeb7ULp/BVuq1IB2b4BbikJgIkSng==
+  dependencies:
+    dequal "^2.0.2"
+    fast-sort "^3.1.1"
+    immer "^9.0.7"
+    react-csv "^2.2.1"
+    react-virtuoso "^2.4.0"
+    use-custom-compare "^1.2.0"
+    zustand "^3.6.8"
 
 nanoid@^3.3.7:
   version "3.3.8"
@@ -3590,6 +3641,11 @@ react-beautiful-dnd@^13.1.1:
     redux "^4.0.4"
     use-memo-one "^1.1.1"
 
+react-csv@^2.2.1:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/react-csv/-/react-csv-2.2.2.tgz#5bbf0d72a846412221a14880f294da9d6def9bfb"
+  integrity sha512-RG5hOcZKZFigIGE8LxIEV/OgS1vigFQT4EkaHeKgyuCbUAu9Nbd/1RYq++bJcJJ9VOqO/n9TZRADsXNDR4VEpw==
+
 react-date-object@^2.1.8:
   version "2.1.9"
   resolved "https://registry.yarnpkg.com/react-date-object/-/react-date-object-2.1.9.tgz#9eb0f70b2b424e32bb437226fc5e435d1fd6a4f1"
@@ -3731,6 +3787,14 @@ react-transition-group@^4.4.5:
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
 
+react-virtuoso@^2.4.0:
+  version "2.19.1"
+  resolved "https://registry.yarnpkg.com/react-virtuoso/-/react-virtuoso-2.19.1.tgz#a660a5c3cafcc7a84b59dfc356e1916e632c1e3a"
+  integrity sha512-zF6MAwujNGy2nJWCx/Df92ay/RnV2Kj4glUZfdyadI4suAn0kAZHB1BeI7yPFVp2iSccLzFlszhakWyr+fJ4Dw==
+  dependencies:
+    "@virtuoso.dev/react-urx" "^0.2.12"
+    "@virtuoso.dev/urx" "^0.2.12"
+
 react@^18.2.0:
   version "18.2.0"
   resolved "https://registry.npmjs.org/react/-/react-18.2.0.tgz"
@@ -3804,6 +3868,11 @@ reselect@^4.1.8:
   version "4.1.8"
   resolved "https://registry.npmjs.org/reselect/-/reselect-4.1.8.tgz"
   integrity sha512-ab9EmR80F/zQTMNeneUr4cv+jSwPJgIlvEmVwLerwrWVbpLlBuls9XHzIeTFy4cegU2NHBp3va0LKOzU5qFEYQ==
+
+reselect@^5.1.1:
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/reselect/-/reselect-5.1.1.tgz#c766b1eb5d558291e5e550298adb0becc24bb72e"
+  integrity sha512-K/BG6eIky/SBpzfHZv/dd+9JBFiS4SWV7FIujVyJRux6e45+73RaUHXLmIR1f7WOMaQ0U1km6qwklRQxpJJY0w==
 
 resize-observer-polyfill@^1.5.1:
   version "1.5.1"
@@ -4245,6 +4314,11 @@ url-parse@^1.5.10:
     querystringify "^2.1.1"
     requires-port "^1.0.0"
 
+use-custom-compare@^1.2.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/use-custom-compare/-/use-custom-compare-1.5.0.tgz#e66cbd4f9cd0e5e39fef99ad01192c9dea14db82"
+  integrity sha512-3Jr28ndcrsaT/R6uVdVmxmeXpF5Ssd5/8cZ0Q0RcaU6KovyqcbZholXMol2aIQ0dyPepfCzHEonMlRYJzrdWPg==
+
 use-memo-one@^1.1.1:
   version "1.1.3"
   resolved "https://registry.npmjs.org/use-memo-one/-/use-memo-one-1.1.3.tgz"
@@ -4254,6 +4328,11 @@ use-sync-external-store@^1.0.0, use-sync-external-store@^1.2.0:
   version "1.2.0"
   resolved "https://registry.npmjs.org/use-sync-external-store/-/use-sync-external-store-1.2.0.tgz"
   integrity sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==
+
+use-sync-external-store@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.5.0.tgz#55122e2a3edd2a6c106174c27485e0fd59bcfca0"
+  integrity sha512-Rb46I4cGGVBmjamjphe8L/UnvJD+uPPtTkNvX5mZgqdbavhI4EbgIWJiIHXJ8bc/i9EQGPRh4DwEURJ552Do0A==
 
 uuid@^9.0.1:
   version "9.0.1"
@@ -4389,3 +4468,8 @@ yup@^1.3.2:
     tiny-case "^1.0.3"
     toposort "^2.0.2"
     type-fest "^2.19.0"
+
+zustand@^3.6.8:
+  version "3.7.2"
+  resolved "https://registry.yarnpkg.com/zustand/-/zustand-3.7.2.tgz#7b44c4f4a5bfd7a8296a3957b13e1c346f42514d"
+  integrity sha512-PIJDIZKtokhof+9+60cpockVOq05sJzHCriyvaLBmEJixseQ1a5Kdov6fWZfWOu5SK9c+FhH1jU0tntLxRJYMA==

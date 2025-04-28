@@ -1,27 +1,27 @@
-/* 1) Ana içerik yüksekliği ve üst/bottom padding */
+/* 1) Ana içerik yüksekliği ve üst/alt dolgular */
 .main-content {
   min-height: auto;
-  height: 100%; // Tarayıcının tamamını kaplayabilmek içiny
-  padding-top: 80px; /* Header yüksekliği kadar */
+  height: 100%; /* Tarayıcının tamamını kaplamak için */
+  padding-top: 80px; /* Başlık yüksekliği kadar */
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
 
   @media (max-width: 768px) {
-    padding-bottom: 1px; /* Mobilde footer için alt boşluk */
+    padding-bottom: 1px; /* Mobilde alt kısım için boşluk */
   }
 }
 
-/* 2) Orta Kısım: Hem sol tablo hem sağ detay */
+/* 2) Orta bölüm: Sol tablo ve sağ detay paneli */
 .request-container {
   flex: 1;
   padding: 20px;
 }
 
-/* 3) Sol Panel: İstek Listesi */
+/* 3) Sol Panel: Talep Listesi */
 .table-container {
   .list-scroll-container {
-    max-height: 85vh; /* Ekranın %70'i kadar */
+    max-height: 85vh; /* Ekranın %85'i kadar */
     overflow-y: auto;
     padding: 10px;
   }
@@ -29,46 +29,104 @@
   .ilacimNerede-data-table-container {
     tbody tr {
       td {
-        background-color: #fff !important; // Satır arka planı beyaz
+        background-color: #fff !important; /* Satır arka planı beyaz */
         color: #333 !important;
       }
       &:hover td {
-        background-color: #f5f5f5 !important;
+        background-color: #f5f5f5 !important; /* Fareyle üzerine gelindiğinde gri ton */
       }
     }
   }
 }
 
-/* 4) Sağ Panel: Detay */
+/* Geçici Stok Listesi Stilleri */
+.buffer-submenu {
+  margin-bottom: 15px;
+  .ant-collapse {
+    border: 1px solid #dde1e7; /* Firma çerçeve rengi */
+    border-radius: 12px; /* Yuvarlak köşeler */
+    background-color: #fff; /* Firma arka plan rengi */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Hafif gölge, progress-container'dan esinlenildi */
+    overflow: hidden; /* Yuvarlak köşeler için taşmayı engelle */
+  }
+  .ant-collapse-header {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333; /* Firma metin rengi */
+    padding: 12px 15px !important;
+    background-color: #f4f7fb; /* Başlık için açık gri, table th'den esinlenildi */
+    border-bottom: 1px solid #dde1e7;
+    transition: background-color 0.3s ease; /* Pürüzsüz geçiş efekti */
+    &:hover {
+      background-color: #e9eff6; /* Hover efekti, table th:hover'dan esinlenildi */
+    }
+  }
+  .ant-list {
+    padding: 10px;
+    background-color: #fff;
+  }
+  .ant-list-item {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f0f0f0; /* İnce ayırıcı çizgi */
+    font-size: 14px;
+    color: #333; /* Firma metin rengi */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px; /* Liste öğeleri için yuvarlak köşeler */
+    transition: background-color 0.3s ease;
+    &:hover {
+      background-color: #f5f5f5; /* Hover efekti, table tr:hover'dan esinlenildi */
+    }
+    .ant-list-item-action {
+      margin-left: 10px;
+      .anticon { /* MUI Delete simgesi için */
+        color: #ff4d4f; /* Kırmızı, daha belirgin firma rengi */
+        font-size: 16px;
+        transition: color 0.3s ease;
+        &:hover {
+          color: #d9363e; /* Daha koyu kırmızı hover efekti */
+        }
+      }
+    }
+  }
+  .ant-list-empty-text {
+    color: #888; /* Firma gri tonu */
+    font-size: 14px;
+    padding: 10px;
+  }
+}
+
+/* 4) Sağ Panel: Talep Detayları */
 .request-table {
   background-color: transparent;
   padding: 0;
 }
 
 .right-panel {
-  position: relative; /* Alt navigasyon için absolute child */
+  position: relative; /* Alt navigasyon için sabit konumlandırma */
   display: flex;
   flex-direction: column;
   height: 100%;
   box-sizing: border-box;
 
   @media (max-width: 768px) {
-    height: calc(100vh - 80px); /* Mobilde header altına tam oturtmak */
+    height: calc(100vh - 80px); /* Mobilde başlık altına tam sığdırma */
   }
 }
 
-/* Üst Kısım: Request Bilgileri */
+/* Üst Kısım: Talep Bilgileri */
 .right-header {
   padding: 10px;
-  border: none; // Çerçeve kaldırıldı
+  border: none; /* Çerçeve kaldırıldı */
   margin-bottom: 10px;
 }
 
 .request-info {
   display: flex;
   flex-direction: column;
-  border: none; // Çerçeve kaldırıldı
-  border-radius: 0; // Yuvarlatma kaldırıldı
+  border: none; /* Çerçeve kaldırıldı */
+  border-radius: 0; /* Yuvarlatma kaldırıldı */
   padding: 10px 15px;
   margin-top: 10px;
 
@@ -82,7 +140,7 @@
 .message-input {
   margin-top: 8px;
   padding: 8px;
-  border: 1px solid #ccc; /* Input için border bırakıldı */
+  border: 1px solid #ccc; /* Giriş alanı için çerçeve */
   border-radius: 4px;
   width: 100%;
   font-size: 14px;
@@ -92,30 +150,43 @@
 .table-scroll-container {
   flex: 1;
   overflow-y: auto;
-  margin: 10px 0 0 0; /* Alt margin sıfırlandı */
+  margin: 10px 0 0 0; /* Alt boşluk sıfırlandı */
   max-height: 60vh;
+
+  .ilacimNerede-data-table-container {
+    tbody tr {
+      td {
+        background-color: #fff !important; /* Satır arka planı beyaz */
+        color: #333 !important;
+        white-space: nowrap; /* Metin kaydırmayı engelle */
+        overflow: visible; /* Metin kesilmesini önle */
+      }
+      &:hover td {
+        background-color: #f5f5f5 !important; /* Fareyle üzerine gelindiğinde gri ton */
+      }
+    }
+  }
 }
+
 @media (max-width: 768px) {
   .table-scroll-container {
-    overflow-x: hidden; // Konteynerin yatay taşmayı engellemesi için
+    overflow-x: hidden; /* Yatay taşmayı engelle */
   }
   .table-scroll-container table {
     width: 100%;
     min-width: 100%;
-    table-layout: fixed; // Sütunlar eşit oranda dağıtılır, içerik sığarsa sarılır
+    table-layout: fixed; /* Sütunları eşit dağıt, içerik sığarsa sar */
   }
 }
 
-
-
-/* 5) Footer: Navigasyon Butonları (Desktop) */
+/* 5) Alt Kısım: Navigasyon Butonları (Masaüstü) */
 .bottom-footer-req {
   display: flex;
   justify-content: center;
   gap: 15px;
   padding: 1px;
-  background: transparent; /* Beyaz arka plan kaldırıldı */
-  box-shadow: none; /* Çerçeve/gölge kaldırıldı */
+  background: transparent; /* Arka plan şeffaf */
+  box-shadow: none; /* Gölge kaldırıldı */
 
   @media (max-width: 768px) {
     position: fixed;
@@ -140,7 +211,7 @@
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  color: #000; /* Enabled buton rengi */
+  color: #000; /* Aktif buton rengi */
   padding: 0.5rem;
   font-size: 1rem;
   cursor: pointer;
@@ -159,8 +230,8 @@
 /* Mobilde "Geri" Butonu */
 .mobileBack {
   grid-column: 1 / -1; /* Tüm sütunları kaplar */
-  grid-row: 2;        /* İkinci satıra yerleşir */
-  width: 100%;         /* Konteynerin tam genişliğini alır */
+  grid-row: 2; /* İkinci satıra yerleşir */
+  width: 100%; /* Konteynerin tam genişliği */
   padding: 0.9rem;
   text-align: center;
   font-size: 1rem;
@@ -169,7 +240,7 @@
   opacity: 1 !important;
 }
 
-/* Disabled Butonlar */
+/* Devre Dışı Butonlar */
 .bottom-footer-req button:disabled,
 .bottom-footer-req .nav-button:disabled,
 .bottom-footer-req .mobileBack:disabled {
@@ -178,7 +249,7 @@
   pointer-events: none !important;
 }
 
-/* PROGRESS BAR (Sabit Konum) */
+/* İlerleme Çubuğu (Sabit Konum) */
 .progress-container {
   position: fixed;
   bottom: 20px;
@@ -214,7 +285,7 @@
   min-height: 200px;
 }
 
-/* ANİMASYONLAR */
+/* Animasyonlar */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -245,14 +316,13 @@
   animation: pulse 1.5s ease-in-out infinite;
 }
 
-
 .INDataTable table {
   table-layout: fixed;
   width: 100%;
 }
 
 .empty-container {
-  height: calc(100vh - 80px); // Header yüksekliğini hesaba katıyoruz (ör. 80px)
+  height: calc(100vh - 80px); /* Başlık yüksekliğini hesaba kat */
   display: flex;
   align-items: center;
   justify-content: center;

@@ -52,10 +52,13 @@
 /* Başlık */
 .page-title {
   color: #07a5c3;
-  font-size: 2rem; /* Ensures single line */
+  font-size: clamp(1.2rem, 2vw + 1rem, 1.8rem); /* Min: 1.2rem, Ideal: ~1.4-1.6rem, Max: 1.8rem */
   margin-bottom: 20px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  white-space: nowrap; /* Force single line */
+  white-space: nowrap; /* Tek satır */
+  overflow-wrap: break-word; /* Uzun kelimeler kırılır */
+  text-align: center;
+  max-width: 90vw; /* Ekran genişliğinin %90'ı ile sınırlı */
 }
 
 /* Form ve butonlar */
@@ -74,11 +77,13 @@
 /* Alt bilgi metni */
 .info-text {
   margin-top: 20px;
-  max-width: 400px;
+  max-width: 90vw; /* Ekranın %90'ı ile sınırlı */
   text-align: center;
   color: #07a5c3;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  font-size: 1rem;
+  font-size: clamp(0.8rem, 1.5vw + 0.5rem, 1rem); /* Min: 0.8rem, Ideal: ~0.9-1rem, Max: 1rem */
+  white-space: normal; /* Mobil için normal akış, tek satır değil */
+  overflow-wrap: break-word; /* Uzun kelimeler kırılır */
 }
 
 /* Footer */
@@ -86,9 +91,11 @@
   margin-top: 20px;
   text-align: center;
   color: #07a5c3;
-  font-size: 0.9rem;
-  max-width: 600px;
+  font-size: clamp(0.7rem, 1.2vw + 0.4rem, 0.9rem); /* Min: 0.7rem, Ideal: ~0.8-0.9rem, Max: 0.9rem */
+  max-width: 90vw; /* Ekranın %90'ı ile sınırlı */
   line-height: 1.5;
+  white-space: normal; /* Normal akış */
+  overflow-wrap: break-word; /* Uzun kelimeler kırılır */
 }
 
 .footer p {
@@ -96,9 +103,10 @@
 }
 
 /* Mobil duyarlılık */
-@media (max-device-width: 480px), (max-device-height: 480px) {
+@media (max-width: 480px) {
   .page-title {
-    font-size: 1.8rem; /* Slightly smaller for mobile */
+    font-size: clamp(1rem, 3vw + 0.8rem, 1.4rem); /* Mobilde daha küçük */
+    max-width: 95vw; /* Daha dar ekranlar için */
   }
 
   .auth-wrapper {
@@ -107,7 +115,9 @@
   }
 
   .info-text {
-    font-size: 0.9rem;
+    font-size: clamp(0.7rem, 2.5vw + 0.5rem, 0.9rem);
+    max-width: 95vw;
+    white-space: normal; /* Mobil için satır kırılmasına izin ver */
   }
 
   .splash-logo {
@@ -116,7 +126,22 @@
   }
 
   .footer {
-    font-size: 0.8rem;
-    max-width: 90%;
+    font-size: clamp(0.6rem, 2vw + 0.4rem, 0.8rem);
+    max-width: 95vw;
+  }
+}
+
+/* Büyük ekranlar için ek kontrol */
+@media (min-width: 1200px) {
+  .page-title {
+    font-size: clamp(1.4rem, 1.5vw + 1rem, 1.8rem); /* Büyük ekranlarda sabit boyut */
+  }
+
+  .info-text {
+    font-size: clamp(0.9rem, 1vw + 0.6rem, 1rem);
+  }
+
+  .footer {
+    font-size: clamp(0.8rem, 0.8vw + 0.5rem, 0.9rem);
   }
 }

@@ -1,4 +1,3 @@
-// queries.jsx
 import { supabase } from "@routes/Login/useCreateClient";
 import {
   selectUserCityId,
@@ -8,30 +7,29 @@ import {
 } from "@store/selectors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
-import { message } from "antd";
+import { message, App } from "antd";
 import React, { useState, useMemo, useEffect } from "react";
 import moment from "moment";
 import "moment/locale/tr";
 
-// LOGO YOLUNUZ
+// Path to logo for notifications
 const LOGO_PATH = "/src/assets/ilacimNeredeLogo.svg";
 
-// React Query Keys
+// Query keys for React Query
 const REQUEST_KEYS = {
   ALL: ["Request", "requests"],
   DETAIL: (id) => ["Request", "requestDetails", id],
+  BUFFER: (pharmacy_id) => ["Request", "responseBuffer", pharmacy_id],
 };
 
 /**
- * Talep tablosundaki veriyi supabase üzerinden çekme fonksiyonu
- * Şehir / ilçe vb. filtrelere göre request kayıtlarını getirir.
+ * Fetch requests from Supabase based on city, neighborhood, district, and pharmacy filters
  */
 async function fetchRequests({ city_id, neighbourhood_id, district_id, pharmacy_id }) {
-  // 1) request tablosunu çek
   const { data, error } = await supabase
     .from("request")
     .select("id, create_date, message_text, district_id, city_id, response_count, status")
-    .not("status", "eq", 2) // 2: Kapalı talep
+    .not("status", "eq", 2)
     .eq("city_id", city_id)
     .or(`neighbourhood_id.is.null,neighbourhood_id.eq.${neighbourhood_id}`)
     .or(`district_id.is.null,district_id.eq.${district_id}`);
@@ -44,7 +42,6 @@ async function fetchRequests({ city_id, neighbourhood_id, district_id, pharmacy_
     return [];
   }
 
-  // 2) Gelen kayıtları formatla
   let formattedData = data.map((item) => ({
     ...item,
     create_date: moment(item.create_date).locale("tr").format("DD MM YYYY HH:mm"),
@@ -52,18 +49,16 @@ async function fetchRequests({ city_id, neighbourhood_id, district_id, pharmacy_
     status: item.status,
   }));
 
-  // 3) Bu eczanenin yanıtladığı talepleri eleyebilmek için response tablosunu çek
   const { data: unFinishedRequests, error: unfinishedError } = await supabase
     .from("response")
     .select("request_id")
     .eq("pharmacy_id", pharmacy_id);
 
   if (unfinishedError) {
-    console.log("error filtering requests:", unfinishedError);
+    console.log("Error filtering requests:", unfinishedError);
     return formattedData;
   }
 
-  // 4) Daha önce yanıtlanan talepleri listeden çıkar
   if (unFinishedRequests && unFinishedRequests.length > 0) {
     formattedData = formattedData.filter(
       (item) =>
@@ -77,29 +72,79 @@ async function fetchRequests({ city_id, neighbourhood_id, district_id, pharmacy_
 }
 
 /**
- * Bir talep detayı (request_item) kaydını çekme fonksiyonu
+ * Fetch request details (request_item) from Supabase
  */
 async function getRequestDetails({ queryKey }) {
   const id = queryKey[2];
   const { data, error } = await supabase
     .from("request_item")
-    .select("request_id,id,position_no,medicine_id, medicine_qty, medicine (name)")
+    .select("request_id, id, position_no, medicine_id, medicine_qty, medicine (name)")
     .eq("request_id", id);
 
   if (error) {
     console.error("getRequestDetails error:", error);
     return [];
   }
-  return data || [];
+
+  console.log("getRequestDetails data:", data);
+
+  const formattedData = data.map((item) => ({
+    ...item,
+    medicine: {
+      name: item.medicine?.name || "Bilinmeyen İlaç",
+    },
+  }));
+
+  return formattedData || [];
 }
 
 /**
- * Yeni talep geldiğinde tarayıcı bildirimi gösterir
- * YALNIZCA Notification.permission === "granted" ise
+ * Fetch medicines in response_buffer for a pharmacy
+ */
+async function getResponseBuffer({ queryKey }) {
+  const pharmacy_id = queryKey[2];
+  const { data, error } = await supabase
+    .from("response_buffer")
+    .select("medicine_id, medicine (name)")
+    .eq("pharmacy_id", pharmacy_id);
+
+  if (error) {
+    console.error("getResponseBuffer error:", error);
+    return [];
+  }
+
+  console.log("getResponseBuffer data:", data);
+
+  return data.map((item) => ({
+    medicine_id: item.medicine_id,
+    medicine_name: item.medicine?.name || "Bilinmeyen İlaç",
+  })) || [];
+}
+
+/**
+ * Delete a specific medicine from response_buffer
+ */
+async function deleteFromResponseBuffer({ pharmacy_id, medicine_id }) {
+  console.log("deleteFromResponseBuffer called:", { pharmacy_id, medicine_id });
+  const { error } = await supabase
+    .from("response_buffer")
+    .delete()
+    .eq("pharmacy_id", pharmacy_id)
+    .eq("medicine_id", medicine_id);
+
+  if (error) {
+    console.error("deleteFromResponseBuffer error:", error);
+    throw new Error(`response_buffer silme hatası: ${error.message}`);
+  }
+  console.log("Successfully deleted from response_buffer:", { pharmacy_id, medicine_id });
+}
+
+/**
+ * Show browser notification for new requests
  */
 function showNewRequestNotification(newRow) {
   if (!("Notification" in window)) {
-    return; // Tarayıcı bildirim API'si yok
+    return;
   }
 
   if (Notification.permission === "granted") {
@@ -108,15 +153,14 @@ function showNewRequestNotification(newRow) {
       icon: LOGO_PATH,
     });
   }
-  // permission === "default" veya "denied" durumunda bir şey yapmıyoruz
 }
 
 /**
- * Bir talebe yanıt verildiğinde 'response' ve 'response_item' tablolarına kaydeden fonksiyon
+ * Handle request response, updating response, response_item, and response_buffer tables
  */
 async function responseRequest(finalData, response) {
   try {
-    // 1) response tablosuna ekle
+    // Insert into response table
     const { data: responseData, error: responseError } = await supabase
       .from("response")
       .insert({
@@ -136,7 +180,7 @@ async function responseRequest(finalData, response) {
       throw new Error("Response kaydı oluşturulamadı veya ID bulunamadı.");
     }
 
-    // 2) response_item tablosuna ekle
+    // Insert into response_item table
     const responseItems = finalData.map((item) => ({
       response_id: responseId,
       request_item_id: item.request_item_id,
@@ -151,7 +195,7 @@ async function responseRequest(finalData, response) {
       throw new Error(`Response_item kaydı hatası: ${responseItemsError.message}`);
     }
 
-    // 3) request_item durumlarını güncelle
+    // Update request_item statuses
     const updatePromises = finalData.map((item) =>
       supabase
         .from("request_item")
@@ -165,6 +209,41 @@ async function responseRequest(finalData, response) {
       }
     }
 
+    // Insert selected medicines into response_buffer, avoiding duplicates
+    const selectedItems = finalData
+      .filter((item) => item.status)
+      .map((item) => ({
+        pharmacy_id: response.pharmacy_id,
+        medicine_id: item.medicine_id,
+      }));
+
+    if (selectedItems.length > 0) {
+      const { data: existingBuffer, error: bufferCheckError } = await supabase
+        .from("response_buffer")
+        .select("medicine_id")
+        .eq("pharmacy_id", response.pharmacy_id)
+        .in("medicine_id", selectedItems.map((item) => item.medicine_id));
+
+      if (bufferCheckError) {
+        throw new Error(`response_buffer kontrol hatası: ${bufferCheckError.message}`);
+      }
+
+      const existingMedicineIds = existingBuffer.map((item) => item.medicine_id);
+      const newItems = selectedItems.filter(
+        (item) => !existingMedicineIds.includes(item.medicine_id)
+      );
+
+      if (newItems.length > 0) {
+        const { error: bufferError } = await supabase
+          .from("response_buffer")
+          .insert(newItems);
+
+        if (bufferError) {
+          throw new Error(`response_buffer kaydı hatası: ${bufferError.message}`);
+        }
+      }
+    }
+
     console.log("Yanıt başarıyla eklendi. Response ID:", responseId);
     return { response: responseData, responseItems: responseItemsData };
   } catch (error) {
@@ -174,7 +253,7 @@ async function responseRequest(finalData, response) {
 }
 
 /**
- * Hook: Tüm request'leri getirir ve Realtime abonesi ekler
+ * Hook: Fetch all requests and subscribe to real-time updates
  */
 export const useGetRequest = () => {
   const city_id = useSelector(selectUserCityId);
@@ -183,30 +262,21 @@ export const useGetRequest = () => {
   const pharmacy_id = useSelector(selectUserPharmacyId);
   const queryClient = useQueryClient();
 
-  // Ana veriyi çek
   const { data: allRequests, ...rest } = useQuery(REQUEST_KEYS.ALL, () =>
     fetchRequests({ city_id, neighbourhood_id, district_id, pharmacy_id })
   );
 
-  // Yeni eklenen request'leri highlight etmek için ID listesini tutacak state
   const [highlightedRequestIds, setHighlightedRequestIds] = useState([]);
 
-  // Realtime subscription
   useEffect(() => {
     const subscription = supabase
       .channel("public:request")
       .on("postgres_changes", { event: "*", schema: "public", table: "request" }, (payload) => {
-        // Veriyi tazele
         queryClient.invalidateQueries(REQUEST_KEYS.ALL);
 
-        // YENİ talep geldi mi?
         if (payload.eventType === "INSERT") {
           showNewRequestNotification(payload.new);
-
-          // Highlight edilecek listeye ekle
           setHighlightedRequestIds((prev) => [...prev, payload.new.id]);
-
-          // 2 saniye sonra highlight’tan çıkar
           setTimeout(() => {
             setHighlightedRequestIds((prev) =>
               prev.filter((id) => id !== payload.new.id)
@@ -221,7 +291,6 @@ export const useGetRequest = () => {
     };
   }, [queryClient]);
 
-  // Örnek: Şehir/ilçe listesi oluşturma vs
   const [hiddenDistrictIds, setHiddenDistrictIds] = useState([]);
   const { districts, cities } = useMemo(() => {
     const uniqueDistricts = new Set();
@@ -244,7 +313,6 @@ export const useGetRequest = () => {
     };
   }, [allRequests]);
 
-  // Filtrelenmiş talepler
   const filteredRequests = useMemo(() => {
     if (!allRequests) return [];
     return allRequests.filter(
@@ -252,7 +320,6 @@ export const useGetRequest = () => {
     );
   }, [allRequests, hiddenDistrictIds]);
 
-  // Belirli ilçe taleplerini gizle/göster
   const toggleDistrictVisibility = (districtId) => {
     setHiddenDistrictIds((prevHiddenDistrictIds) =>
       prevHiddenDistrictIds.includes(districtId)
@@ -269,12 +336,12 @@ export const useGetRequest = () => {
     toggleDistrictVisibility,
     districts,
     cities,
-    highlightedRequestIds, // tablo tarafında kullanabilmek için dışarı veriyoruz
+    highlightedRequestIds,
   };
 };
 
 /**
- * Hook: Tek bir request'in detaylarını çeker
+ * Hook: Fetch details for a single request
  */
 export const useGetRequestDetails = (id) => {
   const pharmacy_id = useSelector(selectUserPharmacyId);
@@ -288,7 +355,21 @@ export const useGetRequestDetails = (id) => {
 };
 
 /**
- * Hook: Bir talebe yanıt verme (mutation)
+ * Hook: Fetch medicines in response_buffer for a pharmacy
+ */
+export const useGetResponseBuffer = () => {
+  const pharmacy_id = useSelector(selectUserPharmacyId);
+  return useQuery(
+    REQUEST_KEYS.BUFFER(pharmacy_id),
+    () => getResponseBuffer({ queryKey: REQUEST_KEYS.BUFFER(pharmacy_id) }),
+    {
+      enabled: !!pharmacy_id,
+    }
+  );
+};
+
+/**
+ * Hook: Mutation to handle request response
  */
 export const useResponseRequest = () => {
   const queryClient = useQueryClient();
@@ -296,12 +377,31 @@ export const useResponseRequest = () => {
     ({ finalData, response }) => responseRequest(finalData, response),
     {
       onSuccess: () => {
-        message.success("Talep başarıyla yanıtlandı!");
-        // Tekrar request listesini tazele
+        message.success({ content: "Talep başarıyla yanıtlandı!", key: "responseRequest" });
         queryClient.invalidateQueries(REQUEST_KEYS.ALL);
+        queryClient.invalidateQueries(REQUEST_KEYS.BUFFER);
       },
       onError: (error) => {
-        message.error("Talep yanıtlanırken bir hata oluştu: " + error.message);
+        message.error({ content: "Talep yanıtlanırken hata oluştu: " + error.message, key: "responseRequest" });
+      },
+    }
+  );
+};
+
+/**
+ * Hook: Mutation to delete a medicine from response_buffer
+ */
+export const useDeleteFromResponseBuffer = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ({ pharmacy_id, medicine_id }) => deleteFromResponseBuffer({ pharmacy_id, medicine_id }),
+    {
+      onSuccess: () => {
+        message.success({ content: "İlaç geçici stok listesinden kaldırıldı!", key: "deleteFromResponseBuffer" });
+        queryClient.invalidateQueries(REQUEST_KEYS.BUFFER);
+      },
+      onError: (error) => {
+        message.error({ content: "İlaç kaldırılırken hata oluştu: " + error.message, key: "deleteFromResponseBuffer" });
       },
     }
   );

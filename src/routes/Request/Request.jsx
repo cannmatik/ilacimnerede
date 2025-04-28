@@ -1,18 +1,20 @@
-// Request.jsx
 import React, { useEffect, useState, useRef } from "react";
 import { Col, Row } from "react-grid-system";
 import { INButton, INDataTable } from "@components";
 import "./rstyle.scss";
-import { Spin, Progress, Empty } from "antd";
+import { Spin, Progress, Empty, Collapse, List } from "antd";
 import {
   useGetRequest,
   useGetRequestDetails,
   useResponseRequest,
+  useGetResponseBuffer,
+  useDeleteFromResponseBuffer,
 } from "./queries";
 import { columns_requestDetail, columns } from "./constants/requestColumns";
 import { useSelector } from "react-redux";
 import { selectUserPharmacyId } from "@store/selectors";
 import { LeftOutlined } from "@ant-design/icons";
+import { Delete } from "@mui/icons-material";
 
 function Request() {
   const [isPrevDisabled, setIsPrevDisabled] = useState(true);
@@ -27,23 +29,37 @@ function Request() {
 
   const {
     data: requests,
-    isLoading,
-    highlightedRequestIds, // useGetRequest'ten gelen highlight listesi
+    isLoading: isRequestsLoading,
+    highlightedRequestIds,
   } = useGetRequest();
-  const { data: requestDetail } = useGetRequestDetails(selectedRequest?.id);
+  const {
+    data: requestDetail,
+    isLoading: isRequestDetailLoading,
+  } = useGetRequestDetails(selectedRequest?.id);
+  const { data: bufferedMedicines } = useGetResponseBuffer();
   const { mutate: responseRequestMutation } = useResponseRequest();
+  const { mutate: deleteFromResponseBuffer } = useDeleteFromResponseBuffer();
 
+  // Log data for debugging
+  useEffect(() => {
+    console.log("requestDetail:", requestDetail);
+    console.log("bufferedMedicines:", bufferedMedicines);
+  }, [requestDetail, bufferedMedicines]);
+
+  // Clear selection and message when request changes
   useEffect(() => {
     setSelectedRows([]);
     setMessageText("");
   }, [selectedRequest?.id]);
 
+  // Handle window resize for mobile detection
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Handle double-tap for mobile selection
   const handleDoubleTap = (row) => {
     const now = new Date().getTime();
     const doubleTapDelay = 300;
@@ -60,6 +76,7 @@ function Request() {
     }
   };
 
+  // Navigate to previous request
   const openPrevRequest = () => {
     const currentIndex = requests?.findIndex((item) => item.id === selectedRequest?.id);
     if (currentIndex > 0) {
@@ -71,6 +88,7 @@ function Request() {
     }
   };
 
+  // Navigate to next request
   const openNextRequest = () => {
     const currentIndex = requests?.findIndex((item) => item.id === selectedRequest?.id);
     if (currentIndex < requests?.length - 1) {
@@ -82,28 +100,31 @@ function Request() {
     }
   };
 
+  // Update navigation button states
   useEffect(() => {
     const currentIndex = requests?.findIndex((item) => item.id === selectedRequest?.id);
     setIsPrevDisabled(currentIndex <= 0);
     setIsNextDisabled(currentIndex >= (requests?.length || 0) - 1);
   }, [selectedRequest, requests]);
 
+  // Handle request submission
   const handleConfirmRequest = async () => {
     setProgress(0);
     setMessageText("");
-    setSelectedRows([]);
 
     const selectedRowsIds = selectedRows.map(({ id }) => id);
-    const checkedRequestDetails = selectedRows.map(({ id }) => ({
+    const checkedRequestDetails = selectedRows.map(({ id, medicine_id }) => ({
       request_item_id: id,
       status: true,
+      medicine_id,
     }));
 
     const uncheckedRequestDetails = (requestDetail || [])
       .filter(({ id }) => !selectedRowsIds.includes(id))
-      .map(({ id }) => ({
+      .map(({ id, medicine_id }) => ({
         request_item_id: id,
         status: false,
+        medicine_id,
       }));
 
     const response = {
@@ -114,6 +135,26 @@ function Request() {
     };
 
     const finalData = [...checkedRequestDetails, ...uncheckedRequestDetails];
+
+    // Identify medicines to remove from response_buffer (deselected items)
+    const selectedMedicineIds = selectedRows.map((row) => row.medicine_id);
+    const medicinesToRemove = bufferedMedicines
+      .filter((item) => !selectedMedicineIds.includes(item.medicine_id))
+      .map((item) => item.medicine_id);
+
+    console.log("Medicines to remove from response_buffer:", medicinesToRemove);
+
+    // Remove deselected medicines from response_buffer
+    if (medicinesToRemove.length > 0 && pharmacyId) {
+      for (const medicine_id of medicinesToRemove) {
+        try {
+          console.log("Removing from response_buffer:", { pharmacy_id, medicine_id });
+          await deleteFromResponseBuffer({ pharmacy_id: pharmacyId, medicine_id });
+        } catch (error) {
+          console.error("Failed to remove from response_buffer:", error);
+        }
+      }
+    }
 
     const interval = setInterval(() => {
       setProgress((prevProgress) => {
@@ -146,6 +187,7 @@ function Request() {
     }
   };
 
+  // Clear selection when no request is selected
   useEffect(() => {
     if (!selectedRequest) {
       setSelectedRows([]);
@@ -157,18 +199,53 @@ function Request() {
       <Row>
         {(!isMobile || !selectedRequest) && (
           <Col xs={12} md={6} className="table-container">
-            {isLoading ? (
+            {isRequestsLoading ? (
               <div className="spin-container center-content pulse">
                 <Spin size="large" />
               </div>
             ) : requests && requests.length > 0 ? (
               <div className="list-scroll-container">
+                <Collapse
+                  items={[
+                    {
+                      key: "1",
+                      label: "Geçici Stok Listesi",
+                      children: (
+                        <List
+                          dataSource={bufferedMedicines}
+                          renderItem={(item) => (
+                            <List.Item
+                              actions={[
+                                <Delete
+                                  style={{ cursor: "pointer", color: "red" }}
+                                  onClick={() => {
+                                    console.log("Manual delete from buffer:", {
+                                      pharmacy_id: pharmacyId,
+                                      medicine_id: item.medicine_id,
+                                    });
+                                    deleteFromResponseBuffer({
+                                      pharmacy_id: pharmacyId,
+                                      medicine_id: item.medicine_id,
+                                    });
+                                  }}
+                                />,
+                              ]}
+                            >
+                              {item.medicine_name} (ID: {item.medicine_id})
+                            </List.Item>
+                          )}
+                          locale={{ emptyText: "Geçici stok listesinde ilaç yok." }}
+                        />
+                      ),
+                    },
+                  ]}
+                />
                 <INDataTable
                   data={requests}
                   columns={columns}
                   rowHoverStyle={{ border: true }}
                   setSelectedRows={setSelectedRows}
-                  // Burada highlight kontrolü
+                  isLoading={isRequestsLoading}
                   rowClassName={(row) =>
                     highlightedRequestIds.includes(row.original.id)
                       ? "blink-row"
@@ -203,21 +280,28 @@ function Request() {
               </div>
 
               <div className="table-scroll-container">
-                <INDataTable
-                  key={selectedRequest?.id || "request-detail-table"}
-                  data={requestDetail || []}
-                  columns={columns_requestDetail}
-                  rowHoverStyle={{ border: true, background: !isMobile }}
-                  checkboxed={[]}
-                  setSelectedRows={setSelectedRows}
-                  unSelectAllOnTabChange={selectedRequest}
-                  rowClassName={(row) =>
-                    `${
-                      row.getIsSelected() ? "selected-row" : "unselected-row"
-                    } ${isMobile ? "mobile-row" : ""}`
-                  }
-                  onRowClick={(row) => isMobile && handleDoubleTap(row)}
-                />
+                {isRequestDetailLoading ? (
+                  <Spin size="large" />
+                ) : (
+                  <INDataTable
+                    key={selectedRequest?.id || "request-detail-table"}
+                    data={requestDetail || []}
+                    columns={columns_requestDetail}
+                    rowHoverStyle={{ border: true, background: !isMobile }}
+                    checkboxed={true}
+                    setSelectedRows={setSelectedRows}
+                    unSelectAllOnTabChange={selectedRequest?.id || ""}
+                    bufferedMedicines={bufferedMedicines}
+                    deleteFromResponseBuffer={deleteFromResponseBuffer}
+                    isLoading={isRequestDetailLoading}
+                    rowClassName={(row) =>
+                      `${
+                        row.getIsSelected() ? "selected-row" : "unselected-row"
+                      } ${isMobile ? "mobile-row" : ""}`
+                    }
+                    onRowClick={(row) => isMobile && handleDoubleTap(row)}
+                  />
+                )}
               </div>
 
               <div className="bottom-footer-req">

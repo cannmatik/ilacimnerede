@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
+import { Outlet } from "react-router-dom";
 import "./style.scss";
 import Main from "./Main";
 import Header from "./Header";
@@ -9,7 +10,6 @@ const Public = React.lazy(() => import("../routes/public.jsx"));
 function Layout() {
   const userLoggedIn = useSelector((state) => state.user.isLoggedIn);
 
-  // Kullanıcı doğrulama işlemi (isteğe bağlı, burada auth kontrolü devam ediyorsa bile ekran hemen render edilir)
   useEffect(() => {
     const checkAuth = async () => {
       const authCheckResult = await checkUserAuth();
@@ -21,24 +21,31 @@ function Layout() {
     checkAuth();
   }, []);
 
-  // Yükleme ekranını kaldırdığımız için, direkt içerikleri render ediyoruz
   return (
-    <React.Suspense fallback={<div>Yükleniyor...</div>}>
-      {userLoggedIn ? (
-        <div className="layout-wrapper">
-          <Header />
-          <Main />
+    <React.Suspense
+      fallback={
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <div className="loading-text">Yükleniyor...</div>
         </div>
-      ) : (
-        <Public />
-      )}
+      }
+    >
+      <div className="layout-wrapper">
+        {userLoggedIn ? (
+          <>
+            <Header />
+            <Main />
+          </>
+        ) : (
+          <Public />
+        )}
+      </div>
     </React.Suspense>
   );
 }
 
 export default Layout;
 
-// Kullanıcı doğrulama işlemi örneği
 const checkUserAuth = async () => {
   const token = localStorage.getItem("authToken");
   if (token) {

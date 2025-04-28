@@ -1,133 +1,83 @@
-// Header, ana içerik ve footer düzenlemeleri
-
-// Header Sabit (Fixed) olacak şekilde
 .header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2.5rem 5%;
-  background-color: var(--primary-background-navbar);
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 80px; /* Header yüksekliği */
+  background-color: #25b597 !important;
   box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
+  height: 80px;
 
-  .logoContainer {
-    cursor: pointer;
-    z-index: 1001;
-    position: absolute;
-    left: 5%;
-    
-    img {
+  .logo {
+    width: 70px;
+    height: auto;
+    transition: width 0.3s ease;
+
+    @media (max-width: 768px) {
       width: 70px;
-      height: auto;
-      transition: width 0.3s ease;
-
-      @media (max-width: 768px) {
-        width: 70px;
-      }
     }
   }
 
-  .hamburgerMenu {
-    display: none;
-    flex-direction: column;
-    justify-content: space-between;
-    width: 30px;
-    height: 21px;
-    cursor: pointer;
-    z-index: 1002;
-    position: absolute;
-    right: 5%;
+  .navLink {
+    transition: transform 0.2s ease;
+    display: inline-block;
 
-    span {
-      display: block;
-      width: 100%;
-      height: 3px;
-      background-color: var(--primary-text-color);
-      border-radius: 3px;
-      transition: all 0.3s ease;
-    }
-
-    &.active {
-      span:nth-child(1) {
-        transform: translateY(9px) rotate(45deg);
-      }
-      span:nth-child(2) {
-        opacity: 0;
-      }
-      span:nth-child(3) {
-        transform: translateY(-9px) rotate(-45deg);
-      }
-    }
-
-    @media (max-width: 768px) {
-      display: flex;
+    &:active {
+      animation: pulse 0.2s ease;
     }
   }
 
-  .nav {
+  .activeLink {
+    font-weight: 700;
+    color: white !important;
+    text-decoration: none;
+  }
+
+  .inactiveLink {
+    font-weight: 700;
+    color: black;
+    text-decoration: none;
+  }
+
+  .logoutButton {
+    font-weight: 700;
+    text-transform: none;
+    padding: 6px 12px;
+    font-size: 1rem;
+    line-height: normal;
+  }
+
+  .drawer {
+    background-color: #25b597 !important;
+    width: 250px;
+    padding: 1rem;
+  }
+
+  .drawerHeader {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2rem;
-    position: relative;
-    
-    a {
-      color: var(--primary-text-color);
-      text-decoration: none;
-      font-size: 1rem;
-      transition: color 0.3s ease;
-
-      &:hover {
-        color: #ffffff;
-      }
-    }
-
-    @media (max-width: 768px) {
-      display: none;
-      position: fixed;
-      top: 80px; // Header'ın altında başlayacak
-      left: 0;
-      right: 0;
-      background-color: var(--primary-background-navbar);
-      flex-direction: column;
-      padding: 2rem 1rem;
-      gap: 1.5rem;
-      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-      align-items: center;
-      justify-content: center;
-
-      &.show {
-        display: flex;
-      }
-    }
+    justify-content: flex-end;
+    padding: 1rem;
   }
 
   .mobileLogout {
-    display: none;
-
-    @media (max-width: 768px) {
-      display: block;
-      width: 100%;
-      margin-top: 1rem;
-    }
+    width: 100%;
+    margin-top: 1rem;
+    padding: 6px 12px;
   }
 }
 
-// Ana İçerik: Header ve Footer yüksekliğini hesaba katarak boşluk bırakıyoruz
-.main-content {
-  margin-top: 21px;   /* Header yüksekliği kadar */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
 
-  min-height: calc(100vh - 14px - 16px);
+.main-content {
+  margin-top: 80px;
+  min-height: calc(100vh - 80px);
   padding: 1rem;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
 }
-
-
-/* Diğer bileşen ve düzenlemeler için ek stil kuralları buraya eklenebilir... */

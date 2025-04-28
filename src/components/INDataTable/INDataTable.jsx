@@ -17,9 +17,8 @@ import {
   CircularProgress,
   IconButton,
 } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { useSelector } from "react-redux";
 import { selectUserPharmacyId } from "@store/selectors";
 import { Clear as ClearIcon } from "@mui/icons-material";
@@ -116,7 +115,7 @@ function INDataTable({
 
   // Sıralama mantığı
   const sortedData = [...filteredData].sort((a, b) => {
-    if (!sortConfig.key) return 0;
+    if (!sortConfig.key || !sortConfig.direction) return 0; // Sıralama yoksa orijinal sırayı koru
     const aValue = getNestedValue(a, sortConfig.key);
     const bValue = getNestedValue(b, sortConfig.key);
     if (!aValue || !bValue) return 0;
@@ -128,11 +127,16 @@ function INDataTable({
   // Sıralama işleyici
   const handleSort = (key) => {
     console.log("Sıralama tetiklendi:", key);
-    setSortConfig((prev) => ({
-      key,
-      direction:
-        prev.key === key && prev.direction === "asc" ? "desc" : "asc",
-    }));
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        if (prev.direction === "asc") {
+          return { key, direction: "desc" }; // Artandan azalana geç
+        } else if (prev.direction === "desc") {
+          return { key: null, direction: null }; // Sıralamayı sıfırla
+        }
+      }
+      return { key, direction: "asc" }; // İlk tıklama artan
+    });
   };
 
   // Satır tıklama işleyici
@@ -177,7 +181,7 @@ function INDataTable({
   return (
     <Box className="ilacimNerede-data-table-container">
       {/* Filtreleme alanı */}
-      <Box className="table-filter-container">
+      <Box className="table-filter-container" sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "nowrap" }}>
         <Select
           value={selectedFilterColumn}
           onChange={(e) => {
@@ -196,21 +200,15 @@ function INDataTable({
         </Select>
         {selectedFilterColumn === "create_date" ? (
           <Box display="flex" alignItems="center" gap={1}>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                value={dateFilter}
-                onChange={(newValue) => setDateFilter(newValue)}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    size="small"
-                    className="table-filter-textfield"
-                    placeholder="Tarih Seçin"
-                  />
-                )}
-                format="DD/MM/YYYY"
-              />
-            </LocalizationProvider>
+            <DatePicker
+              selected={dateFilter}
+              onChange={(date) => setDateFilter(date)}
+              dateFormat="dd/MM/yyyy"
+              placeholderText="Tarih Seçin"
+              className="table-filter-datepicker"
+              wrapperClassName="table-filter-datepicker-wrapper"
+              style={{ height: "40px", fontSize: "14px" }} // Inline stil ek olarak
+            />
             {dateFilter && (
               <IconButton onClick={clearDateFilter} size="small">
                 <ClearIcon />
@@ -258,7 +256,7 @@ function INDataTable({
                   data-column={column.accessor}
                 >
                   {column.header}
-                  {sortConfig.key === column.accessor &&
+                  {sortConfig.key === column.accessor && sortConfig.direction &&
                     (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
                 </TableCell>
               ))}

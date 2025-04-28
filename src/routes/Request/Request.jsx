@@ -16,39 +16,6 @@ import { selectUserPharmacyId } from "@store/selectors";
 import { Button, IconButton } from "@mui/material";
 import { ArrowBack, ArrowForward, Check, ArrowBackIos, Delete } from "@mui/icons-material";
 
-// Geçici Stok Listesi için sütun tanımları
-const bufferColumns = [
-  {
-    header: "İlaç Adı",
-    accessor: "medicine_name",
-  },
-  {
-    header: "ID",
-    accessor: "medicine_id",
-  },
-  {
-    header: "Sil",
-    accessor: "action",
-    Cell: ({ row, deleteFromResponseBuffer, pharmacyId }) => (
-      <IconButton
-        onClick={() => {
-          console.log("Geçici stoktan manuel silme:", {
-            pharmacy_id: pharmacyId,
-            medicine_id: row.medicine_id,
-          });
-          deleteFromResponseBuffer({
-            pharmacy_id: pharmacyId,
-            medicine_id: row.medicine_id,
-          });
-        }}
-        color="error"
-      >
-        <Delete />
-      </IconButton>
-    ),
-  },
-];
-
 // Talep ekranı bileşeni
 function Request() {
   const [isPrevDisabled, setIsPrevDisabled] = useState(true);
@@ -194,7 +161,17 @@ function Request() {
       for (const medicine_id of medicinesToRemove) {
         try {
           console.log("response_buffer'dan kaldırılıyor:", { pharmacy_id, medicine_id });
-          await deleteFromResponseBuffer({ pharmacy_id: pharmacyId, medicine_id });
+          await deleteFromResponseBuffer(
+            { pharmacy_id: pharmacyId, medicine_id },
+            {
+              onSuccess: () => {
+                setNotification("İlaç geçici stok listesinden kaldırıldı!");
+              },
+              onError: (error) => {
+                setNotification("İlaç kaldırılırken hata oluştu: " + error.message);
+              },
+            }
+          );
         } catch (error) {
           console.error("response_buffer'dan silme başarısız:", error);
         }
@@ -241,6 +218,55 @@ function Request() {
     }
   }, [selectedRequest]);
 
+  // Geçici Stok Listesi için sütun tanımları (dinamik olarak oluşturuluyor)
+  const bufferColumns = [
+    {
+      header: "İlaç Adı",
+      accessor: "medicine_name",
+    },
+    {
+      header: "ID",
+      accessor: "medicine_id",
+    },
+    {
+      header: "Sil",
+      accessor: "action",
+      Cell: ({ row }) => (
+        <IconButton
+          onClick={() => {
+            console.log("Geçici stoktan manuel silme:", {
+              pharmacy_id: pharmacyId,
+              medicine_id: row.medicine_id,
+            });
+            deleteFromResponseBuffer(
+              {
+                pharmacy_id: pharmacyId,
+                medicine_id: row.medicine_id,
+              },
+              {
+                onSuccess: () => {
+                  setNotification("İlaç geçici stok listesinden kaldırıldı!");
+                },
+                onError: (error) => {
+                  setNotification("İlaç kaldırılırken hata oluştu: " + error.message);
+                },
+              }
+            );
+          }}
+          color="error"
+        >
+          <Delete />
+        </IconButton>
+      ),
+    },
+  ];
+
+  // BufferedMedicines'a benzersiz id ekleme (key prop uyarısını çözmek için)
+  const bufferedMedicinesWithIds = bufferedMedicines?.map((item, index) => ({
+    ...item,
+    id: item.medicine_id || index, // medicine_id yoksa index kullan
+  })) || [];
+
   return (
     <div className="req_main-content">
       {/* Bildirim sayfanın üst kısmında gösteriliyor */}
@@ -270,12 +296,8 @@ function Request() {
                       label: "Geçici Stok Listesi",
                       children: (
                         <INDataTable
-                          data={bufferedMedicines || []}
-                          columns={bufferColumns.map((col) =>
-                            col.header === "Sil"
-                              ? { ...col, deleteFromResponseBuffer, pharmacyId }
-                              : col
-                          )}
+                          data={bufferedMedicinesWithIds}
+                          columns={bufferColumns}
                           rowHoverStyle={{ border: true }}
                           emptyText={<span className="req_empty-list-text">Geçici stok listesinde ilaç yok.</span>}
                         />
@@ -408,4 +430,4 @@ function Request() {
   );
 }
 
-export default Request; 
+export default Request;

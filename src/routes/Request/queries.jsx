@@ -7,7 +7,6 @@ import {
 } from "@store/selectors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
-import { message, App } from "antd";
 import React, { useState, useMemo, useEffect } from "react";
 import moment from "moment";
 import "moment/locale/tr";
@@ -387,12 +386,14 @@ export const useResponseRequest = () => {
     ({ finalData, response }) => responseRequest(finalData, response),
     {
       onSuccess: () => {
-        message.success({ content: "Talep başarıyla yanıtlandı!", key: "responseRequest" });
+        console.log("useResponseRequest - Talep başarıyla yanıtlandı, bildirim Request.jsx tarafından gösterilecek.");
         queryClient.invalidateQueries(REQUEST_KEYS.ALL);
         queryClient.invalidateQueries(REQUEST_KEYS.BUFFER);
       },
       onError: (error) => {
-        message.error({ content: "Talep yanıtlanırken hata oluştu: " + error.message, key: "responseRequest" });
+        console.log("useResponseRequest - Talep yanıtlanırken hata oluştu, bildirim Request.jsx tarafından gösterilecek:", error.message);
+        queryClient.invalidateQueries(REQUEST_KEYS.ALL);
+        queryClient.invalidateQueries(REQUEST_KEYS.BUFFER);
       },
     }
   );
@@ -407,11 +408,12 @@ export const useDeleteFromResponseBuffer = () => {
     ({ pharmacy_id, medicine_id }) => deleteFromResponseBuffer({ pharmacy_id, medicine_id }),
     {
       onSuccess: () => {
-        message.success({ content: "İlaç geçici stok listesinden kaldırıldı!", key: "deleteFromResponseBuffer" });
+        console.log("useDeleteFromResponseBuffer - İlaç geçici stok listesinden kaldırıldı, bildirim Request.jsx tarafından gösterilecek.");
         queryClient.invalidateQueries(REQUEST_KEYS.BUFFER);
       },
       onError: (error) => {
-        message.error({ content: "İlaç kaldırılırken hata oluştu: " + error.message, key: "deleteFromResponseBuffer" });
+        console.log("useDeleteFromResponseBuffer - İlaç kaldırılırken hata oluştu, bildirim Request.jsx tarafından gösterilecek:", error.message);
+        queryClient.invalidateQueries(REQUEST_KEYS.BUFFER);
       },
     }
   );

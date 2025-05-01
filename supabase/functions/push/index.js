@@ -1,15 +1,9 @@
-import { createClient } from "@supabase/supabase-js";
-import { encodeBase64Url } from "std/encoding/base64url.ts";
-import { create, getNumericDate } from "djwt";
+import { encodeBase64Url } from "https://deno.land/std@0.224.0/encoding/base64url.ts";
+import serviceAccount from "../service-account.json" assert { type: "json" };
 
 // Çevre değişkenlerini kontrol et
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-const serviceAccount = {
-  client_email: Deno.env.get("SERVICE_ACCOUNT_CLIENT_EMAIL"),
-  private_key: Deno.env.get("SERVICE_ACCOUNT_PRIVATE_KEY"),
-  project_id: Deno.env.get("SERVICE_ACCOUNT_PROJECT_ID"),
-};
 
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   const msg = `Çevre değişkenleri eksik: SUPABASE_URL=${SUPABASE_URL}, SUPABASE_KEY=${SUPABASE_KEY ? "tanımlı" : "tanımsız"}`;
@@ -17,33 +11,90 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
   throw new Error(msg);
 }
 
-if (!serviceAccount.client_email || !serviceAccount.private_key || !serviceAccount.project_id) {
-  const msg = `Service account bilgileri eksik: client_email=${serviceAccount.client_email}, private_key=${serviceAccount.private_key ? "tanımlı" : "tanımsız"}, project_id=${serviceAccount.project_id}`;
-  console.error(msg);
-  throw new Error(msg);
+// Supabase REST API sorguları
+async function getRequestUuid(requestId) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/request?id=eq.${requestId}&select=uuid`, {
+    headers: {
+      "Authorization": `Bearer ${SUPABASE_KEY}`,
+      "apikey": SUPABASE_KEY,
+      "Content-Type": "application/json",
+    },
+  });
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Request sorgusu başarısız: ${error}`);
+  }
+  const [data] = await res.json();
+  if (!data) throw new Error("Request bulunamadı");
+  return data.uuid;
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+async function getUserData(userUuid) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/user?uuid=eq.${userUuid}&select=fcm_token,name`, {
+    headers: {
+      "Authorization": `Bearer ${SUPABASE_KEY}`,
+      "apikey": SUPABASE_KEY,
+      "Content-Type": "application/json",
+    },
+  });
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`User sorgusu başarısız: ${error}`);
+  }
+  const [data] = await res.json();
+  if (!data?.fcm_token) throw new Error("FCM token bulunamadı");
+  return data;
+}
 
-// Google OAuth2 access token alma (djwt ile)
+async function getPharmacyName(pharmacyId) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/pharmacy?id=eq.${pharmacyId}&select=name`, {
+    headers: {
+      "Authorization": `Bearer ${SUPABASE_KEY}`,
+      "apikey": SUPABASE_KEY,
+      "Content-Type": "application/json",
+    },
+  });
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Pharmacy sorgusu başarısız: ${error}`);
+  }
+  const [data] = await res.json();
+  return data?.name || "Eczane";
+}
+
+// Google OAuth2 access token alma (manuel JWT)
 async function getAccessToken({ clientEmail, privateKey }) {
+  const header = { alg: "RS256", typ: "JWT" };
+  const now = Math.floor(Date.now() / 1000);
   const payload = {
     iss: clientEmail,
     scope: "https://www.googleapis.com/auth/firebase.messaging",
     aud: "https://oauth2.googleapis.com/token",
-    iat: getNumericDate(new Date()),
-    exp: getNumericDate(new Date(Date.now() + 3600 * 1000)),
+    iat: now,
+    exp: now + 3600,
   };
+
+  const encode = (obj) => encodeBase64Url(new TextEncoder().encode(JSON.stringify(obj)));
+  const unsignedToken = `${encode(header)}.${encode(payload)}`;
 
   const key = await crypto.subtle.importKey(
     "pkcs8",
     pemToArrayBuffer(privateKey),
-    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    {
+      name: "RSASSA-PKCS1-v1_5",
+      hash: "SHA-256",
+    },
     false,
     ["sign"]
   );
 
-  const jwt = await create({ alg: "RS256", typ: "JWT" }, payload, key);
+  const signature = await crypto.subtle.sign(
+    "RSASSA-PKCS1-v1_5",
+    key,
+    new TextEncoder().encode(unsignedToken)
+  );
+
+  const jwt = `${unsignedToken}.${encodeBase64Url(new Uint8Array(signature))}`;
 
   const res = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
@@ -96,41 +147,15 @@ export default async (req) => {
     if (!request_id) throw new Error("request_id zorunlu");
 
     // 1) request tablosundan uuid al
-    const { data: requestData, error: requestError } = await supabase
-      .from("request")
-      .select("uuid")
-      .eq("id", request_id)
-      .single();
-
-    if (requestError || !requestData) {
-      throw new Error(`Request bulunamadı: ${requestError?.message || "Veri yok"}`);
-    }
-
-    const userUuid = requestData.uuid;
+    const userUuid = await getRequestUuid(request_id);
 
     // 2) user tablosundan fcm_token al
-    const { data: userData, error: userError } = await supabase
-      .from("user")
-      .select("fcm_token, name")
-      .eq("uuid", userUuid)
-      .single();
-
-    if (userError || !userData?.fcm_token) {
-      throw new Error(`FCM token bulunamadı: ${userError?.message || "Token yok"}`);
-    }
-
-    const fcmToken = userData.fcm_token;
-    const userName = userData.name || "Kullanıcı";
+    const { fcm_token: fcmToken, name: userName = "Kullanıcı" } = await getUserData(userUuid);
 
     // 3) Eczane bilgisi
     let pharmacyName = "Eczane";
     if (pharmacy_id) {
-      const { data: pharmacyData } = await supabase
-        .from("pharmacy")
-        .select("name")
-        .eq("id", pharmacy_id)
-        .single();
-      if (pharmacyData?.name) pharmacyName = pharmacyData.name;
+      pharmacyName = await getPharmacyName(pharmacy_id);
     }
 
     // 4) Access token al

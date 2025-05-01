@@ -166,6 +166,7 @@ function showNewRequestNotification(newRow) {
 
 /**
  * Talep yanıtını işle, response, response_item ve response_buffer tablolarını güncelle
+ * Ayrıca notifications tablosuna bildirim ekle
  */
 async function responseRequest(finalData, response) {
   try {
@@ -253,7 +254,50 @@ async function responseRequest(finalData, response) {
       }
     }
 
+    // Eczane ismini pharmacy tablosundan al
+    const { data: pharmacyData, error: pharmacyError } = await supabase
+      .from("pharmacy")
+      .select("name")
+      .eq("id", response.pharmacy_id)
+      .single();
+
+    if (pharmacyError || !pharmacyData) {
+      throw new Error(`Eczane ismi alınamadı: ${pharmacyError?.message || "Eczane bulunamadı"}`);
+    }
+    const pharmacyName = pharmacyData.name;
+
+    // request tablosundan uuid al
+    const { data: requestData, error: requestError } = await supabase
+      .from("request")
+      .select("uuid")
+      .eq("id", response.request_id)
+      .single();
+
+    if (requestError || !requestData) {
+      throw new Error(`Request uuid alınamadı: ${requestError?.message || "Talep bulunamadı"}`);
+    }
+    const requestUuid = requestData.uuid;
+
+    // notifications tablosuna bildirim ekle
+    const { error: notificationError } = await supabase
+      .from("notifications")
+      .insert({
+        user_id: requestUuid,
+        body: `${pharmacyName} talebinizi yanıtladı`,
+        title: "İlaç Talebin Yanıtlandı",
+      });
+
+    if (notificationError) {
+      throw new Error(`Bildirim ekleme hatası: ${notificationError.message}`);
+    }
+
     console.log("Yanıt başarıyla eklendi. Response ID:", responseId);
+    console.log("Bildirim başarıyla eklendi:", {
+      user_id: requestUuid,
+      body: `${pharmacyName} talebinizi yanıtladı`,
+      title: "İlaç Talebin Yanıtlandı",
+    });
+
     return { response: responseData, responseItems: responseItemsData };
   } catch (error) {
     console.error("Hata:", error.message);

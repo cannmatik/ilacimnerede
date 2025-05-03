@@ -12,7 +12,7 @@ import Collapse from "@mui/material/Collapse";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import CloseIcon from "@mui/icons-material/Close";
-import { customTrLocale } from "./locale";
+import { customTrLocale } from "./locale.jsg";
 
 import "./dutyStyle.scss";
 import "flatpickr/dist/flatpickr.min.css";

@@ -4,11 +4,11 @@ import { setSession, setUser } from "./slice";
 import { supabase } from "./useCreateClient";
 import "./style.scss";
 
-// Ant Design for main buttons & messages
-import { Button as AntButton, Modal as AntModal, message } from "antd";
+// Ant Design for buttons and modal
+import { Button as AntButton, Modal as AntModal } from "antd";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 
-// MUI for password-reset dialog
+// MUI for dialogs
 import { Button as MUIButton, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 
 function Login() {
@@ -23,14 +23,14 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
 
-  // Dialog for password-reset feedback
+  // Dialog for error and password-reset feedback
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogTitle, setDialogTitle] = useState("");
   const [dialogMessage, setDialogMessage] = useState("");
 
   // Splash screen timeout
   useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 3000);
+    const timer = setTimeout(() => setShowSplash(false), 1500); // Süre 1.5 saniyeye düşürüldü
     return () => clearTimeout(timer);
   }, []);
 
@@ -43,7 +43,9 @@ function Login() {
       .single();
     if (error) {
       console.error("Eczane bilgisi alınamadı:", error);
-      message.error("Eczane bilgileri alınırken hata oluştu.");
+      setDialogTitle("Hata");
+      setDialogMessage("Eczane bilgileri alınırken hata oluştu.");
+      setDialogOpen(true);
       return null;
     }
     return data;
@@ -69,9 +71,11 @@ function Login() {
             dispatch(setUser(updatedUser));
             window.location.replace("/home");
           } else {
-            message.error(
+            setDialogTitle("Hata");
+            setDialogMessage(
               "Bu sayfa sadece eczacılara özeldir. Lütfen mobil uygulamayı kullanın."
             );
+            setDialogOpen(true);
             supabase.auth.signOut();
           }
         }
@@ -103,7 +107,9 @@ function Login() {
         default:
           errorMessage = `Giriş başarısız: ${error.message}`;
       }
-      message.error(errorMessage);
+      setDialogTitle("Giriş Hatası");
+      setDialogMessage(errorMessage);
+      setDialogOpen(true);
     }
     setLoading(false);
   };
@@ -122,7 +128,7 @@ function Login() {
     } else {
       setDialogTitle("E-posta Gönderildi");
       setDialogMessage(
-        "Şifre sıfırlama bağlantısı e-postanıza başarıyla gönderildi."
+        "Şifre sıfırlama bağlantısı e-postanıza başarıyla gönderildi. Lütfen gelen kutunuzu ve spam klasörünüzü kontrol edin."
       );
     }
     setDialogOpen(true);
@@ -137,7 +143,7 @@ function Login() {
   // Render
   return (
     <>
-      {showSplash && <div className="splash">Loading...</div>}
+      {showSplash && <div className="splash-screen">Loading...</div>}
       <div className="app-header">
         <div className="page-title-wrapper">
           <h1 className="page-title">İlacım Nerede</h1>
@@ -245,7 +251,7 @@ function Login() {
               block
             >
               Kapat
-            </AntButton>
+            </AntButton>,
           ]}
           width={400}
         >
@@ -265,13 +271,18 @@ function Login() {
           </ul>
         </AntModal>
 
-        {/* Password-reset feedback dialog */}
+        {/* Error and password-reset feedback dialog */}
         <Dialog
           open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-          aria-labelledby="reset-dialog-title"
+          onClose={() => {
+            setDialogOpen(false);
+            if (dialogTitle === "E-posta Gönderildi") {
+              setAuthView("sign_in");
+            }
+          }}
+          aria-labelledby="dialog-title"
         >
-          <DialogTitle id="reset-dialog-title">{dialogTitle}</DialogTitle>
+          <DialogTitle id="dialog-title">{dialogTitle}</DialogTitle>
           <DialogContent>{dialogMessage}</DialogContent>
           <DialogActions>
             <MUIButton
@@ -289,18 +300,23 @@ function Login() {
 
         <p className="info-text">
           Bu panel sadece eczacılar içindir. İlaç arayan kullanıcılar lütfen
-          mobil uygulamamızı kullanın. <a href="https://www.ilacimnerede.com">
-          www.ilacimnerede.com</a> Web sitesi üzerinden uygulamamız ile ilgili bilgi alıp
-          uygulamamızı indirebilirsiniz.
+          mobil uygulamamızı kullanın.{" "}
+          <a href="https://www.ilacimnerede.com">www.ilacimnerede.com</a> Web
+          sitesi üzerinden uygulamamız ile ilgili bilgi alıp uygulamamızı
+          indirebilirsiniz.
         </p>
 
         <footer className="footer">
           <p>
             <a href="https://www.google.com/maps?saddr=My%20Location&daddr=41.080013336027,29.009160314659">
-              Esentepe Mah. Talatpaşa Cad. No: 5/1 (Harman Sok. Girişi) Şişli / İstanbul
+              Esentepe Mah. Talatpaşa Cad. No: 5/1 (Harman Sok. Girişi) Şişli /
+              İstanbul
             </a>
           </p>
-          <p>©2025, CuraNodus Yazılım Teknolojileri Limited Şirketi. Tüm Hakları Saklıdır.</p>
+          <p>
+            ©2025, CuraNodus Yazılım Teknolojileri Limited Şirketi. Tüm Hakları
+            Saklıdır.
+          </p>
         </footer>
       </div>
     </>

@@ -3,13 +3,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center; /* Mobil için center */
   background: rgba(245, 245, 245, 0.95);
   padding: 20px;
   margin-top: 80px; /* Offset for fixed navbar */
   min-height: calc(100vh - 80px); /* Adjust to subtract navbar height */
   box-sizing: border-box;
   overflow-y: auto;
+  width: 100%; /* Tam genişlik */
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Splash screen */
@@ -24,24 +27,23 @@
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  animation: fadeInOut 3s ease-in-out forwards;
+  animation: fadeInOut 1.5s ease-in-out forwards; /* Süre kısaltıldı */
   overflow: hidden;
 }
-
 
 /* Fade-in and fade-out animation */
 @keyframes fadeInOut {
   0% {
     opacity: 0;
   }
-  16.67% {
-    opacity: 1; /* Fade-in complete at 0.5s (0.5/3) */
+  20% {
+    opacity: 1; /* Fade-in complete at 0.3s */
   }
-  83.33% {
-    opacity: 1; /* Stay visible until 2.5s (2.5/3) */
+  80% {
+    opacity: 1; /* Stay visible until 1.2s */
   }
   100% {
-    opacity: 0; /* Fade-out complete at 3s */
+    opacity: 0; /* Fade-out complete at 1.5s */
   }
 }
 
@@ -50,7 +52,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px; /* Reduced from 8px for tighter spacing */
+  justify-content: center; /* Mobil için ek hizalama */
+  gap: 4px;
+  width: 100%; /* Tam genişlik */
 }
 
 /* Page title */
@@ -69,12 +73,13 @@
   max-width: 400px;
   display: flex;
   flex-direction: column;
-  gap: 12px; /* Reduced from 16px for tighter spacing */
+  gap: 12px;
   background: rgba(255, 255, 255, 0.9);
-  padding: 20px; /* Reduced from 24px */
+  padding: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
+  margin: 0 auto; /* Ortalamak için */
 }
 
 /* Input wrapper */
@@ -86,8 +91,8 @@
 /* Input fields */
 .auth-input {
   width: 100%;
-  padding: 12px 14px;
-  font-size: 1rem;
+  padding: 10px 12px; /* Mobil için daha az padding */
+  font-size: 0.95rem;
   border: 1px solid #d9d9d9;
   border-radius: 4px;
   box-sizing: border-box;
@@ -208,38 +213,65 @@
   margin: 3px 0;
 }
 
+/* MUI Dialog styles */
+.MuiDialog-paper {
+  max-width: 95% !important;
+  margin: 10px !important;
+  padding: 10px;
+}
+
 /* Mobile responsiveness */
 @media (max-device-width: 480px), (max-device-height: 480px) {
+  .app-header {
+    padding: 10px;
+    max-width: 100%; /* Ekranın tamamını kullan */
+    margin: 80px auto 0; /* Ortalamak için */
+  }
+
+  .auth-wrapper {
+    padding: 12px;
+    max-width: 95%; /* %90 yerine %95 */
+    margin: 0 auto;
+  }
+
   .page-title {
-    font-size: 1.4rem;
+    font-size: 1.2rem; /* Daha küçük yazı tipi */
   }
 
   .page-title-wrapper {
     gap: 6px;
   }
 
-  .app-header {
-    padding: 16px;
-    max-width: 90%;
-    margin-top: 80px;
-  }
-
-  .auth-wrapper {
-    padding: 16px;
-    max-width: 90%;
-  }
-
   .info-text {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
 
   .footer {
-    font-size: 0.8rem;
-    max-width: 90%;
+    font-size: 0.75rem;
+    max-width: 95%;
+  }
+
+  .auth-input {
+    padding: 8px 10px;
+    font-size: 0.9rem;
+  }
+
+  .MuiDialog-paper {
+    width: 100%;
+    margin: 5px;
+  }
+
+  .MuiDialogTitle-root {
+    font-size: 1.1rem;
+  }
+
+  .MuiDialogContent-root {
+    font-size: 0.9rem;
   }
 }
 
-/* style.scss’ın en altına ekleyin */
-.ant-wave, .ant-wave-container {
+/* Ant Design wave effect'i gizle */
+.ant-wave,
+.ant-wave-container {
   display: none !important;
 }

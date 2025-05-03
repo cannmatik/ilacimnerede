@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useNavigate } from "react-router-dom";
 import { supabase } from "@routes/Login/useCreateClient";
 import { ilacimNeredeLogo } from "@assets";
@@ -25,6 +25,7 @@ function Header() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
 
   async function signOutUser() {
     try {
@@ -41,12 +42,18 @@ function Header() {
     }
   }
 
-  const navLinks = [
+  const privateNavLinks = [
     { to: "/request", label: "Açık Talepler" },
     { to: "/answered-request", label: "Cevaplanan Talepler" },
     { to: "/finished-request", label: "Kapanan Talepler" },
     { to: "/duty-selection", label: "Nöbet Seçimi" },
   ];
+
+  const publicNavLinks = [
+    { to: "/login", label: "Eczacı Paneli" },
+  ];
+
+  const navLinks = isLoggedIn ? privateNavLinks : publicNavLinks;
 
   const handleNavClick = () => {
     setIsMenuOpen(false);
@@ -68,7 +75,7 @@ function Header() {
       >
         {/* Logo */}
         <Box
-          onClick={() => navigate("/home")}
+          onClick={() => navigate(isLoggedIn ? "/welcome" : "/login")}
           sx={{ cursor: "pointer", display: "flex", alignItems: "center" }}
         >
           <img
@@ -124,7 +131,7 @@ function Header() {
           ))}
         </Box>
 
-        {/* Logout Button */}
+        {/* Logout/Login Button */}
         <Box
           sx={{
             display: { xs: "none", md: "flex" },
@@ -133,24 +140,26 @@ function Header() {
             right: "16px",
           }}
         >
-          <Button
-            variant="contained"
-            onClick={signOutUser}
-            className={`${styles.logoutButton} ${styles.navLink}`}
-            sx={{
-              backgroundColor: "#000000",
-              color: "white",
-              fontWeight: 700,
-              padding: "6px 12px",
-              minWidth: "auto",
-              height: "fit-content",
-              "&:hover": {
-                backgroundColor: "#333333",
-              },
-            }}
-          >
-            Çıkış Yap
-          </Button>
+          {isLoggedIn ? (
+            <Button
+              variant="contained"
+              onClick={signOutUser}
+              className={`${styles.logoutButton} ${styles.navLink}`}
+              sx={{
+                backgroundColor: "#000000",
+                color: "white",
+                fontWeight: 700,
+                padding: "6px 12px",
+                minWidth: "auto",
+                height: "fit-content",
+                "&:hover": {
+                  backgroundColor: "#333333",
+                },
+              }}
+            >
+              Çıkış Yap
+            </Button>
+          ) : null}
         </Box>
       </Toolbar>
 
@@ -196,27 +205,29 @@ function Header() {
               <ListItemText primary={link.label} />
             </ListItem>
           ))}
-          <ListItem>
-            <Button
-              variant="contained"
-              onClick={signOutUser}
-              className={`${styles.logoutButton} ${styles.mobileLogout} ${styles.navLink}`}
-              sx={{
-                backgroundColor: "#000000",
-                color: "white",
-                fontWeight: 700,
-                padding: "6px 12px",
-                minWidth: "auto",
-                height: "fit-content",
-                "&:hover": {
-                  backgroundColor: "#333333",
-                },
-                width: "100%",
-              }}
-            >
-              Çıkış Yap
-            </Button>
-          </ListItem>
+          {isLoggedIn ? (
+            <ListItem>
+              <Button
+                variant="contained"
+                onClick={signOutUser}
+                className={`${styles.logoutButton} ${styles.mobileLogout} ${styles.navLink}`}
+                sx={{
+                  backgroundColor: "#000000",
+                  color: "white",
+                  fontWeight: 700,
+                  padding: "6px 12px",
+                  minWidth: "auto",
+                  height: "fit-content",
+                  "&:hover": {
+                    backgroundColor: "#333333",
+                  },
+                  width: "100%",
+                }}
+              >
+                Çıkış Yap
+              </Button>
+            </ListItem>
+          ) : null}
         </List>
       </Drawer>
     </AppBar>

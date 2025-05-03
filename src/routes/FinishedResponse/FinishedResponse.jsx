@@ -10,12 +10,31 @@ import { Button } from "@mui/material";
 import { ArrowBack, ArrowForward, ArrowBackIos } from "@mui/icons-material";
 import "./frstyle.scss";
 
+// Error Boundary Component
+class DataTableErrorBoundary extends React.Component {
+  state = { hasError: false, error: null };
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <div className="finished-empty-container fade-in pulse">
+        <Empty description="Tablo yüklenirken bir hata oluştu." />
+      </div>;
+    }
+    return this.props.children;
+  }
+}
+
 function FinishedResponse() {
   const pharmacyId = useSelector(selectUserPharmacyId);
   const [isPrevDisabled, setIsPrevDisabled] = useState(true);
   const [isNextDisabled, setIsNextDisabled] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [selectedRows, setSelectedRows] = useState([]); // Added for INDataTable
 
   // Sorgular
   const { data: answeredRequests = [], isLoading: isRequestsLoading } = useGetFinishedRequests(pharmacyId);
@@ -34,7 +53,8 @@ function FinishedResponse() {
     console.log("FinishedResponse.jsx - isDetailsLoading:", isDetailsLoading);
     console.log("FinishedResponse.jsx - isDetailsFetching:", isDetailsFetching);
     console.log("FinishedResponse.jsx - selectedRequest:", selectedRequest);
-  }, [answeredRequests, answeredRequestDetails, detailsError, isDetailsLoading, isDetailsFetching, selectedRequest]);
+    console.log("FinishedResponse.jsx - selectedRows:", selectedRows);
+  }, [answeredRequests, answeredRequestDetails, detailsError, isDetailsLoading, isDetailsFetching, selectedRequest, selectedRows]);
 
   // Responsive kontrol
   useEffect(() => {
@@ -83,15 +103,19 @@ function FinishedResponse() {
               </div>
             ) : answeredRequests.length > 0 ? (
               <div className="finished-table-wrapper fade-in" style={{ width: "100%" }}>
-                <INDataTable
-                  data={answeredRequests}
-                  columns={columns}
-                  rowHoverStyle={{ border: true }}
-                  onRowClick={(row) => {
-                    console.log("onRowClick - row:", row);
-                    setSelectedRequest(row);
-                  }}
-                />
+                <DataTableErrorBoundary>
+                  <INDataTable
+                    data={answeredRequests}
+                    columns={columns}
+                    rowHoverStyle={{ border: true }}
+                    onRowClick={(row) => {
+                      console.log("onRowClick - row:", row);
+                      setSelectedRequest(row);
+                    }}
+                    selectedRows={selectedRows}
+                    setSelectedRows={setSelectedRows}
+                  />
+                </DataTableErrorBoundary>
               </div>
             ) : (
               <div className="finished-empty-container fade-in pulse">
@@ -125,13 +149,17 @@ function FinishedResponse() {
                     <Empty description={<span className="empty-list-text">Talep detayı bulunamadı.</span>} />
                   </div>
                 ) : (
-                  <INDataTable
-                    key={`${selectedRequest?.id}-${selectedRequest?.request_id}`}
-                    data={answeredRequestDetails}
-                    columns={columns_requestDetail}
-                    rowHoverStyle={{ border: true }}
-                    emptyText={<span className="empty-list-text">Talep detayı bulunamadı.</span>}
-                  />
+                  <DataTableErrorBoundary>
+                    <INDataTable
+                      key={`${selectedRequest?.id}-${selectedRequest?.request_id}`}
+                      data={answeredRequestDetails}
+                      columns={columns_requestDetail}
+                      rowHoverStyle={{ border: true }}
+                      emptyText={<span className="empty-list-text">Talep detayı bulunamadı.</span>}
+                      selectedRows={selectedRows}
+                      setSelectedRows={setSelectedRows}
+                    />
+                  </DataTableErrorBoundary>
                 )}
               </div>
 

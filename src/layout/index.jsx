@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
-import { Outlet } from "react-router-dom";
 import "./style.scss";
 import Main from "./Main";
 import Header from "./Header";
@@ -14,7 +13,7 @@ function Layout() {
     const checkAuth = async () => {
       const authCheckResult = await checkUserAuth();
       if (authCheckResult) {
-        window.location.href = "/home";
+        window.location.href = "/welcome";
       }
     };
 
@@ -31,14 +30,8 @@ function Layout() {
       }
     >
       <div className="layout-wrapper">
-        {userLoggedIn ? (
-          <>
-            <Header />
-            <Main />
-          </>
-        ) : (
-          <Public />
-        )}
+        <Header />
+        {userLoggedIn ? <Main /> : <Public />}
       </div>
     </React.Suspense>
   );

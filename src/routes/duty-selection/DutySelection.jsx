@@ -1,72 +1,21 @@
-import React, {
-  useState,
-  useEffect,
-  useMemo,
-  useCallback,
-} from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useSelector } from "react-redux";
 import Flatpickr from "react-flatpickr";
 import { Spin, Empty } from "antd";
 import { useGetPharmacyDuties, useUpdatePharmacyDuty } from "./queries";
 import { selectUserPharmacyId } from "@store/selectors";
-import { useSelector } from "react-redux";
 import dayjs from "dayjs";
 import "dayjs/locale/tr";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
+import Collapse from "@mui/material/Collapse";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import CloseIcon from "@mui/icons-material/Close";
+import { customTrLocale } from "./locale";
 
 import "./dutyStyle.scss";
 import "flatpickr/dist/flatpickr.min.css";
-
-dayjs.locale("tr");
-
-/* Flatpickr Türkçe locale */
-const customTrLocale = {
-  weekdays: {
-    shorthand: ["Paz", "Pzt", "Sal", "Çar", "Per", "Cum", "Cmt"],
-    longhand: [
-      "Pazar",
-      "Pazartesi",
-      "Salı",
-      "Çarşamba",
-      "Perşembe",
-      "Cuma",
-      "Cumartesi",
-    ],
-  },
-  months: {
-    shorthand: [
-      "Oca",
-      "Şub",
-      "Mar",
-      "Nis",
-      "May",
-      "Haz",
-      "Tem",
-      "Ağu",
-      "Eyl",
-      "Eki",
-      "Kas",
-      "Ara",
-    ],
-    longhand: [
-      "Ocak",
-      "Şubat",
-      "Mart",
-      "Nisan",
-      "Mayıs",
-      "Haziran",
-      "Temmuz",
-      "Ağustos",
-      "Eylül",
-      "Ekim",
-      "Kasım",
-      "Aralık",
-    ],
-  },
-  firstDayOfWeek: 1,
-};
 
 export default function DutySelection() {
   /* ---- Data ---- */
@@ -78,6 +27,9 @@ export default function DutySelection() {
   /* ---- State ---- */
   const [selectedDates, setSelectedDates] = useState([]);
   const [currentMonth, setCurrentMonth] = useState(dayjs().format("YYYY-MM"));
+  const [isDutyListExpanded, setIsDutyListExpanded] = useState(true);
+  const [isAddingDuties, setIsAddingDuties] = useState(false); // Track adding state
+  const flatpickrRef = useRef(null);
 
   /* ---- Helpers ---- */
   const dutySet = useMemo(
@@ -111,19 +63,55 @@ export default function DutySelection() {
     setCurrentMonth(newMonth);
   };
 
+  const handleDateChange = (dates) => {
+    const normalizedDates = dates.map((date) =>
+      dayjs(date).format("YYYY-MM-DD")
+    );
+    setSelectedDates(normalizedDates);
+  };
+
   /* Toplu ekle */
-  const addSelectedDuties = useCallback(() => {
+  const addSelectedDuties = useCallback(async () => {
     const toAdd = selectedDates.filter((d) => {
       const key = dayjs(d).format("YYYY-MM-DD");
       return !dutySet.has(key);
     });
 
-    toAdd.forEach((d) =>
-      updateDuty({
-        duty_date: dayjs(d).format("YYYY-MM-DD"),
-        action: "add",
-      })
-    );
+    if (toAdd.length === 0) {
+      setSelectedDates([]);
+      if (flatpickrRef.current?.flatpickr) {
+        flatpickrRef.current.flatpickr.clear();
+      }
+      return;
+    }
+
+    setIsAddingDuties(true);
+    try {
+      const updatePromises = toAdd.map(
+        (d) =>
+          new Promise((resolve, reject) => {
+            updateDuty(
+              { duty_date: dayjs(d).format("YYYY-MM-DD"), action: "add" },
+              {
+                onSuccess: () => resolve(),
+                onError: (error) => reject(error),
+              }
+            );
+          })
+      );
+
+      await Promise.all(updatePromises);
+
+      // Clear selections
+      setSelectedDates([]);
+      if (flatpickrRef.current?.flatpickr) {
+        flatpickrRef.current.flatpickr.clear();
+      }
+    } catch (error) {
+      console.error("Failed to add duties:", error);
+    } finally {
+      setIsAddingDuties(false);
+    }
   }, [selectedDates, dutySet, updateDuty]);
 
   /* Eklenebilir gün sayısı */
@@ -136,7 +124,7 @@ export default function DutySelection() {
     [selectedDates, dutySet]
   );
 
-  /* Seçili günleri ay-bazlı grupla (ör. “Nisan 12, 13, 24”) */
+  /* Seçili günleri ay-bazlı grupla */
   const groupedSelected = useMemo(() => {
     const obj = {};
     selectedDates.forEach((d) => {
@@ -148,6 +136,18 @@ export default function DutySelection() {
     });
     return obj;
   }, [selectedDates, dutySet]);
+
+  /* Debug logging */
+  useEffect(() => {
+    console.log("selectedDates:", selectedDates);
+    console.log("groupedSelected:", groupedSelected);
+    console.log("isAddingDuties:", isAddingDuties);
+  }, [selectedDates, groupedSelected, isAddingDuties]);
+
+  /* Toggle collapsible section */
+  const toggleDutyList = () => {
+    setIsDutyListExpanded((prev) => !prev);
+  };
 
   /* ---------- UI ---------- */
   return (
@@ -163,8 +163,10 @@ export default function DutySelection() {
             ) : (
               <div className="duty-calendar duty-fade-in">
                 <Flatpickr
+                  ref={flatpickrRef}
+                  key={selectedDates.join(",")}
                   value={selectedDates}
-                  onChange={setSelectedDates}
+                  onChange={handleDateChange}
                   onMonthChange={onMonthChange}
                   options={{
                     mode: "multiple",
@@ -175,35 +177,54 @@ export default function DutySelection() {
                   }}
                 />
 
-                {/* Ayın nöbet günleri */}
+                {/* Ayın nöbet günleri (Collapsible) */}
                 <div className="duty-month-duties">
-                  <h3>
+                  <h3
+                    onClick={toggleDutyList}
+                    style={{
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      padding: "8px 0",
+                    }}
+                  >
                     {dayjs(currentMonth + "-01")
                       .locale("tr")
                       .format("MMMM YYYY")}{" "}
                     Nöbet Günleri
+                    <ExpandMoreIcon
+                      style={{
+                        transform: isDutyListExpanded
+                          ? "rotate(180deg)"
+                          : "rotate(0deg)",
+                        transition: "transform 0.2s",
+                        marginLeft: "8px",
+                      }}
+                    />
                   </h3>
-                  {currentMonthDuties.length === 0 ? (
-                    <p>Bu ay nöbet günü yok.</p>
-                  ) : (
-                    <ul>
-                      {currentMonthDuties.map((d) => (
-                        <li key={d.date}>
-                          {d.pretty}
-                          <IconButton
-                            onClick={() =>
-                              updateDuty({ duty_date: d.date, action: "remove" })
-                            }
-                            disabled={isUpdating}
-                            size="small"
-                            className="duty-remove-icon"
-                          >
-                            <CloseIcon fontSize="small" />
-                          </IconButton>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                  <Collapse in={isDutyListExpanded}>
+                    {currentMonthDuties.length === 0 ? (
+                      <p>Bu ay nöbet günü yok.</p>
+                    ) : (
+                      <ul>
+                        {currentMonthDuties.map((d) => (
+                          <li key={d.date}>
+                            {d.pretty}
+                            <IconButton
+                              onClick={() =>
+                                updateDuty({ duty_date: d.date, action: "remove" })
+                              }
+                              disabled={isUpdating}
+                              size="small"
+                              className="duty-remove-icon"
+                            >
+                              <CloseIcon fontSize="small" />
+                            </IconButton>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </Collapse>
                 </div>
               </div>
             )}
@@ -221,7 +242,7 @@ export default function DutySelection() {
                   {/* Kompakt ay satırları */}
                   {Object.entries(groupedSelected).map(([month, days]) => (
                     <div className="compact-month-row" key={month}>
-                      <strong>{month}:&nbsp;</strong>
+                      <strong>{month}: </strong>
                       {days
                         .sort((a, b) => a.dayNo - b.dayNo)
                         .map((d, i) => (
@@ -240,7 +261,7 @@ export default function DutySelection() {
                     variant="contained"
                     startIcon={<AddCircleOutlineIcon />}
                     onClick={addSelectedDuties}
-                    disabled={isUpdating || selectableCount === 0}
+                    disabled={isUpdating || isAddingDuties || selectableCount === 0}
                     sx={{
                       mt: 2,
                       alignSelf: "flex-end",
@@ -256,7 +277,7 @@ export default function DutySelection() {
                   >
                     {selectableCount
                       ? `Nöbet Ekle (${selectableCount})`
-                      : "Eklenebilecek Tarih Yok"}
+                      : "Eklenebilir Tarih Yok"}
                   </Button>
                 </>
               )}

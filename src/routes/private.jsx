@@ -5,12 +5,12 @@ import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 const Request = React.lazy(() => import("./Request"));
 const AnsweredResponse = React.lazy(() => import("./AnsweredResponse"));
 const FinishedResponse = React.lazy(() => import("./FinishedResponse"));
-const Home = React.lazy(() => import("./HomePage"));
+const Home = React.lazy(() => import("./Welcome"));
 const DutySelection = React.lazy(() => import("./duty-selection"));
 
 const privateRoutes = [
   {
-    path: "/home",
+    path: "/welcome",
     element: Home,
     title: "Ana Sayfa",
     pageName: "Home",
@@ -62,7 +62,7 @@ function RenderRoutes() {
   )?.path;
 
   const navigateToDefault = () => {
-    navigate("/home", {
+    navigate("/welcome", {
       state: {
         navigated: true,
       },

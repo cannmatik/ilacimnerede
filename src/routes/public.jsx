@@ -1,8 +1,8 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-const ConfrimUser = React.lazy(() => import ("./ConfrimUser"));
-const resetpassword = React.lazy(() => import ("./resetpassword"));
 
+const ConfrimUser = React.lazy(() => import("./ConfrimUser"));
+const ResetPassword = React.lazy(() => import("./resetpassword"));
 const Login = React.lazy(() => import("./Login"));
 
 const publicRoutes = [
@@ -18,7 +18,7 @@ const publicRoutes = [
   },
   {
     path: "/resetpassword",
-    element: resetpassword,
+    element: ResetPassword,
     title: "Ilacım Nerede Şifre Sıfırlama",
   },
   {
@@ -29,11 +29,24 @@ const publicRoutes = [
 
 function RenderRoutes() {
   return (
-    <Routes>
-      {publicRoutes.map((route) => (
-        <Route key={route.path} path={route.path} element={<route.element />} />
-      ))}
-    </Routes>
+    <React.Suspense
+      fallback={
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <div className="loading-text">Yükleniyor...</div>
+        </div>
+      }
+    >
+      <Routes>
+        {publicRoutes.map((route) => (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={<route.element />}
+          />
+        ))}
+      </Routes>
+    </React.Suspense>
   );
 }
 

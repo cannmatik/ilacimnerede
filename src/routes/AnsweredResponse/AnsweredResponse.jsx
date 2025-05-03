@@ -11,6 +11,26 @@ import "./arstyle.scss";
 import { Button } from "@mui/material";
 import { ArrowBack, ArrowForward, Delete, ArrowBackIos } from "@mui/icons-material";
 
+// Error Boundary Component
+class DataTableErrorBoundary extends React.Component {
+  state = { hasError: false, error: null };
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="answered-empty-container fade-in pulse">
+          <Empty description="Tablo yüklenirken bir hata oluştu." />
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 const AnsweredResponse = () => {
   const pharmacyId = useSelector(selectUserPharmacyId);
   const [isPrevDisabled, setIsPrevDisabled] = useState(true);
@@ -19,6 +39,7 @@ const AnsweredResponse = () => {
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState("");
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [selectedRows, setSelectedRows] = useState([]); // Added for INDataTable
 
   // Sorgular
   const {
@@ -42,7 +63,16 @@ const AnsweredResponse = () => {
     console.log("AnsweredResponse.jsx - isDetailsLoading:", isDetailsLoading);
     console.log("AnsweredResponse.jsx - isDetailsFetching:", isDetailsFetching);
     console.log("AnsweredResponse.jsx - selectedRequest:", selectedRequest);
-  }, [answeredRequests, answeredRequestDetails, detailsError, isDetailsLoading, isDetailsFetching, selectedRequest]);
+    console.log("AnsweredResponse.jsx - selectedRows:", selectedRows);
+  }, [
+    answeredRequests,
+    answeredRequestDetails,
+    detailsError,
+    isDetailsLoading,
+    isDetailsFetching,
+    selectedRequest,
+    selectedRows,
+  ]);
 
   // Yeniden veri çekme
   useEffect(() => {
@@ -135,19 +165,27 @@ const AnsweredResponse = () => {
               </div>
             ) : answeredRequests.length > 0 ? (
               <div className="answered-table-wrapper fade-in" style={{ width: "100%" }}>
-                <INDataTable
-                  data={answeredRequests}
-                  columns={columns}
-                  rowHoverStyle={{ border: true }}
-                  onRowClick={(row) => {
-                    console.log("onRowClick - row:", row);
-                    setSelectedRequest(row); // row.original yerine row kullanılıyor, INDataTable doğrudan row nesnesini geçiriyor
-                  }}
-                />
+                <DataTableErrorBoundary>
+                  <INDataTable
+                    data={answeredRequests}
+                    columns={columns}
+                    rowHoverStyle={{ border: true }}
+                    onRowClick={(row) => {
+                      console.log("onRowClick - row:", row);
+                      setSelectedRequest(row);
+                    }}
+                    selectedRows={selectedRows}
+                    setSelectedRows={setSelectedRows}
+                  />
+                </DataTableErrorBoundary>
               </div>
             ) : (
               <div className="answered-empty-container fade-in pulse">
-                <Empty description={<span className="empty-list-text">Henüz hiçbir talebi cevaplamadınız.</span>} />
+                <Empty
+                  description={
+                    <span className="empty-list-text">Henüz hiçbir talebi cevaplamadınız.</span>
+                  }
+                />
               </div>
             )}
           </Col>
@@ -170,20 +208,32 @@ const AnsweredResponse = () => {
                   </div>
                 ) : detailsError ? (
                   <div className="answered-empty-container fade-in pulse">
-                    <Empty description={`Hata: Detaylar yüklenemedi. ${detailsError.message}`} />
+                    <Empty
+                      description={`Hata: Detaylar yüklenemedi. ${detailsError.message}`}
+                    />
                   </div>
                 ) : !answeredRequestDetails || answeredRequestDetails.length === 0 ? (
                   <div className="answered-empty-container fade-in pulse">
-                    <Empty description={<span className="empty-list-text">Detay bulunamadı. Seçilen talep ID: {selectedRequest?.request_id}</span>} />
+                    <Empty
+                      description={
+                        <span className="empty-list-text">
+                          Detay bulunamadı. Seçilen talep ID: {selectedRequest?.request_id}
+                        </span>
+                      }
+                    />
                   </div>
                 ) : (
-                  <INDataTable
-                    key={`${selectedRequest?.id}-${selectedRequest?.request_id}`}
-                    data={answeredRequestDetails}
-                    columns={columns_requestDetail}
-                    rowHoverStyle={{ border: true }}
-                    emptyText={<span className="empty-list-text">Detay bulunamadı</span>}
-                  />
+                  <DataTableErrorBoundary>
+                    <INDataTable
+                      key={`${selectedRequest?.id}-${selectedRequest?.request_id}`}
+                      data={answeredRequestDetails}
+                      columns={columns_requestDetail}
+                      rowHoverStyle={{ border: true }}
+                      emptyText={<span className="empty-list-text">Detay bulunamadı</span>}
+                      selectedRows={selectedRows}
+                      setSelectedRows={setSelectedRows}
+                    />
+                  </DataTableErrorBoundary>
                 )}
               </div>
 
@@ -243,4 +293,4 @@ const AnsweredResponse = () => {
   );
 };
 
-export default AnsweredResponse;
+export default AnsweredResponse;  

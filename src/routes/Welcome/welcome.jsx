@@ -6,7 +6,7 @@ import "./hpstyle.scss";
 import dayjs from 'dayjs'; // dayjs'i import et
 import 'dayjs/locale/tr'; // Türkçe yerelleştirme
 
-const Home = () => {
+const welcome = () => {
   const [countries, setCountries] = useState([]);
   const navigate = useNavigate();
   const user = useSelector((state) => state.user);
@@ -56,4 +56,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default welcome;

@@ -54,7 +54,7 @@ function INDataTable({
     columns[0]?.accessor || ""
   );
   const [selectedRowIds, setSelectedRowIds] = useState([]);
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+  const [sortConfig, setSortConfig] = useState({ key: "id", direction: "desc" }); // Default: id descending
   const [dateFilter, setDateFilter] = useState(null); // Tarih filtresi için state
   const pharmacy_id = useSelector(selectUserPharmacyId);
 

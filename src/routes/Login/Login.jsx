@@ -4,32 +4,37 @@ import { setSession, setUser } from "./slice";
 import { supabase } from "./useCreateClient";
 import "./style.scss";
 
-// Ant Design components
-import { Button, Modal, message } from "antd";
+// Ant Design for main buttons & messages
+import { Button as AntButton, Modal as AntModal, message } from "antd";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 
-// Logo (placeholder path, replace with actual path)
-import curanodusLogo from "../../assets/curanoduslogo.png";
+// MUI for password-reset dialog
+import { Button as MUIButton, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 
 function Login() {
   const dispatch = useDispatch();
+
+  // Auth & UI states
   const [showPassword, setShowPassword] = useState(false);
   const [registerOpen, setRegisterOpen] = useState(false);
-  const [authView, setAuthView] = useState("sign_in"); // "sign_in" or "forgotten_password"
+  const [authView, setAuthView] = useState("sign_in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
 
+  // Dialog for password-reset feedback
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogTitle, setDialogTitle] = useState("");
+  const [dialogMessage, setDialogMessage] = useState("");
+
   // Splash screen timeout
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 3000); // 3 seconds (0.5s fade-in + 2s visible + 0.5s fade-out)
+    const timer = setTimeout(() => setShowSplash(false), 3000);
     return () => clearTimeout(timer);
   }, []);
 
-  // Fetch pharmacy info
+  // Fetch pharmacy info helper
   const getPharmacyInfo = async (userId) => {
     const { data, error } = await supabase
       .from("pharmacy_user")
@@ -44,51 +49,45 @@ function Login() {
     return data;
   };
 
-  // Auth state listener
+  // Supabase auth listener
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN") {
-        const info = await getPharmacyInfo(session.user.id);
-        if (info) {
-          const updatedUser = {
-            ...session.user,
-            pharmacyId: info.id,
-            pharmacyName: info.pharmacy.name,
-            pharmacyCityId: info.pharmacy.city_id,
-            pharmacyDistrictId: info.pharmacy.district_id,
-            pharmacyNeighbourhoodId: info.pharmacy.neighbourhood_id,
-          };
-          const updatedSession = { ...session, user: updatedUser };
-          dispatch(setSession(updatedSession));
-          dispatch(setUser(updatedUser));
-          window.location.replace("/home");
-        } else {
-          message.error(
-            "Bu sayfa sadece eczacılara özeldir. Lütfen mobil uygulamayı kullanın."
-          );
-          supabase.auth.signOut();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === "SIGNED_IN") {
+          const info = await getPharmacyInfo(session.user.id);
+          if (info) {
+            const updatedUser = {
+              ...session.user,
+              pharmacyId: info.id,
+              pharmacyName: info.pharmacy.name,
+              pharmacyCityId: info.pharmacy.city_id,
+              pharmacyDistrictId: info.pharmacy.district_id,
+              pharmacyNeighbourhoodId: info.pharmacy.neighbourhood_id,
+            };
+            const updatedSession = { ...session, user: updatedUser };
+            dispatch(setSession(updatedSession));
+            dispatch(setUser(updatedUser));
+            window.location.replace("/home");
+          } else {
+            message.error(
+              "Bu sayfa sadece eczacılara özeldir. Lütfen mobil uygulamayı kullanın."
+            );
+            supabase.auth.signOut();
+          }
+        }
+        if (event === "SIGNED_OUT") {
+          localStorage.clear();
+          dispatch({ type: "CLEAR_STORE" });
         }
       }
-      if (event === "SIGNED_OUT") {
-        localStorage.clear();
-        dispatch({ type: "CLEAR_STORE" });
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    );
+    return () => subscription.unsubscribe();
   }, [dispatch]);
 
-  // Handle login with error message translation
+  // Handle login
   const handleLogin = async () => {
     setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       let errorMessage = "Giriş başarısız: Bilinmeyen bir hata oluştu.";
       switch (error.message) {
@@ -102,59 +101,48 @@ function Login() {
           errorMessage = "Giriş başarısız: E-posta adresiniz doğrulanmamış.";
           break;
         default:
-          errorMessage = `Giriş başarısız: ${error.message}`; // Fallback for untranslated errors
+          errorMessage = `Giriş başarısız: ${error.message}`;
       }
       message.error(errorMessage);
     }
     setLoading(false);
   };
 
-  // Handle password reset with error message translation
+  // Handle password reset
   const handlePasswordReset = async () => {
     setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
-    if (error) {
-      let errorMessage = "Şifre sıfırlama başarısız: Bilinmeyen bir hata oluştu.";
-      switch (error.message) {
-        case "User not found":
-          errorMessage = "Şifre sıfırlama başarısız: Kullanıcı bulunamadı.";
-          break;
-        case "Invalid email":
-          errorMessage = "Şifre sıfırlama başarısız: Geçersiz e-posta adresi.";
-          break;
-        default:
-          errorMessage = `Şifre sıfırlama başarısız: ${error.message}`; // Fallback for untranslated errors
-      }
-      message.error(errorMessage);
-    } else {
-      message.success("Şifre sıfırlama bağlantısı e-postanıza gönderildi.");
-      setAuthView("sign_in");
-    }
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/update-password`,
+    });
     setLoading(false);
+
+    if (error) {
+      setDialogTitle("Şifre Sıfırlama Hatası");
+      setDialogMessage(error.message);
+    } else {
+      setDialogTitle("E-posta Gönderildi");
+      setDialogMessage(
+        "Şifre sıfırlama bağlantısı e-postanıza başarıyla gönderildi."
+      );
+    }
+    setDialogOpen(true);
   };
 
-  // Handle form submission on Enter key press
+  // Form submission handler
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (authView === "sign_in") {
-      handleLogin();
-    } else {
-      handlePasswordReset();
-    }
+    authView === "sign_in" ? handleLogin() : handlePasswordReset();
   };
 
+  // Render
   return (
     <>
-      {showSplash && (
-        <div className="splash-screen">
-          <img src={curanodusLogo} alt="Curanodus Logo" className="splash-logo" />
-        </div>
-      )}
+      {showSplash && <div className="splash">Loading...</div>}
       <div className="app-header">
-      <div className="page-title-wrapper">
-         <h1 className="page-title">İlacım Nerede</h1>
-         <h1 className="page-title">Eczacı Paneli</h1>
-      </div>
+        <div className="page-title-wrapper">
+          <h1 className="page-title">İlacım Nerede</h1>
+          <h1 className="page-title">Eczacı Paneli</h1>
+        </div>
         <form onSubmit={handleSubmit} className="auth-wrapper">
           {authView === "sign_in" ? (
             <>
@@ -184,7 +172,7 @@ function Login() {
                   {showPassword ? <EyeTwoTone /> : <EyeInvisibleOutlined />}
                 </span>
               </div>
-              <Button
+              <AntButton
                 type="primary"
                 htmlType="submit"
                 className="auth-button"
@@ -192,23 +180,23 @@ function Login() {
                 block
               >
                 {loading ? "Giriş Yapılıyor..." : "Giriş Yap"}
-              </Button>
-              <Button
+              </AntButton>
+              <AntButton
                 type="primary"
                 className="auth-button"
                 onClick={() => setRegisterOpen(true)}
                 block
               >
                 Eczacı Kaydı
-              </Button>
-              <Button
+              </AntButton>
+              <AntButton
                 type="primary"
                 className="auth-button"
                 onClick={() => setAuthView("forgotten_password")}
                 block
               >
                 Parolamı Unuttum
-              </Button>
+              </AntButton>
             </>
           ) : (
             <>
@@ -222,7 +210,7 @@ function Login() {
                   required
                 />
               </div>
-              <Button
+              <AntButton
                 type="primary"
                 htmlType="submit"
                 className="auth-button"
@@ -230,25 +218,26 @@ function Login() {
                 block
               >
                 {loading ? "Gönderiliyor..." : "Şifre sıfırlama talimatları gönder"}
-              </Button>
-              <Button
+              </AntButton>
+              <AntButton
                 type="default"
                 className="auth-button secondary-button"
                 onClick={() => setAuthView("sign_in")}
                 block
               >
                 Giriş Ekranına Dön
-              </Button>
+              </AntButton>
             </>
           )}
         </form>
 
-        <Modal
+        {/* Eczacı kaydı modal */}
+        <AntModal
           title="Eczane Kaydı"
           open={registerOpen}
           onCancel={() => setRegisterOpen(false)}
           footer={[
-            <Button
+            <AntButton
               key="close"
               type="primary"
               className="auth-button"
@@ -256,7 +245,7 @@ function Login() {
               block
             >
               Kapat
-            </Button>,
+            </AntButton>
           ]}
           width={400}
         >
@@ -274,13 +263,35 @@ function Login() {
             </li>
             <li>WhatsApp: +90 545 519 11 99</li>
           </ul>
-        </Modal>
+        </AntModal>
+
+        {/* Password-reset feedback dialog */}
+        <Dialog
+          open={dialogOpen}
+          onClose={() => setDialogOpen(false)}
+          aria-labelledby="reset-dialog-title"
+        >
+          <DialogTitle id="reset-dialog-title">{dialogTitle}</DialogTitle>
+          <DialogContent>{dialogMessage}</DialogContent>
+          <DialogActions>
+            <MUIButton
+              onClick={() => {
+                setDialogOpen(false);
+                if (dialogTitle === "E-posta Gönderildi") {
+                  setAuthView("sign_in");
+                }
+              }}
+            >
+              Tamam
+            </MUIButton>
+          </DialogActions>
+        </Dialog>
 
         <p className="info-text">
-          Bu panel sadece eczacılar içindir. İlaç arayan kullanıcılar lütfen mobil uygulamamızı kullanın.{" "}
-          <a href="https://www.ilacimnerede.com">www.ilacimnerede.com</a>{" "}
-          Web sitesi üzerinden uygulamamız ile ilgili bilgi alıp uygulamamızı
-          indirebilirsiniz.
+          Bu panel sadece eczacılar içindir. İlaç arayan kullanıcılar lütfen
+          mobil uygulamamızı kullanın. <a href="https://www.ilacimnerede.com">
+          www.ilacimnerede.com</a> Web sitesi üzerinden uygulamamız ile ilgili bilgi alıp
+          uygulamamızı indirebilirsiniz.
         </p>
 
         <footer className="footer">
@@ -289,10 +300,7 @@ function Login() {
               Esentepe Mah. Talatpaşa Cad. No: 5/1 (Harman Sok. Girişi) Şişli / İstanbul
             </a>
           </p>
-          <p>
-            ©2025, CuraNodus Yazılım Teknolojileri Limited Şirketi. Tüm Hakları
-            Saklıdır.
-          </p>
+          <p>©2025, CuraNodus Yazılım Teknolojileri Limited Şirketi. Tüm Hakları Saklıdır.</p>
         </footer>
       </div>
     </>

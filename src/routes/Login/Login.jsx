@@ -21,67 +21,86 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showSplash, setShowSplash] = useState(true);
-
-  // Dialog for error and password-reset feedback
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogTitle, setDialogTitle] = useState("");
   const [dialogMessage, setDialogMessage] = useState("");
+  const [infoPopupOpen, setInfoPopupOpen] = useState(true); // Yeni popup state'i
 
-  // Splash screen timeout
+  // Vercel Analytics koşullu yükleme
   useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 1500); // Süre 1.5 saniyeye düşürüldü
-    return () => clearTimeout(timer);
+    if (import.meta.env.PROD) {
+      try {
+        import('@vercel/analytics').then((analytics) => {
+          analytics.track('pageview');
+        });
+        import('@vercel/speed-insights').then((speedInsights) => {
+          speedInsights.track();
+        });
+      } catch (error) {
+        console.warn('Analytics veya Speed Insights yüklenemedi:', error);
+      }
+    }
   }, []);
 
   // Fetch pharmacy info helper
   const getPharmacyInfo = async (userId) => {
-    const { data, error } = await supabase
-      .from("pharmacy_user")
-      .select("id, pharmacy (name, city_id, district_id, neighbourhood_id)")
-      .eq("uuid", userId)
-      .single();
-    if (error) {
-      console.error("Eczane bilgisi alınamadı:", error);
+    try {
+      const { data, error } = await supabase
+        .from("pharmacy_user")
+        .select("id, pharmacy (name, city_id, district_id, neighbourhood_id)")
+        .eq("uuid", userId)
+        .single();
+      if (error) {
+        throw new Error(`Eczane bilgisi alınamadı: ${error.message}`);
+      }
+      return data;
+    } catch (error) {
+      console.error(error);
       setDialogTitle("Hata");
       setDialogMessage("Eczane bilgileri alınırken hata oluştu.");
       setDialogOpen(true);
       return null;
     }
-    return data;
   };
 
   // Supabase auth listener
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (event === "SIGNED_IN") {
-          const info = await getPharmacyInfo(session.user.id);
-          if (info) {
-            const updatedUser = {
-              ...session.user,
-              pharmacyId: info.id,
-              pharmacyName: info.pharmacy.name,
-              pharmacyCityId: info.pharmacy.city_id,
-              pharmacyDistrictId: info.pharmacy.district_id,
-              pharmacyNeighbourhoodId: info.pharmacy.neighbourhood_id,
-            };
-            const updatedSession = { ...session, user: updatedUser };
-            dispatch(setSession(updatedSession));
-            dispatch(setUser(updatedUser));
-            window.location.replace("/home");
-          } else {
-            setDialogTitle("Hata");
-            setDialogMessage(
-              "Bu sayfa sadece eczacılara özeldir. Lütfen mobil uygulamayı kullanın."
-            );
-            setDialogOpen(true);
-            supabase.auth.signOut();
+        try {
+          if (event === "SIGNED_IN") {
+            const info = await getPharmacyInfo(session.user.id);
+            if (info) {
+              const updatedUser = {
+                ...session.user,
+                pharmacyId: info.id,
+                pharmacyName: info.pharmacy.name,
+                pharmacyCityId: info.pharmacy.city_id,
+                pharmacyDistrictId: info.pharmacy.district_id,
+                pharmacyNeighbourhoodId: info.pharmacy.neighbourhood_id,
+              };
+              const updatedSession = { ...session, user: updatedUser };
+              dispatch(setSession(updatedSession));
+              dispatch(setUser(updatedUser));
+              window.location.replace("/home");
+            } else {
+              setDialogTitle("Hata");
+              setDialogMessage(
+                "Bu sayfa sadece eczacılara özeldir. Lütfen mobil uygulamayı kullanın."
+              );
+              setDialogOpen(true);
+              await supabase.auth.signOut();
+            }
           }
-        }
-        if (event === "SIGNED_OUT") {
-          localStorage.clear();
-          dispatch({ type: "CLEAR_STORE" });
+          if (event === "SIGNED_OUT") {
+            localStorage.clear();
+            dispatch({ type: "CLEAR_STORE" });
+          }
+        } catch (error) {
+          console.error("Auth state change hatası:", error);
+          setDialogTitle("Hata");
+          setDialogMessage("Oturum işlemi sırasında bir hata oluştu.");
+          setDialogOpen(true);
         }
       }
     );
@@ -91,8 +110,15 @@ function Login() {
   // Handle login
   const handleLogin = async () => {
     setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        console.error("Supabase auth error:", error);
+        throw error;
+      }
+      console.log("Login successful:", data);
+    } catch (error) {
+      console.error("Login error:", error.message);
       let errorMessage = "Giriş başarısız: Bilinmeyen bir hata oluştu.";
       switch (error.message) {
         case "Invalid login credentials":
@@ -110,28 +136,32 @@ function Login() {
       setDialogTitle("Giriş Hatası");
       setDialogMessage(errorMessage);
       setDialogOpen(true);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // Handle password reset
   const handlePasswordReset = async () => {
     setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/update-password`,
-    });
-    setLoading(false);
-
-    if (error) {
-      setDialogTitle("Şifre Sıfırlama Hatası");
-      setDialogMessage(error.message);
-    } else {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/update-password`,
+      });
+      if (error) {
+        throw error;
+      }
       setDialogTitle("E-posta Gönderildi");
       setDialogMessage(
         "Şifre sıfırlama bağlantısı e-postanıza başarıyla gönderildi. Lütfen gelen kutunuzu ve spam klasörünüzü kontrol edin."
       );
+    } catch (error) {
+      setDialogTitle("Şifre Sıfırlama Hatası");
+      setDialogMessage(error.message);
+    } finally {
+      setLoading(false);
+      setDialogOpen(true);
     }
-    setDialogOpen(true);
   };
 
   // Form submission handler
@@ -143,9 +173,8 @@ function Login() {
   // Render
   return (
     <>
-      {showSplash && <div className="splash-screen">Loading...</div>}
       <div className="app-header">
-        <div className="page-title-wrapper">
+        <div className="page-title-wrapper" style={{ marginBottom: '24px' }}>
           <h1 className="page-title">İlacım Nerede</h1>
           <h1 className="page-title">Eczacı Paneli</h1>
         </div>
@@ -158,6 +187,13 @@ function Login() {
                   placeholder="E-posta adresiniz"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onBlur={(e) => {
+                    if (!e.target.value.includes("@")) {
+                      setDialogTitle("Hata");
+                      setDialogMessage("Geçerli bir e-posta adresi girin.");
+                      setDialogOpen(true);
+                    }
+                  }}
                   className="auth-input"
                   required
                 />
@@ -180,7 +216,7 @@ function Login() {
               </div>
               <AntButton
                 type="primary"
-                htmlType="submit"
+                onClick={handleSubmit}
                 className="auth-button"
                 loading={loading}
                 block
@@ -271,6 +307,33 @@ function Login() {
           </ul>
         </AntModal>
 
+        {/* Info popup */}
+        <AntModal
+          title="Bilgilendirme"
+          open={infoPopupOpen}
+          onCancel={() => setInfoPopupOpen(false)}
+          footer={[
+            <AntButton
+              key="ok"
+              type="primary"
+              className="auth-button"
+              onClick={() => setInfoPopupOpen(false)}
+              block
+            >
+              Tamam
+            </AntButton>,
+          ]}
+          width={400}
+        >
+          <p>
+            Bu panel sadece eczacılar içindir. İlaç arayan kullanıcılar lütfen
+            mobil uygulamamızı kullanın.{" "}
+            <a href="https://www.ilacimnerede.com">www.ilacimnerede.com</a> Web
+            sitesi üzerinden uygulamamız ile ilgili bilgi alıp uygulamamızı
+            indirebilirsiniz.
+          </p>
+        </AntModal>
+
         {/* Error and password-reset feedback dialog */}
         <Dialog
           open={dialogOpen}
@@ -297,14 +360,6 @@ function Login() {
             </MUIButton>
           </DialogActions>
         </Dialog>
-
-        <p className="info-text">
-          Bu panel sadece eczacılar içindir. İlaç arayan kullanıcılar lütfen
-          mobil uygulamamızı kullanın.{" "}
-          <a href="https://www.ilacimnerede.com">www.ilacimnerede.com</a> Web
-          sitesi üzerinden uygulamamız ile ilgili bilgi alıp uygulamamızı
-          indirebilirsiniz.
-        </p>
 
         <footer className="footer">
           <p>

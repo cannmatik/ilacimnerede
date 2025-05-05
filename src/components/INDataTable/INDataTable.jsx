@@ -17,14 +17,15 @@ import {
   CircularProgress,
   IconButton,
 } from "@mui/material";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { useSelector } from "react-redux";
 import { selectUserPharmacyId } from "@store/selectors";
 import { Clear as ClearIcon } from "@mui/icons-material";
 import dayjs from "dayjs";
 
-// İç içe nesneler için değer alma (örneğin, medicine.name)
+// İç içe nesneler için değer alma
 const getNestedValue = (obj, path) => {
   try {
     return path.split(".").reduce((acc, part) => acc && acc[part], obj);
@@ -42,23 +43,25 @@ function INDataTable({
   setSelectedRows,
   unSelectAllOnClick,
   unSelectAllOnTabChange,
-  selectedRequest,
   onRowClick,
   rowHoverStyle,
   isLoading,
   bufferedMedicines,
   deleteFromResponseBuffer,
+  defaultSort, // Yeni prop: Varsayılan sıralama
 }) {
   const [globalFilter, setGlobalFilter] = useState("");
   const [selectedFilterColumn, setSelectedFilterColumn] = useState(
     columns[0]?.accessor || ""
   );
   const [selectedRowIds, setSelectedRowIds] = useState([]);
-  const [sortConfig, setSortConfig] = useState({ key: "id", direction: "desc" }); // Default: id descending
-  const [dateFilter, setDateFilter] = useState(null); // Tarih filtresi için state
+  const [sortConfig, setSortConfig] = useState(
+    defaultSort || { key: null, direction: null } // Varsayılan sıralama prop ile ayarlanıyor
+  );
+  const [dateFilter, setDateFilter] = useState(null);
   const pharmacy_id = useSelector(selectUserPharmacyId);
 
-  // Veri ve sütun logları (hata ayıklama için)
+  // Veri ve sütun logları
   useEffect(() => {
     console.log("INDataTable - veri:", data);
     console.log("INDataTable - sütunlar:", columns);
@@ -66,13 +69,16 @@ function INDataTable({
     console.log("INDataTable - bufferedMedicines:", bufferedMedicines);
     console.log("INDataTable - globalFilter:", globalFilter);
     console.log("INDataTable - dateFilter:", dateFilter);
-  }, [data, columns, checkboxed, bufferedMedicines, globalFilter, dateFilter]);
+    console.log("INDataTable - sortConfig:", sortConfig);
+  }, [data, columns, checkboxed, bufferedMedicines, globalFilter, dateFilter, sortConfig]);
 
   // Seçili satırları güncelle
   useEffect(() => {
-    const checkedRows = data.filter((row) => selectedRowIds.includes(row.id));
-    console.log("Seçili satırlar güncellendi:", checkedRows);
-    setSelectedRows(checkedRows);
+    if (setSelectedRows) {
+      const checkedRows = data.filter((row) => selectedRowIds.includes(row.id));
+      console.log("Seçili satırlar güncellendi:", checkedRows);
+      setSelectedRows(checkedRows);
+    }
   }, [selectedRowIds, data, setSelectedRows]);
 
   // unSelectAllOnTabChange değiştiğinde seçimi sıfırla
@@ -95,30 +101,30 @@ function INDataTable({
 
   // Filtreleme mantığı
   const filteredData = data.filter((row) => {
-    // Metin bazlı arama
     if (globalFilter && !dateFilter) {
       const value = getNestedValue(row, selectedFilterColumn);
       return value?.toString().toLowerCase().includes(globalFilter.toLowerCase());
     }
-
-    // Tarih bazlı arama (create_date sütunu için)
     if (dateFilter && selectedFilterColumn === "create_date") {
       const selectedDate = dayjs(dateFilter).format("YYYY-MM-DD");
       const rowDate = dayjs(row.create_date).format("YYYY-MM-DD");
       console.log("Tarih filtresi - selectedDate:", selectedDate, "rowDate:", rowDate);
       return rowDate === selectedDate;
     }
-
-    // Filtre yoksa tüm veriyi döndür
     return true;
   });
 
   // Sıralama mantığı
   const sortedData = [...filteredData].sort((a, b) => {
-    if (!sortConfig.key || !sortConfig.direction) return 0; // Sıralama yoksa orijinal sırayı koru
+    if (!sortConfig.key) return 0;
     const aValue = getNestedValue(a, sortConfig.key);
     const bValue = getNestedValue(b, sortConfig.key);
     if (!aValue || !bValue) return 0;
+    if (sortConfig.key === "id" && typeof aValue === "number" && typeof bValue === "number") {
+      // ID için sayısal karşılaştırma
+      return sortConfig.direction === "asc" ? aValue - bValue : bValue - aValue;
+    }
+    // Diğer sütunlar için string karşılaştırma
     if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
     if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
     return 0;
@@ -127,16 +133,11 @@ function INDataTable({
   // Sıralama işleyici
   const handleSort = (key) => {
     console.log("Sıralama tetiklendi:", key);
-    setSortConfig((prev) => {
-      if (prev.key === key) {
-        if (prev.direction === "asc") {
-          return { key, direction: "desc" }; // Artandan azalana geç
-        } else if (prev.direction === "desc") {
-          return { key: null, direction: null }; // Sıralamayı sıfırla
-        }
-      }
-      return { key, direction: "asc" }; // İlk tıklama artan
-    });
+    setSortConfig((prev) => ({
+      key,
+      direction:
+        prev.key === key && prev.direction === "asc" ? "desc" : "asc",
+    }));
   };
 
   // Satır tıklama işleyici
@@ -180,14 +181,13 @@ function INDataTable({
 
   return (
     <Box className="ilacimNerede-data-table-container">
-      {/* Filtreleme alanı */}
-      <Box className="table-filter-container" sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "nowrap" }}>
+      <Box className="table-filter-container">
         <Select
           value={selectedFilterColumn}
           onChange={(e) => {
             setSelectedFilterColumn(e.target.value);
-            setGlobalFilter(""); // Sütun değiştiğinde metin filtresini sıfırla
-            setDateFilter(null); // Sütun değiştiğinde tarih filtresini sıfırla
+            setGlobalFilter("");
+            setDateFilter(null);
           }}
           size="small"
           className="table-filter-select"
@@ -200,15 +200,21 @@ function INDataTable({
         </Select>
         {selectedFilterColumn === "create_date" ? (
           <Box display="flex" alignItems="center" gap={1}>
-            <DatePicker
-              selected={dateFilter}
-              onChange={(date) => setDateFilter(date)}
-              dateFormat="dd/MM/yyyy"
-              placeholderText="Tarih Seçin"
-              className="table-filter-datepicker"
-              wrapperClassName="table-filter-datepicker-wrapper"
-              style={{ height: "40px", fontSize: "14px" }} // Inline stil ek olarak
-            />
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DatePicker
+                value={dateFilter}
+                onChange={(newValue) => setDateFilter(newValue)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    size="small"
+                    className="table-filter-textfield"
+                    placeholder="Tarih Seçin"
+                  />
+                )}
+                format="DD/MM/YYYY"
+              />
+            </LocalizationProvider>
             {dateFilter && (
               <IconButton onClick={clearDateFilter} size="small">
                 <ClearIcon />
@@ -226,7 +232,6 @@ function INDataTable({
         )}
       </Box>
 
-      {/* Tablo */}
       <TableContainer component={Paper} sx={{ boxShadow: 0, border: "1px solid #dde1e7", borderRadius: 2 }}>
         <Table stickyHeader sx={{ tableLayout: "auto" }}>
           <TableHead>
@@ -252,11 +257,12 @@ function INDataTable({
                     maxWidth: { xs: 100, sm: 150 },
                     overflow: "hidden",
                     textOverflow: "ellipsis",
+                    textAlign: column.accessor === "action" ? "center" : undefined,
                   }}
                   data-column={column.accessor}
                 >
                   {column.header}
-                  {sortConfig.key === column.accessor && sortConfig.direction &&
+                  {sortConfig.key === column.accessor &&
                     (sortConfig.direction === "asc" ? " 🔼" : " 🔽")}
                 </TableCell>
               ))}
@@ -282,8 +288,8 @@ function INDataTable({
               <TableRow
                 key={row.id}
                 onClick={() => handleRowClick(row)}
-                onDoubleClick={() => toggleRowSelection(row.id)}
-                className={selectedRowIds.includes(row.id) && checkboxed ? "selected-row" : checkboxed ? "unselected-row" : ""}
+                onDoubleClick={() => checkboxed && toggleRowSelection(row.id)}
+                className={row.className || ""} // rowClassName prop'unu destekle
                 sx={{
                   cursor: "pointer",
                   backgroundColor: selectedRowIds.includes(row.id) && checkboxed
@@ -301,15 +307,18 @@ function INDataTable({
                 {columns.map((column) => {
                   let cellContent;
                   if (column.Cell) {
-                    const cellResult = column.Cell({ row, value: getNestedValue(row, column.accessor) });
+                    const cellResult = column.Cell({
+                      row,
+                      value: getNestedValue(row, column.accessor),
+                    });
                     cellContent = cellResult !== undefined && cellResult !== null ? cellResult : "-";
                   } else {
                     cellContent = getNestedValue(row, column.accessor) || "-";
                   }
-                  console.log(`Hücre içeriği - column.accessor: ${column.accessor}, cellContent:`, cellContent);
                   return (
                     <TableCell
                       key={column.accessor}
+                      align={column.accessor === "action" ? "center" : undefined}
                       sx={{
                         fontSize: { xs: 12, sm: 14 },
                         padding: { xs: "6px 8px", sm: "8px 15px" },
@@ -344,7 +353,11 @@ function INDataTable({
                       checked={selectedRowIds.includes(row.id)}
                       onChange={() => toggleRowSelection(row.id)}
                       onClick={(e) => e.stopPropagation()}
-                      className={selectedRowIds.includes(row.id) ? "selected-row-checkbox" : "unselected-row-checkbox"}
+                      className={
+                        selectedRowIds.includes(row.id)
+                          ? "selected-row-checkbox"
+                          : "unselected-row-checkbox"
+                      }
                       sx={{
                         color: "#333 !important",
                         "&.Mui-checked": {
@@ -370,7 +383,6 @@ INDataTable.propTypes = {
   setSelectedRows: PropTypes.func,
   unSelectAllOnClick: PropTypes.bool,
   unSelectAllOnTabChange: PropTypes.string,
-  checkedActionsBar: PropTypes.node,
   onRowClick: PropTypes.func,
   rowHoverStyle: PropTypes.shape({
     background: PropTypes.bool,
@@ -384,15 +396,18 @@ INDataTable.propTypes = {
     })
   ),
   deleteFromResponseBuffer: PropTypes.func,
+  defaultSort: PropTypes.shape({ // Yeni prop için PropTypes
+    key: PropTypes.string,
+    direction: PropTypes.oneOf(["asc", "desc"]),
+  }),
 };
 
 INDataTable.defaultProps = {
   data: [],
   checkboxed: false,
-  setSelectedRows: () => {},
+  setSelectedRows: null,
   unSelectAllOnClick: false,
   unSelectAllOnTabChange: "",
-  checkedActionsBar: null,
   onRowClick: () => {},
   rowHoverStyle: {
     background: true,
@@ -401,6 +416,7 @@ INDataTable.defaultProps = {
   isLoading: false,
   bufferedMedicines: [],
   deleteFromResponseBuffer: () => {},
+  defaultSort: { key: null, direction: null }, // Varsayılan sıralama
 };
 
 export default INDataTable;

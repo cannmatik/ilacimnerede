@@ -7,6 +7,7 @@ import {
 } from "@store/selectors";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
+import { message, App } from "antd";
 import React, { useState, useMemo, useEffect } from "react";
 import moment from "moment";
 import "moment/locale/tr";
@@ -19,6 +20,7 @@ const REQUEST_KEYS = {
   ALL: ["Request", "requests"],
   DETAIL: (id) => ["Request", "requestDetails", id],
   BUFFER: (pharmacy_id) => ["Request", "responseBuffer", pharmacy_id],
+  HIDDEN: (pharmacy_id) => ["Request", "hiddenRequests", pharmacy_id],
 };
 
 /**
@@ -64,11 +66,30 @@ async function fetchRequests({ city_id, neighbourhood_id, district_id, pharmacy_
     return formattedData;
   }
 
+  const { data: hiddenRequests, error: hiddenError } = await supabase
+    .from("hide_request")
+    .select("request_id")
+    .eq("pharmacy_id", pharmacy_id);
+
+  if (hiddenError) {
+    console.log("Gizlenmiş talepleri filtreleme hatası:", hiddenError);
+    return formattedData;
+  }
+
   if (unFinishedRequests && unFinishedRequests.length > 0) {
     formattedData = formattedData.filter(
       (item) =>
         !unFinishedRequests.some(
           (unFinishedRequest) => unFinishedRequest.request_id === item.id
+        )
+    );
+  }
+
+  if (hiddenRequests && hiddenRequests.length > 0) {
+    formattedData = formattedData.filter(
+      (item) =>
+        !hiddenRequests.some(
+          (hiddenRequest) => hiddenRequest.request_id === item.id
         )
     );
   }
@@ -131,6 +152,32 @@ async function getResponseBuffer({ queryKey }) {
 }
 
 /**
+ * Eczanenin gizlenmiş taleplerini getir
+ */
+async function getHiddenRequests({ queryKey }) {
+  const pharmacy_id = queryKey[2];
+  console.log("getHiddenRequests - pharmacy_id:", pharmacy_id);
+  const { data, error } = await supabase
+    .from("hide_request")
+    .select("request_id, request (id, create_date, message_text)")
+    .eq("pharmacy_id", pharmacy_id);
+
+  if (error) {
+    console.error("Gizlenmiş talepler getirme hatası:", error);
+    return [];
+  }
+
+  console.log("getHiddenRequests verisi:", data);
+
+  return data.map((item) => ({
+    request_id: item.request_id,
+    id: item.request?.id || item.request_id,
+    create_date: item.request?.create_date ? moment(item.request.create_date).toISOString() : null,
+    message_text: item.request?.message_text || "Mesaj yok",
+  })) || [];
+}
+
+/**
  * response_buffer'dan belirli bir ilacı sil
  */
 async function deleteFromResponseBuffer({ pharmacy_id, medicine_id }) {
@@ -146,6 +193,40 @@ async function deleteFromResponseBuffer({ pharmacy_id, medicine_id }) {
     throw new Error(`response_buffer silme hatası: ${error.message}`);
   }
   console.log("response_buffer'dan başarıyla silindi:", { pharmacy_id, medicine_id });
+}
+
+/**
+ * hide_request tablosuna talep ekle
+ */
+async function hideRequest({ request_id, pharmacy_id }) {
+  console.log("hideRequest çağrıldı:", { request_id, pharmacy_id });
+  const { error } = await supabase
+    .from("hide_request")
+    .insert({ request_id, pharmacy_id });
+
+  if (error) {
+    console.error("hideRequest hatası:", error);
+    throw new Error(`Talep gizleme hatası: ${error.message}`);
+  }
+  console.log("Talep başarıyla gizlendi:", { request_id, pharmacy_id });
+}
+
+/**
+ * hide_request tablosundan talep sil
+ */
+async function deleteHiddenRequest({ request_id, pharmacy_id }) {
+  console.log("deleteHiddenRequest çağrıldı:", { request_id, pharmacy_id });
+  const { error } = await supabase
+    .from("hide_request")
+    .delete()
+    .eq("request_id", request_id)
+    .eq("pharmacy_id", pharmacy_id);
+
+  if (error) {
+    console.error("deleteHiddenRequest hatası:", error);
+    throw new Error(`Gizlenmiş talep silme hatası: ${error.message}`);
+  }
+  console.log("Gizlenmiş talep başarıyla silindi:", { request_id, pharmacy_id });
 }
 
 /**
@@ -166,7 +247,6 @@ function showNewRequestNotification(newRow) {
 
 /**
  * Talep yanıtını işle, response, response_item ve response_buffer tablolarını güncelle
- * Ayrıca notifications tablosuna bildirim ekle
  */
 async function responseRequest(finalData, response) {
   try {
@@ -422,6 +502,59 @@ export const useGetResponseBuffer = () => {
 };
 
 /**
+ * Hook: Eczanenin gizlenmiş taleplerini getir
+ */
+export const useGetHiddenRequests = () => {
+  const pharmacy_id = useSelector(selectUserPharmacyId);
+  return useQuery(
+    REQUEST_KEYS.HIDDEN(pharmacy_id),
+    () => getHiddenRequests({ queryKey: REQUEST_KEYS.HIDDEN(pharmacy_id) }),
+    {
+      enabled: !!pharmacy_id,
+    }
+  );
+};
+
+/**
+ * Hook: Talep gizleme mutasyonu
+ */
+export const useHideRequest = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ({ request_id, pharmacy_id }) => hideRequest({ request_id, pharmacy_id }),
+    {
+      onSuccess: () => {
+        message.success({ content: "Talep başarıyla gizlendi!", key: "hideRequest" });
+        queryClient.invalidateQueries(REQUEST_KEYS.ALL);
+        queryClient.invalidateQueries(REQUEST_KEYS.HIDDEN);
+      },
+      onError: (error) => {
+        message.error({ content: "Talep gizlenirken hata oluştu: " + error.message, key: "hideRequest" });
+      },
+    }
+  );
+};
+
+/**
+ * Hook: Gizlenmiş talep silme mutasyonu
+ */
+export const useDeleteHiddenRequest = () => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ({ request_id, pharmacy_id }) => deleteHiddenRequest({ request_id, pharmacy_id }),
+    {
+      onSuccess: () => {
+        message.success({ content: "Gizlenmiş talep başarıyla silindi!", key: "deleteHiddenRequest" });
+        queryClient.invalidateQueries(REQUEST_KEYS.HIDDEN);
+      },
+      onError: (error) => {
+        message.error({ content: "Gizlenmiş talep silinirken hata oluştu: " + error.message, key: "deleteHiddenRequest" });
+      },
+    }
+  );
+};
+
+/**
  * Hook: Talep yanıtlama mutasyonu
  */
 export const useResponseRequest = () => {
@@ -430,14 +563,12 @@ export const useResponseRequest = () => {
     ({ finalData, response }) => responseRequest(finalData, response),
     {
       onSuccess: () => {
-        console.log("useResponseRequest - Talep başarıyla yanıtlandı, bildirim Request.jsx tarafından gösterilecek.");
+        message.success({ content: "Talep başarıyla yanıtlandı!", key: "responseRequest" });
         queryClient.invalidateQueries(REQUEST_KEYS.ALL);
         queryClient.invalidateQueries(REQUEST_KEYS.BUFFER);
       },
       onError: (error) => {
-        console.log("useResponseRequest - Talep yanıtlanırken hata oluştu, bildirim Request.jsx tarafından gösterilecek:", error.message);
-        queryClient.invalidateQueries(REQUEST_KEYS.ALL);
-        queryClient.invalidateQueries(REQUEST_KEYS.BUFFER);
+        message.error({ content: "Talep yanıtlanırken hata oluştu: " + error.message, key: "responseRequest" });
       },
     }
   );
@@ -452,12 +583,11 @@ export const useDeleteFromResponseBuffer = () => {
     ({ pharmacy_id, medicine_id }) => deleteFromResponseBuffer({ pharmacy_id, medicine_id }),
     {
       onSuccess: () => {
-        console.log("useDeleteFromResponseBuffer - İlaç geçici stok listesinden kaldırıldı, bildirim Request.jsx tarafından gösterilecek.");
+        message.success({ content: "İlaç geçici stok listesinden kaldırıldı!", key: "deleteFromResponseBuffer" });
         queryClient.invalidateQueries(REQUEST_KEYS.BUFFER);
       },
       onError: (error) => {
-        console.log("useDeleteFromResponseBuffer - İlaç kaldırılırken hata oluştu, bildirim Request.jsx tarafından gösterilecek:", error.message);
-        queryClient.invalidateQueries(REQUEST_KEYS.BUFFER);
+        message.error({ content: "İlaç kaldırılırken hata oluştu: " + error.message, key: "deleteFromResponseBuffer" });
       },
     }
   );

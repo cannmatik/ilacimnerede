@@ -1,10 +1,5 @@
 /* rstyle.scss */
 
-/* Brand Colors */
-$brand-primary: #00C4B4; /* Green */
-$brand-secondary: #ffffff; /* White */
-$brand-text: #333333; /* Dark text */
-
 /* 1) Ana içerik yüksekliği ve üst/alt dolgular */
 .req_main-content {
   min-height: auto;
@@ -97,90 +92,6 @@ $brand-text: #333333; /* Dark text */
     }
   }
 
-  /* Button group for stock list and hidden requests */
-  .req_button-group {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-    @media (max-width: 768px) {
-      flex-direction: column;
-      gap: 8px;
-    }
-  }
-
-  /* Primary buttons (Geçici Stok Listesi, Gizli Talepler) */
-  .req_stock-button,
-  .req_hidden-requests-button {
-    background-color: $brand-primary !important;
-    color: $brand-secondary !important;
-    border: none !important;
-    border-radius: 8px !important;
-    padding: 8px 16px !important;
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    text-transform: none !important;
-    transition: background-color 0.3s ease !important;
-
-    &:hover {
-      background-color: darken($brand-primary, 10%) !important;
-    }
-
-    @media (max-width: 768px) {
-      font-size: 12px !important;
-      padding: 6px 12px !important;
-    }
-  }
-
-  /* Modal styles */
-  .req_stock-modal,
-  .req_hidden-requests-modal {
-    .ant-modal-content {
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-    .ant-modal-header {
-      background-color: #f4f7fb;
-      border-bottom: 1px solid #dde1e7;
-      border-radius: 12px 12px 0 0;
-      padding: 12px 16px;
-    }
-    .ant-modal-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: $brand-text;
-      @media (max-width: 768px) {
-        font-size: 14px;
-      }
-    }
-    .ant-modal-body {
-      padding: 16px;
-      max-height: 60vh;
-      overflow-y: auto;
-    }
-  }
-
-  /* Unhide button in hidden requests modal */
-  .req_unhide-button {
-    background-color: $brand-primary !important;
-    color: $brand-secondary !important;
-    border: none !important;
-    border-radius: 8px !important;
-    padding: 4px 8px !important;
-    font-size: 12px !important;
-    font-weight: 500 !important;
-    text-transform: none !important;
-    transition: background-color 0.3s ease !important;
-
-    &:hover {
-      background-color: darken($brand-primary, 10%) !important;
-    }
-
-    @media (max-width: 768px) {
-      font-size: 10px !important;
-      padding: 3px 6px !important;
-    }
-  }
-
   /* Tablo stilleri (Sol panel için) */
   .MuiTable-root {
     width: 100%;
@@ -197,7 +108,7 @@ $brand-text: #333333; /* Dark text */
     border: 1px solid #dde1e7; /* İnce çerçeve */
     font-size: 14px;
     font-weight: 600;
-    color: $brand-text; /* Firma metin rengi */
+    color: #333; /* Firma metin rengi */
     cursor: pointer;
     transition: all 0.3s ease-in-out;
     white-space: normal;
@@ -244,7 +155,7 @@ $brand-text: #333333; /* Dark text */
     padding: 8px 15px; /* Hücre içindeki boşluk */
     border: 1px solid #dde1e7; /* İnce çerçeve */
     font-size: 14px;
-    color: $brand-text; /* Firma metin rengi */
+    color: #333; /* Firma metin rengi */
     white-space: normal;
     word-break: break-word;
     max-width: 150px; /* Sabit maksimum genişlik */
@@ -278,6 +189,31 @@ $brand-text: #333333; /* Dark text */
 .req_buffer-submenu {
   margin-bottom: 15px;
 
+  .ant-collapse {
+    border: 1px solid #dde1e7; /* Firma çerçeve rengi */
+    border-radius: 12px; /* Yuvarlak köşeler */
+    background-color: #fff; /* Firma arka plan rengi */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Hafif gölge */
+    overflow: hidden; /* Yuvarlak köşeler için taşmayı engelle */
+  }
+
+  .ant-collapse-header {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333; /* Firma metin rengi */
+    padding: 12px 15px !important;
+    background-color: #f4f7fb; /* Başlık için açık gri */
+    border-bottom: 1px solid #dde1e7;
+    transition: background-color 0.3s ease; /* Pürüzsüz geçiş efekti */
+    &:hover {
+      background-color: #e9eff6; /* Hover efekti */
+    }
+    @media (max-width: 768px) {
+      font-size: 12px; /* Mobilde daha küçük font */
+      padding: 10px 12px !important;
+    }
+  }
+
   /* INDataTable içindeki stiller zaten INDataTable.scss içinde tanımlı */
   .ilacimNerede-data-table-container {
     background-color: #e6f7e6; /* Light green background */
@@ -290,9 +226,6 @@ $brand-text: #333333; /* Dark text */
     &[data-column="action"] {
       text-align: center; /* Sil butonunu ortala */
       padding: 8px !important; /* Daha az padding */
-      display: flex;
-      justify-content: center;
-      align-items: center;
       @media (max-width: 768px) {
         padding: 6px !important; /* Mobilde daha az padding */
       }
@@ -321,7 +254,7 @@ $brand-text: #333333; /* Dark text */
     border: 1px solid #dde1e7; /* İnce çerçeve */
     font-size: 14px;
     font-weight: 600;
-    color: $brand-text; /* Firma metin rengi */
+    color: #333; /* Firma metin rengi */
     cursor: pointer;
     transition: all 0.3s ease-in-out;
     white-space: normal;
@@ -365,7 +298,7 @@ $brand-text: #333333; /* Dark text */
     padding: 8px 15px; /* Hücre içindeki boşluk */
     border: 1px solid #dde1e7; /* İnce çerçeve */
     font-size: 14px;
-    color: $brand-text; /* Firma metin rengi */
+    color: #333; /* Firma metin rengi */
     white-space: normal;
     word-break: break-word;
     max-width: 150px; /* Sabit maksimum genişlik */
@@ -435,7 +368,7 @@ $brand-text: #333333; /* Dark text */
   span {
     margin-bottom: 5px;
     font-size: 14px;
-    color: $brand-text;
+    color: #333;
     word-break: break-word; /* Uzun metinlerin sarmasını sağla */
     @media (max-width: 768px) {
       font-size: 12px; /* Mobilde daha küçük font */
@@ -483,80 +416,53 @@ $brand-text: #333333; /* Dark text */
     left: 0;
     right: 0;
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 buton için eşit genişlik */
-    grid-template-rows: auto auto auto; /* Üç satır: üstte 3 buton, ortada Talebi Gizle, altta Geri */
+    grid-template-columns: repeat(4, 1fr); /* 4 buton için eşit genişlik */
+    grid-template-rows: auto auto; /* İki satır: üstte 4 buton, altta Geri butonu */
     gap: 0.5rem;
     padding: 0.5rem 1rem;
     background: #fff !important; /* Mobilde arka plan beyaz */
     box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1) !important; /* Hafif gölge */
     z-index: 1000;
-    min-height: 6rem;
+    min-height: 4rem;
   }
 }
 
-/* Primary buttons (Talebi Yanıtla, Talebi Gizle) */
-.req_action-button {
-  background-color: $brand-primary !important;
-  color: $brand-secondary !important;
-  border: none !important;
-  border-radius: 8px !important;
-  padding: 8px 16px !important;
-  font-size: 14px !important;
-  font-weight: 500 !important;
-  text-transform: none !important;
-  transition: background-color 0.3s ease !important;
-
-  &:hover {
-    background-color: darken($brand-primary, 10%) !important;
-  }
-
+/* Mobilde Butonlar */
+.req_bottom-footer-req .MuiButton-root {
+  font-size: 1rem;
   @media (max-width: 768px) {
-    font-size: 12px !important;
-    padding: 6px 12px !important;
-  }
-}
-
-/* Secondary buttons (Önceki Talep, Sonraki Talep, Geri) */
-.req_nav-button {
-  background-color: $brand-secondary !important;
-  color: $brand-primary !important;
-  border: 1px solid $brand-primary !important;
-  border-radius: 8px !important;
-  padding: 8px 16px !important;
-  font-size: 14px !important;
-  font-weight: 500 !important;
-  text-transform: none !important;
-  transition: background-color 0.3s ease !important;
-
-  &:hover {
-    background-color: lighten($brand-primary, 40%) !important;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 12px !important;
-    padding: 6px 12px !important;
-  }
-}
-
-/* Mobilde "Talebi Gizle" Butonu */
-.req_bottom-footer-req .req_action-button[aria-label="hide-request"] {
-  @media (max-width: 768px) {
-    grid-column: 1 / -1; /* Tüm sütunları kaplar */
-    grid-row: 2; /* İkinci satıra yerleşir */
-    width: 100%; /* Konteynerin tam genişliği */
-    padding: 8px 16px !important;
-    font-size: 12px !important;
+    font-size: 0; /* Metni gizle */
+    padding: 0.4rem;
+    min-width: 0; /* Genişliği simgeye göre ayarla */
+    .MuiButton-startIcon {
+      margin: 0; /* Simgeyi merkeze al */
+    }
+    .MuiButton-endIcon {
+      margin: 0; /* Simgeyi merkeze al */
+    }
+    span:not(.MuiButton-icon) {
+      display: none; /* Metni gizle */
+    }
   }
 }
 
 /* Mobilde "Geri" Butonu */
-.req_bottom-footer-req .req_mobile-back {
+.req_bottom-footer-req .MuiButton-root[aria-label="mobile-back"] {
+  grid-column: 1 / -1; /* Tüm sütunları kaplar */
+  grid-row: 2; /* İkinci satıra yerleşir */
+  width: 100%; /* Konteynerin tam genişliği */
+  padding: 0.9rem;
+  text-align: center;
+  font-size: 1rem;
   @media (max-width: 768px) {
-    grid-column: 1 / -1; /* Tüm sütunları kaplar */
-    grid-row: 3; /* Üçüncü satıra yerleşir */
-    width: 100%; /* Konteynerin tam genişliği */
-    padding: 8px 16px !important;
-    font-size: 12px !important;
+    font-size: 0; /* Metni gizle */
+    padding: 0.7rem;
+    .MuiButton-startIcon {
+      margin: 0; /* Simgeyi merkeze al */
+    }
+    span:not(.MuiButton-icon) {
+      display: none; /* Metni gizle */
+    }
   }
 }
 
@@ -564,7 +470,6 @@ $brand-text: #333333; /* Dark text */
 .req_bottom-footer-req .MuiButton-root.Mui-disabled {
   opacity: 0.5 !important;
   color: #888 !important;
-  border-color: #888 !important;
   pointer-events: none !important;
 }
 

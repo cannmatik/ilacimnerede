@@ -98,4 +98,4 @@ const columns_requestDetail = [
   },
 ];
 
-export { columns, columns_requestDetail };
+export { columns, columns_requestDetail, formatTurkishDate };

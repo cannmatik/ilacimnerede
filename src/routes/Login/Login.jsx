@@ -82,7 +82,7 @@ function Login() {
               const updatedSession = { ...session, user: updatedUser };
               dispatch(setSession(updatedSession));
               dispatch(setUser(updatedUser));
-              window.location.replace("/home");
+              window.location.replace("/welcome");
             } else {
               setDialogTitle("Hata");
               setDialogMessage(

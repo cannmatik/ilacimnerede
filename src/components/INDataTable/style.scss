@@ -45,6 +45,7 @@
     min-width: 150px !important;
     max-width: 150px !important;
     height: 40px !important;
+    z-index: 10000;
     display: flex;
     align-items: center;
 
@@ -134,6 +135,7 @@
   border: 1px solid #dde1e7; /* İnce çerçeve */
   font-size: 14px;
   font-weight: 600;
+  z-index: 100;
   color: #333; /* Firma metin rengi */
   cursor: pointer;
   transition: all 0.3s ease-in-out;

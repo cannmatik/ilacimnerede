@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@routes/Login/useCreateClient";
-import { ilacimNeredeLogo } from "@assets";
+import { ilacimNeredeLogo, curaicon } from "@assets";
 import styles from "./style.module.scss";
 
 // MUI Components
@@ -24,8 +24,17 @@ import CloseIcon from "@mui/icons-material/Close";
 function Header() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
+  console.log("isLoggedIn:", isLoggedIn); // Debug log for visibility issue
+
+  // Determine navbar color and logo based on route
+  const isHomepage = location.pathname === "/homepage";
+  const navbarColor = isHomepage ? "#0097b2" : "#25b597";
+  const logo = isHomepage ? curaicon : ilacimNeredeLogo;
+  const logoAlt = isHomepage ? "CuraNodus Logosu" : "İlacım Nerede Logosu";
+  console.log("isHomepage:", isHomepage, "navbarColor:", navbarColor); // Debug log for color issue
 
   async function signOutUser() {
     try {
@@ -50,6 +59,7 @@ function Header() {
   ];
 
   const publicNavLinks = [
+    { to: "/homepage", label: "Ana Sayfa" },
     { to: "/login", label: "Eczacı Paneli" },
   ];
 
@@ -63,7 +73,11 @@ function Header() {
     <AppBar
       position="fixed"
       className={styles.header}
-      sx={{ backgroundColor: "#25b597 !important" }}
+      sx={{
+        backgroundColor: navbarColor,
+        "&.MuiAppBar-root": { backgroundColor: navbarColor },
+        "& .MuiToolbar-root": { backgroundColor: navbarColor },
+      }}
     >
       <Toolbar
         sx={{
@@ -75,12 +89,12 @@ function Header() {
       >
         {/* Logo */}
         <Box
-          onClick={() => navigate(isLoggedIn ? "/welcome" : "/login")}
+          onClick={() => navigate("/homepage")}
           sx={{ cursor: "pointer", display: "flex", alignItems: "center" }}
         >
           <img
-            src={ilacimNeredeLogo}
-            alt="İlaçım Nerede Logosu"
+            src={logo || ilacimNeredeLogo} // Fallback to ilacimNeredeLogo
+            alt={logoAlt}
             className={styles.logo}
           />
         </Box>
@@ -169,7 +183,10 @@ function Header() {
         open={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
         PaperProps={{
-          sx: { backgroundColor: "#25b597 !important" },
+          sx: {
+            backgroundColor: navbarColor,
+            "&.MuiDrawer-paper": { backgroundColor: navbarColor },
+          },
           className: styles.drawer,
         }}
       >
@@ -205,7 +222,7 @@ function Header() {
               <ListItemText primary={link.label} />
             </ListItem>
           ))}
-          {isLoggedIn ? (
+          {isLoggedIn && (
             <ListItem>
               <Button
                 variant="contained"
@@ -227,7 +244,7 @@ function Header() {
                 Çıkış Yap
               </Button>
             </ListItem>
-          ) : null}
+          )}
         </List>
       </Drawer>
     </AppBar>

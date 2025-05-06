@@ -24,7 +24,10 @@ function Login() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogTitle, setDialogTitle] = useState("");
   const [dialogMessage, setDialogMessage] = useState("");
-  const [infoPopupOpen, setInfoPopupOpen] = useState(true); // Yeni popup state'i
+  // Initialize infoPopupOpen based on localStorage
+  const [infoPopupOpen, setInfoPopupOpen] = useState(
+    !localStorage.getItem("hideInfoPopup")
+  );
 
   // Vercel Analytics koşullu yükleme
   useEffect(() => {
@@ -170,6 +173,12 @@ function Login() {
     authView === "sign_in" ? handleLogin() : handlePasswordReset();
   };
 
+  // Handle "Don't show again" for info popup
+  const handleDontShowAgain = () => {
+    localStorage.setItem("hideInfoPopup", "true");
+    setInfoPopupOpen(false);
+  };
+
   // Render
   return (
     <>
@@ -313,6 +322,15 @@ function Login() {
           open={infoPopupOpen}
           onCancel={() => setInfoPopupOpen(false)}
           footer={[
+            <AntButton
+              key="dont-show"
+              type="default"
+              className="auth-button secondary-button"
+              onClick={handleDontShowAgain}
+              block
+            >
+              Bir Daha Gösterme
+            </AntButton>,
             <AntButton
               key="ok"
               type="primary"

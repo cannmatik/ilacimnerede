@@ -1,16 +1,13 @@
 .header {
-  background-color: #25b597 !important;
+  background-color: #25b597; /* Default color for login and private pages */
   box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
   height: 80px;
 
   .logo {
-    width: 70px;
-    height: auto;
+    height: 70px; /* Slightly smaller to fit navbar */
+    width: auto; /* Maintain aspect ratio */
+    border-radius: 5px; /* Curved corners */
     transition: width 0.3s ease;
-
-    @media (max-width: 768px) {
-      width: 70px;
-    }
   }
 
   .navLink {
@@ -30,7 +27,7 @@
 
   .inactiveLink {
     font-weight: 700;
-    color: black;
+    color: black !important; /* Ensure visibility against both backgrounds */
     text-decoration: none;
   }
 
@@ -43,7 +40,7 @@
   }
 
   .drawer {
-    background-color: #25b597 !important;
+    background-color: #25b597; /* Default color for login and private pages */
     width: 250px;
     padding: 1rem;
   }

@@ -1,0 +1,237 @@
+/* Ana İçerik Alanı: Tüm bölümleri kapsayan ana konteyner */
+.homemain-content {
+    margin-top: 80px; /* Üst kısımda gezinme çubuğu için boşluk */
+    min-height: calc(100vh - 80px); /* Tüm ekran yüksekliğini kaplar, üst boşluk hariç */
+    background: rgba(245, 245, 245, 0.95); /* Hafif şeffaf açık gri arka plan */
+    padding: 48px 16px; /* İç boşluklar */
+    box-sizing: border-box; /* Padding ve border’ı boyut hesaplamasına dahil eder */
+    position: relative; /* Parallax arka plan için konumlandırma */
+    overflow: hidden; /* Taşan içerikleri gizler */
+  }
+  
+  /* Parallax Arka Plan: Sayfaya derinlik katan arka plan resmi */
+  .homeparallax-bg {
+    position: absolute; /* Mutlak konumlandırma */
+    top: 0;
+    left: 0;
+    width: 100%; /* Tüm genişlik */
+    height: 100%; /* Tüm yükseklik */
+    background: url("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80") no-repeat center center; /* Arka plan resmi */
+    background-size: cover; /* Resmi tüm alana yayar */
+    z-index: -1; /* İçeriğin altına yerleştirir */
+    transform: translateZ(0); /* Parallax efekti için */
+  }
+  
+  /* Kartlar: Her bir bölümü (Giriş, Neden CuraNodus, vb.) kapsayan kartlar */
+  .homecard {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Hafif gölge efekti */
+    border-radius: 12px; /* Yuvarlatılmış köşeler */
+    background: rgba(255, 255, 255, 0.95); /* Beyaz, hafif şeffaf arka plan */
+    padding: 24px; /* İç boşluk */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Üzerine gelince geçiş efekti */
+  
+    &:hover {
+      transform: translateY(-5px); /* Hafif yukarı kayar */
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2); /* Daha belirgin gölge */
+    }
+  }
+  
+  /* İletişim Kartı: İletişim bilgilerinin genişliğini diğer kartlarla aynı tutar */
+  .homecontact-card {
+    display: flex; /* Esnek kutu düzeni */
+    flex-direction: column; /* İçerikleri dikey hizalar */
+    align-items: stretch; /* İçerikleri tam genişliğe yayar */
+  }
+  
+  /* İletişim Bilgileri: İletişim metinlerinin genişliğini düzenler */
+  .homecontact-info {
+    width: 100%; /* Tam genişlik */
+    max-width: 100%; /* Maksimum genişlik sınırı */
+  }
+  
+  /* Başlıklar: Ana başlık (örneğin, "CuraNodus'a Hoş Geldiniz") */
+  .hometitle {
+    color: #007a93; /* Marka rengi: Koyu teal */
+    font-size: 2.5rem; /* Büyük font boyutu */
+    font-weight: 800; /* Kalın font */
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Hafif gölge efekti */
+    margin-bottom: 20px; /* Alt boşluk */
+    display: flex; /* Simge ve metni hizalar */
+    align-items: center; /* Dikeyde ortalar */
+  }
+  
+  /* Alt Başlıklar: Bölüm başlıkları (örneğin, "İlk Uygulamamız: İlacım Nerede") */
+  .homesubtitle {
+    color: #007a93; /* Marka rengi */
+    font-size: 1.8rem; /* Orta büyük font */
+    font-weight: 700; /* Kalın font */
+    margin-bottom: 16px; /* Alt boşluk */
+    display: flex; /* Simge ve metni hizalar */
+    align-items: center; /* Dikeyde ortalar */
+  }
+  
+  /* Metin: Genel metin içeriği (paragraflar) */
+  .homebody-text {
+    color: #555; /* Koyu gri metin rengi */
+    font-size: 1.1rem; /* Okunabilir font boyutu */
+    line-height: 1.7; /* Satır aralığı */
+  
+    a {
+      color: #007a93; /* Bağlantı rengi: Marka rengi */
+      text-decoration: none; /* Alt çizgi yok */
+      font-weight: 600; /* Kalın font */
+  
+      &:hover {
+        text-decoration: underline; /* Üzerine gelince alt çizgi */
+      }
+    }
+  }
+  
+  /* Butonlar: Genel butonlar (örneğin, "Detaylar için Tıklayın") */
+  .homebutton {
+    background: #007a93 !important; /* Marka rengi arka plan */
+    color: white !important; /* Beyaz metin */
+    font-weight: 700; /* Kalın font */
+    text-transform: uppercase; /* Büyük harf */
+    padding: 14px 28px; /* İç boşluk */
+    border-radius: 6px; /* Yuvarlatılmış köşeler */
+    transition: all 0.3s ease; /* Geçiş efekti */
+    border: none !important; /* Kenarlık yok */
+  
+    &:hover {
+      background: white !important; /* Üzerine gelince beyaz arka plan */
+      color: #007a93 !important; /* Marka rengi metin */
+      border: 2px solid #007a93 !important; /* Marka rengi kenarlık */
+      transform: scale(1.05); /* Hafif büyütme efekti */
+    }
+  }
+  
+  /* Altbilgi (Footer): Telif hakkı bilgisi */
+  .homefooter {
+    background: #007a93; /* Marka rengi arka plan */
+    padding: 20px; /* İç boşluk */
+    text-align: center; /* Metni ortalar */
+  }
+  
+  /* Altbilgi Metni: Telif hakkı metni */
+  .homefooter-text {
+    color: white; /* Beyaz metin */
+    font-size: 1rem; /* Normal font boyutu */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Hafif gölge efekti */
+  }
+  
+  /* Simge: Başlıkların yanındaki simgeler */
+  .homeicon {
+    margin-right: 8px; /* Simge ile metin arasında boşluk */
+  }
+  
+  /* Modal (Popup): Ekibimiz bilgilerini gösteren popup */
+  .homemodal {
+    display: flex; /* Esnek kutu düzeni */
+    align-items: center; /* Dikeyde ortalar */
+    justify-content: center; /* Yatayda ortalar */
+  }
+  
+  /* Modal İçeriği: Popup’ın ana kapsayıcısı */
+  .homemodal-content {
+    background: white; /* Beyaz arka plan */
+    border-radius: 12px; /* Yuvarlatılmış köşeler */
+    padding: 24px; /* İç boşluk */
+    max-width: 500px; /* Maksimum genişlik */
+    width: 90%; /* Genişlik oranı */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Gölge efekti */
+    position: relative; /* Kapatma butonu için konumlandırma */
+    border: 2px solid #007a93; /* Marka rengi kenarlık */
+  }
+  
+  /* Modal Başlık Alanı: Başlık ve kapatma butonunu içerir */
+  .homemodal-header {
+    display: flex; /* Esnek kutu düzeni */
+    justify-content: space-between; /* Başlık ve butonu ayırır */
+    align-items: center; /* Dikeyde ortalar */
+    margin-bottom: 16px; /* Alt boşluk */
+    border-bottom: 1px solid #e0e0e0; /* Hafif bir ayırıcı çizgi */
+    padding-bottom: 8px; /* Ayırıcı çizgi ile boşluk */
+  }
+  
+  /* Modal Başlık: "Ekibimiz" başlığı */
+  .homemodal-title {
+    color: #007a93; /* Marka rengi */
+    font-weight: 700; /* Kalın font */
+  }
+  
+  /* Modal Kapatma Butonu: Popup’ı kapatır */
+  .homemodal-close-button {
+    color: #555; /* Koyu gri */
+    min-width: 0; /* Buton genişliğini simgeye göre ayarlar */
+    padding: 4px; /* İç boşluk */
+  
+    &:hover {
+      color: #007a93; /* Üzerine gelince marka rengi */
+    }
+  }
+  
+  /* Modal Gövde: Ekip üyelerinin bilgilerini içerir */
+  .homemodal-body {
+    max-height: 60vh; /* Maksimum yükseklik */
+    overflow-y: auto; /* Taşarsa kaydırma çubuğu ekler */
+  }
+  
+  /* Ekip Üyesi Başlığı: Üye adı ve pozisyonu */
+  .hometeam-member-title {
+    color: #007a93; /* Marka rengi */
+    font-size: 1.2rem; /* Orta büyük font */
+    font-weight: 600; /* Kalın font */
+  }
+  
+  /* Ekip Üyesi Bilgisi: Üye hakkında detaylar */
+  .hometeam-member-info {
+    color: #555; /* Koyu gri metin */
+    font-size: 1rem; /* Normal font boyutu */
+    line-height: 1.6; /* Satır aralığı */
+    margin-bottom: 16px; /* Alt boşluk */
+  }
+  
+  /* LinkedIn Butonu: LinkedIn profiline yönlendirme */
+  .homelinkedin-button {
+    background: #007a93 !important; /* Marka rengi arka plan */
+    color: white !important; /* Beyaz metin */
+    font-weight: 600; /* Kalın font */
+    padding: 8px 16px; /* İç boşluk */
+    border-radius: 6px; /* Yuvarlatılmış köşeler */
+    margin-bottom: 16px; /* Alt boşluk */
+    transition: all 0.3s ease; /* Geçiş efekti */
+  
+    &:hover {
+      background: #005f73 !important; /* Daha koyu bir teal tonu */
+      transform: scale(1.02); /* Hafif büyütme efekti */
+    }
+  }
+  
+  /* Duyarlı Tasarım: Küçük ekranlar için düzenlemeler */
+  @media (max-width: 768px) {
+    .homemain-content {
+      padding: 32px 12px; /* Daha az iç boşluk */
+    }
+  
+    .hometitle {
+      font-size: 2rem; /* Daha küçük font */
+    }
+  
+    .homesubtitle {
+      font-size: 1.5rem; /* Daha küçük font */
+    }
+  
+    .homebody-text {
+      font-size: 1rem; /* Daha küçük font */
+    }
+  
+    .homebutton {
+      padding: 12px 20px; /* Daha küçük iç boşluk */
+    }
+  
+    .homemodal-content {
+      padding: 16px; /* Daha az iç boşluk */
+      max-width: 90%; /* Daha küçük ekranlar için genişlik */
+    }
+  }

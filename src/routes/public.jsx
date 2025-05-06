@@ -4,26 +4,32 @@ import { Routes, Route, Navigate } from "react-router-dom";
 const ConfrimUser = React.lazy(() => import("./ConfrimUser"));
 const ResetPassword = React.lazy(() => import("./resetpassword"));
 const Login = React.lazy(() => import("./Login"));
+const homepage = React.lazy(() => import("./homepage"));
 
 const publicRoutes = [
   {
+    path: "/homepage",
+    element: homepage,
+    title: "CuraNodus Ana Sayfa",
+  },
+  {
     path: "/login",
     element: Login,
-    title: "Ilacım Nerede",
+    title: "İlacım Nerede",
   },
   {
     path: "/confrimuser",
     element: ConfrimUser,
-    title: "Ilacım Nerede Doğrulama",
+    title: "İlacım Nerede Doğrulama",
   },
   {
     path: "/resetpassword",
     element: ResetPassword,
-    title: "Ilacım Nerede Şifre Sıfırlama",
+    title: "İlacım Nerede Şifre Sıfırlama",
   },
   {
     path: "/*",
-    element: () => <Navigate to="/login" />,
+    element: () => <Navigate to="/homepage" />,
   },
 ];
 

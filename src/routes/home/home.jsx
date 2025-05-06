@@ -189,57 +189,75 @@ function home() {
 
       {/* Modal (Popup): Neden CuraNodus butonuna tıklayınca ekibimiz hakkında bilgi gösterir */}
       <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="home-team-modal-title"
-        className="homemodal"
-      >
-        <Paper className="homemodal-content">
-          <Box className="homemodal-header">
-            <Typography id="home-team-modal-title" variant="h6" className="homemodal-title">
-              Ekibimiz
-            </Typography>
-            <Button onClick={handleClose} className="homemodal-close-button">
-              <Close />
-            </Button>
-          </Box>
-          <Box className="homemodal-body">
-            {/* Alper Ürker Bilgileri */}
-            <Typography variant="h6" className="hometeam-member-title">
-              Alper Ürker - Mobil Geliştirici
-            </Typography>
-            <Typography className="hometeam-member-info">
-              5 yılı aşkın deneyime sahip Kıdemli Mobil Uygulama Geliştiricisi. Daha önce Gedik Yatırım, Demirören, Scorp ve Huawei’de çalıştı. Castaway Studios’un kurucu ortağı. Koç Üniversitesi Bilgisayar Mühendisliği mezunu.
-            </Typography>
-            <Button
-              href="https://www.linkedin.com/in/alper-tolga-urker/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="homelinkedin-button"
-              startIcon={<LinkedIn />}
-            >
-              LinkedIn
-            </Button>
+  open={open}
+  onClose={handleClose}
+  aria-labelledby="home-team-modal-title"
+  className="homemodal"
+>
+  <Paper className="homemodal-content">
+    <Box className="homemodal-header">
+      <Typography id="home-team-modal-title" variant="h6" className="homemodal-title">
+        Ekibimiz
+      </Typography>
+      <Button onClick={handleClose} className="homemodal-close-button">
+        <Close />
+      </Button>
+    </Box>
+    <Box className="homemodal-body">
 
             {/* Cand Matik Bilgileri */}
             <Typography variant="h6" className="hometeam-member-title" sx={{ mt: 2 }}>
-              Can Matik - Kurucu
-            </Typography>
-            <Typography className="hometeam-member-info">
-              CuraNodus’un kurucusu, web paneli ve veritabanı geliştirme sorumlusu. Sovos Türkiye ve Sorgera Yazılım Teknolojileri’de SAP ABAP Danışmanı olarak çalışıyor, daha önce Microsoft’ta görev aldı. Bulut uygulamaları ve sunum becerilerinde uzman. Mimar Sinan Güzel Sanatlar Üniversitesi ve İstanbul Bilgi Üniversitesi Matematik mezunu.
-            </Typography>
-            <Button
-              href="https://www.linkedin.com/in/can-matik/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="homelinkedin-button"
-              startIcon={<LinkedIn />}
-            >
-              LinkedIn
-            </Button>
-          </Box>
-        </Paper>
-      </Modal>
+        Can Matik - Kurucu
+      </Typography>
+      <Typography className="hometeam-member-info">
+        CuraNodus’un kurucusu, web paneli ve veritabanı geliştirme ve diğer tüm süreçlerin sorumlusu. Sovos Türkiye ve Sorgera Yazılım Teknolojileri’de SAP ABAP Danışmanı olarak çalışıyor, daha önce Microsoft’ta görev aldı. Bulut uygulamaları ve sunum becerilerinde uzman. Mimar Sinan Güzel Sanatlar Üniversitesi ve İstanbul Bilgi Üniversitesi Matematik mezunu.
+      </Typography>
+      <Button
+        href="https://www.linkedin.com/in/can-matik/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="homelinkedin-button"
+        startIcon={<LinkedIn />}
+      >
+        LinkedIn
+      </Button>
+      {/* Alper Ürker Bilgileri */}
+      <Typography variant="h6" className="hometeam-member-title">
+        Alper Ürker - Mobil / Backend Geliştirici
+      </Typography>
+      <Typography className="hometeam-member-info">
+        10 yılı aşkın deneyime sahip Kıdemli Uygulama Geliştiricisi. Daha önce Gedik Yatırım, Demirören, Scorp ve Huawei’de çalıştı. Castaway Studios’un kurucu ortağı. Koç Üniversitesi Bilgisayar Mühendisliği mezunu.
+      </Typography>
+      <Button
+        href="https://www.linkedin.com/in/alper-tolga-urker/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="homelinkedin-button"
+        startIcon={<LinkedIn />}
+      >
+        LinkedIn
+      </Button>
+
+
+      {/* Mustafa Acar Bilgileri */}
+      <Typography variant="h6" className="hometeam-member-title" sx={{ mt: 2 }}>
+        Mustafa Acar - İş Geliştirme ve Süreç Yöneticisi
+      </Typography>
+      <Typography className="hometeam-member-info">
+        İş geliştirme ve süreç optimizasyonunda deneyimli lider. NTT DATA Business Solutions’ta Ürün Geliştirme Direktör Yardımcısı, Sovos Türkiye’de SAP ABAP ve Teknik Süpervizör, Detaysoft’ta Kıdemli SAP ABAP Danışmanı olarak görev yaptı. SAP HANA, Salesforce entegrasyonu ve Workday gibi projelerde uzman. İstanbul Teknik Üniversitesi İşletme ve Teknoloji Yönetimi Yüksek Lisans, Mimar Sinan Güzel Sanatlar Üniversitesi Matematik mezunu.
+      </Typography>
+      <Button
+        href="https://www.linkedin.com/in/mustafa34acar/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="homelinkedin-button"
+        startIcon={<LinkedIn />}
+      >
+        LinkedIn
+      </Button>
+    </Box>
+  </Paper>
+</Modal>
     </>
   );
 }

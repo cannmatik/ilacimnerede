@@ -1,12 +1,17 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-
+const kullanicisozlesmesi = React.lazy(() => import("./kullanicisozlesmesi"));
 const ConfrimUser = React.lazy(() => import("./ConfrimUser"));
 const ResetPassword = React.lazy(() => import("./resetpassword"));
 const Login = React.lazy(() => import("./Login"));
 const homepage = React.lazy(() => import("./home"));
 
 const publicRoutes = [
+  {
+    path: "/kullanicisozlesmesi",
+    element:kullanicisozlesmesi,
+    title: "CuraNodus Ana Sayfa",
+  },
   {
     path: "/home",
     element: homepage,

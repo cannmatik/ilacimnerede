@@ -1,13 +1,19 @@
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 import "./style.scss";
 import Main from "./Main";
 import Header from "./Header";
+
 
 const Public = React.lazy(() => import("../routes/public.jsx"));
 
 function Layout() {
   const userLoggedIn = useSelector((state) => state.user.isLoggedIn);
+  const location = useLocation();
+
+  // Header ve Footer'ın görünmeyeceği rotalar
+  const noHeaderFooterRoutes = ["/kullanicisozlesmesi"];
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -30,7 +36,7 @@ function Layout() {
       }
     >
       <div className="layout-wrapper">
-        <Header />
+        {!noHeaderFooterRoutes.includes(location.pathname) && <Header />}
         {userLoggedIn ? <Main /> : <Public />}
       </div>
     </React.Suspense>

@@ -5,61 +5,112 @@ import remarkGfm from 'remark-gfm';
 // sozlesme.txt dosyasını içe aktar
 import sozlesme from './sozlesme.txt';
 
-const KullaniciSozlesmesi = () => {
-  const [markdownContent, setMarkdownContent] = useState('');
-  const [openSections, setOpenSections] = useState({});
+// Hata sınırı bileşeni
+class ErrorBoundary extends React.Component {
+  state = { hasError: false, error: null };
 
-  // Dosya içeriğini yükle
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ textAlign: 'center', padding: '32px', color: 'red' }}>
+          Bir hata oluştu: {this.state.error?.message || 'Bilinmeyen hata'}
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+const KullaniciSozlesmesi = () => {
+  const [sections, setSections] = useState([]);
+  const [openSections, setOpenSections] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Dosya içeriğini yükle ve bölümlere ayır
   useEffect(() => {
+    setLoading(true);
     fetch(sozlesme)
-      .then((response) => response.text())
-      .then((text) => setMarkdownContent(text))
-      .catch((error) => console.error('Sözleşme dosyası yüklenemedi:', error));
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Dosya yüklenemedi');
+        }
+        return response.text();
+      })
+      .then((text) => {
+        // Markdown içeriğini satır satır böl
+        const lines = text.split('\n');
+        const parsedSections = [];
+        let currentSection = null;
+
+        lines.forEach((line) => {
+          // Başlık satırlarını tespit et
+          const headingMatch = line.match(/^(#{1,6})\s+(.+)/);
+          if (headingMatch) {
+            const level = headingMatch[1].length;
+            const title = headingMatch[2].trim();
+            const id = title
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, '-')
+              .replace(/(^-|-$)/g, '');
+
+            // Yeni bir bölüm başlat
+            if (currentSection) {
+              parsedSections.push(currentSection);
+            }
+            currentSection = {
+              id,
+              level,
+              title,
+              content: [],
+            };
+          } else if (currentSection) {
+            // Başlık değilse, içeriği mevcut bölüme ekle
+            currentSection.content.push(line);
+          }
+        });
+
+        // Son bölümü ekle
+        if (currentSection) {
+          parsedSections.push(currentSection);
+        }
+
+        setSections(parsedSections);
+
+        // Tüm bölümleri varsayılan olarak açık yap
+        const initialOpenSections = {};
+        parsedSections.forEach((section) => {
+          initialOpenSections[section.id] = true;
+        });
+        setOpenSections(initialOpenSections);
+
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError('Sözleşme yüklenemedi: ' + err.message);
+        setLoading(false);
+      });
   }, []);
 
   const toggleSection = (id) => {
-    setOpenSections((prev) => ({ ...prev, [id]: !prev[id] }));
+    setOpenSections((prev) => {
+      const newState = { ...prev, [id]: !prev[id] };
+      console.log('Toggling section:', id, 'New state:', newState); // Hata ayıklama için
+      return newState;
+    });
   };
 
-  // Başlıkları ve alt içeriklerini işlemek için özel bir yapı
-  const HeadingWithContent = ({ level, children }) => {
-    // children'ın bir dizi olup olmadığını kontrol et
-    const isArray = Array.isArray(children);
-    const text = isArray
-      ? children.find((child) => typeof child === 'string') || children[0] || ''
-      : children || '';
+  if (loading) {
+    return <div style={{ textAlign: 'center', padding: '32px' }}>Yükleniyor...</div>;
+  }
 
-    const id = text
-      .toString()
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-    const isCollapsible = level <= 2;
-    const isOpen = openSections[id];
-
-    return (
-      <div className="heading-wrapper">
-        {isCollapsible ? (
-          <>
-            <div
-              className={`collapsible-heading h${level}`}
-              onClick={() => toggleSection(id)}
-            >
-              <span>{text}</span>
-              <span className="toggle-icon">{isOpen ? '▲' : '▼'}</span>
-            </div>
-            {isOpen && (
-              <div className="collapsible-content">
-                {isArray ? children.slice(1) : null}
-              </div>
-            )}
-          </>
-        ) : (
-          <div className={`h${level}`}>{text}</div>
-        )}
-      </div>
-    );
-  };
+  if (error) {
+    return <div style={{ textAlign: 'center', padding: '32px', color: 'red' }}>{error}</div>;
+  }
 
   return (
     <>
@@ -109,6 +160,12 @@ const KullaniciSozlesmesi = () => {
             border-left: 2px solid #d1d5db;
             padding-left: 16px;
             margin-top: 8px;
+          }
+          .collapsible-content.closed {
+            display: none;
+          }
+          .collapsible-content.open {
+            display: block;
           }
           h1 {
             font-size: 36px;
@@ -199,28 +256,64 @@ const KullaniciSozlesmesi = () => {
           }
         `}
       </style>
-      <main>
-        <div className="container">
-          <article>
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                h1: ({ children }) => <HeadingWithContent level={1} children={children} />,
-                h2: ({ children }) => <HeadingWithContent level={2} children={children} />,
-                h3: ({ children }) => <HeadingWithContent level={3} children={children} />,
-                h4: ({ children }) => <HeadingWithContent level={4} children={children} />,
-                h5: ({ children }) => <HeadingWithContent level={5} children={children} />,
-                h6: ({ children }) => <HeadingWithContent level={6} children={children} />,
-                p: ({ children }) => <p>{children}</p>,
-                ul: ({ children }) => <ul>{children}</ul>,
-                ol: ({ children }) => <ol>{children}</ol>,
-              }}
-            >
-              {markdownContent}
-            </ReactMarkdown>
-          </article>
-        </div>
-      </main>
+      <ErrorBoundary>
+        <main>
+          <div className="container">
+            <article>
+              {sections.map((section) => {
+                const isCollapsible = section.level <= 2;
+                const isOpen = openSections[section.id] !== undefined ? openSections[section.id] : true;
+                const headingTag = `h${section.level}`;
+
+                return (
+                  <div key={section.id} className="heading-wrapper">
+                    {isCollapsible ? (
+                      <>
+                        <div
+                          className={`collapsible-heading h${section.level}`}
+                          onClick={() => toggleSection(section.id)}
+                          data-section-id={section.id}
+                        >
+                          <span>{section.title}</span>
+                          <span className="toggle-icon">{isOpen ? '▲' : '▼'}</span>
+                        </div>
+                        <div className={`collapsible-content ${isOpen ? 'open' : 'closed'}`}>
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              p: ({ children }) => <p>{children}</p>,
+                              ul: ({ children }) => <ul>{children}</ul>,
+                              ol: ({ children }) => <ol>{children}</ol>,
+                            }}
+                          >
+                            {section.content.join('\n')}
+                          </ReactMarkdown>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {React.createElement(headingTag, { className: `h${section.level}` }, section.title)}
+                        <div>
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              p: ({ children }) => <p>{children}</p>,
+                              ul: ({ children }) => <ul>{children}</ul>,
+                              ol: ({ children }) => <ol>{children}</ol>,
+                            }}
+                          >
+                            {section.content.join('\n')}
+                          </ReactMarkdown>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </article>
+          </div>
+        </main>
+      </ErrorBoundary>
     </>
   );
 };

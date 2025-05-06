@@ -5,7 +5,7 @@ import { motion, useInView } from "framer-motion";
 import "./home.scss";
 
 // Ana sayfa bileşenimiz: Tüm bölümleri (CuraNodus'a Hoş Geldiniz, Neden CuraNodus, İlacım Nerede, İletişim) içerir.
-function Homepage() {
+function home() {
   // Modal'ın (popup) açık/kapalı durumunu kontrol eden state
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true); // Modal'ı açar
@@ -244,4 +244,4 @@ function Homepage() {
   );
 }
 
-export default Homepage;
+export default home;

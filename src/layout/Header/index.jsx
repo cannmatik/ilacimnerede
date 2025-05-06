@@ -30,7 +30,7 @@ function Header() {
   console.log("isLoggedIn:", isLoggedIn); // Debug log for visibility issue
 
   // Determine navbar color and logo based on route
-  const isHomepage = location.pathname === "/homepage";
+  const isHomepage = location.pathname === "/home";
   const navbarColor = isHomepage ? "#0097b2" : "#25b597";
   const logo = isHomepage ? curaicon : ilacimNeredeLogo;
   const logoAlt = isHomepage ? "CuraNodus Logosu" : "İlacım Nerede Logosu";
@@ -59,7 +59,7 @@ function Header() {
   ];
 
   const publicNavLinks = [
-    { to: "/homepage", label: "Ana Sayfa" },
+    { to: "/home", label: "Ana Sayfa" },
     { to: "/login", label: "Eczacı Paneli" },
   ];
 
@@ -89,7 +89,7 @@ function Header() {
       >
         {/* Logo */}
         <Box
-          onClick={() => navigate("/homepage")}
+          onClick={() => navigate("/home")}
           sx={{ cursor: "pointer", display: "flex", alignItems: "center" }}
         >
           <img

@@ -1,11 +1,11 @@
 import React, { useRef, useState } from "react";
 import { Box, Typography, Container, Grid, Button, Modal, Paper } from "@mui/material";
-import { Favorite, Medication, Phone, Group, Close, LinkedIn } from "@mui/icons-material";
+import { Favorite, Medication, Phone, Group, Close, LinkedIn, WhatsApp } from "@mui/icons-material";
 import { motion, useInView } from "framer-motion";
 import "./home.scss";
 
 // Ana sayfa bileşenimiz: Tüm bölümleri (CuraNodus'a Hoş Geldiniz, Neden CuraNodus, İlacım Nerede, İletişim) içerir.
-function home() {
+function Home() {
   // Modal'ın (popup) açık/kapalı durumunu kontrol eden state
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true); // Modal'ı açar
@@ -167,12 +167,23 @@ function home() {
                     No: 5/1, 34394 Şişli/İstanbul
                   </Typography>
                   <Typography className="homebody-text homecontact-info" sx={{ mb: 1 }}>
-                    <strong>Telefon:</strong> +90 545 519 11 99
+                    <strong>Telefon:</strong> 0850 304 21 93 
                   </Typography>
-                  <Typography className="homebody-text homecontact-info">
+                  <Typography className="homebody-text homecontact-info" sx={{ mb: 1 }}>
                     <strong>E-posta:</strong>{" "}
                     <a href="mailto:ilacimnerede@curanodus.com">ilacimnerede@curanodus.com</a>
                   </Typography>
+                  <Button
+                    variant="contained"
+                    href="https://api.whatsapp.com/send/?phone=908503042193&text&type=phone_number&app_absent=0"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="homebutton"
+                    startIcon={<WhatsApp />}
+                    sx={{ mt: 2 }}
+                  >
+                    Bize WhatsApp'tan Mesaj Göndermek İçin Tıklayın
+                  </Button>
                 </motion.div>
               </motion.div>
             </Grid>
@@ -189,77 +200,74 @@ function home() {
 
       {/* Modal (Popup): Neden CuraNodus butonuna tıklayınca ekibimiz hakkında bilgi gösterir */}
       <Modal
-  open={open}
-  onClose={handleClose}
-  aria-labelledby="home-team-modal-title"
-  className="homemodal"
->
-  <Paper className="homemodal-content">
-    <Box className="homemodal-header">
-      <Typography id="home-team-modal-title" variant="h6" className="homemodal-title">
-        Ekibimiz
-      </Typography>
-      <Button onClick={handleClose} className="homemodal-close-button">
-        <Close />
-      </Button>
-    </Box>
-    <Box className="homemodal-body">
-
-            {/* Cand Matik Bilgileri */}
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="home-team-modal-title"
+        className="homemodal"
+      >
+        <Paper className="homemodal-content">
+          <Box className="homemodal-header">
+            <Typography id="home-team-modal-title" variant="h6" className="homemodal-title">
+              Ekibimiz
+            </Typography>
+            <Button onClick={handleClose} className="homemodal-close-button">
+              <Close />
+            </Button>
+          </Box>
+          <Box className="homemodal-body">
+            {/* Can Matik Bilgileri */}
             <Typography variant="h6" className="hometeam-member-title" sx={{ mt: 2 }}>
-        Can Matik - Kurucu
-      </Typography>
-      <Typography className="hometeam-member-info">
-        CuraNodus’un kurucusu, web paneli ve veritabanı geliştirme ve diğer tüm süreçlerin sorumlusu. Sovos Türkiye ve Sorgera Yazılım Teknolojileri’de SAP ABAP Danışmanı olarak çalışıyor, daha önce Microsoft’ta görev aldı. Bulut uygulamaları ve sunum becerilerinde uzman. Mimar Sinan Güzel Sanatlar Üniversitesi ve İstanbul Bilgi Üniversitesi Matematik mezunu.
-      </Typography>
-      <Button
-        href="https://www.linkedin.com/in/can-matik/"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="homelinkedin-button"
-        startIcon={<LinkedIn />}
-      >
-        LinkedIn
-      </Button>
-      {/* Alper Ürker Bilgileri */}
-      <Typography variant="h6" className="hometeam-member-title">
-        Alper Ürker - Mobil / Backend Geliştirici
-      </Typography>
-      <Typography className="hometeam-member-info">
-        10 yılı aşkın deneyime sahip Kıdemli Uygulama Geliştiricisi. Daha önce Gedik Yatırım, Demirören, Scorp ve Huawei’de çalıştı. Castaway Studios’un kurucu ortağı. Koç Üniversitesi Bilgisayar Mühendisliği mezunu.
-      </Typography>
-      <Button
-        href="https://www.linkedin.com/in/alper-tolga-urker/"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="homelinkedin-button"
-        startIcon={<LinkedIn />}
-      >
-        LinkedIn
-      </Button>
-
-
-      {/* Mustafa Acar Bilgileri */}
-      <Typography variant="h6" className="hometeam-member-title" sx={{ mt: 2 }}>
-        Mustafa Acar - İş Geliştirme ve Süreç Yöneticisi
-      </Typography>
-      <Typography className="hometeam-member-info">
-        İş geliştirme ve süreç optimizasyonunda deneyimli lider. NTT DATA Business Solutions’ta Ürün Geliştirme Direktör Yardımcısı, Sovos Türkiye’de SAP ABAP ve Teknik Süpervizör, Detaysoft’ta Kıdemli SAP ABAP Danışmanı olarak görev yaptı. SAP HANA, Salesforce entegrasyonu ve Workday gibi projelerde uzman. İstanbul Teknik Üniversitesi İşletme ve Teknoloji Yönetimi Yüksek Lisans, Mimar Sinan Güzel Sanatlar Üniversitesi Matematik mezunu.
-      </Typography>
-      <Button
-        href="https://www.linkedin.com/in/mustafa34acar/"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="homelinkedin-button"
-        startIcon={<LinkedIn />}
-      >
-        LinkedIn
-      </Button>
-    </Box>
-  </Paper>
-</Modal>
+              Can Matik - Kurucu
+            </Typography>
+            <Typography className="hometeam-member-info">
+              CuraNodus’un kurucusu, web paneli ve veritabanı geliştirme ve diğer tüm süreçlerin sorumlusu. Sovos Türkiye ve Sorgera Yazılım Teknolojileri’de SAP ABAP Danışmanı olarak çalışıyor, daha önce Microsoft’ta görev aldı. Bulut uygulamaları ve sunum becerilerinde uzman. Mimar Sinan Güzel Sanatlar Üniversitesi ve İstanbul Bilgi Üniversitesi Matematik mezunu.
+            </Typography>
+            <Button
+              href="https://www.linkedin.com/in/can-matik/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="homelinkedin-button"
+              startIcon={<LinkedIn />}
+            >
+              LinkedIn
+            </Button>
+            {/* Alper Ürker Bilgileri */}
+            <Typography variant="h6" className="hometeam-member-title">
+              Alper Ürker - Mobil / Backend Geliştirici
+            </Typography>
+            <Typography className="hometeam-member-info">
+              10 yılı aşkın deneyime sahip Kıdemli Uygulama Geliştiricisi. Daha önce Gedik Yatırım, Demirören, Scorp ve Huawei’de çalıştı. Castaway Studios’un kurucu ortağı. Koç Üniversitesi Bilgisayar Mühendisliği mezunu.
+            </Typography>
+            <Button
+              href="https://www.linkedin.com/in/alper-tolga-urker/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="homelinkedin-button"
+              startIcon={<LinkedIn />}
+            >
+              LinkedIn
+            </Button>
+            {/* Mustafa Acar Bilgileri */}
+            <Typography variant="h6" className="hometeam-member-title" sx={{ mt: 2 }}>
+              Mustafa Acar - İş Geliştirme ve Süreç Yöneticisi
+            </Typography>
+            <Typography className="hometeam-member-info">
+              İş geliştirme ve süreç optimizasyonunda deneyimli lider. NTT DATA Business Solutions’ta Ürün Geliştirme Direktör Yardımcısı, Sovos Türkiye’de SAP ABAP ve Teknik Süpervizör, Detaysoft’ta Kıdemli SAP ABAP Danışmanı olarak görev yaptı. SAP HANA, Salesforce entegrasyonu ve Workday gibi projelerde uzman. İstanbul Teknik Üniversitesi İşletme ve Teknoloji Yönetimi Yüksek Lisans, Mimar Sinan Güzel Sanatlar Üniversitesi Matematik mezunu.
+            </Typography>
+            <Button
+              href="https://www.linkedin.com/in/mustafa34acar/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="homelinkedin-button"
+              startIcon={<LinkedIn />}
+            >
+              LinkedIn
+            </Button>
+          </Box>
+        </Paper>
+      </Modal>
     </>
   );
 }
 
-export default home;
+export default Home;

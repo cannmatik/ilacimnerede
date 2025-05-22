@@ -312,7 +312,12 @@ function Login() {
                 ilacimnerede@curanodus.com
               </a>
             </li>
-            <li>WhatsApp: +90 545 519 11 99</li>
+            <li>
+              WhatsApp:{" "}
+                <a href="https://api.whatsapp.com/send/?phone=908503042193&text&type=phone_number&app_absent=0">
+                 +90 850 304 2193
+            </a>
+          </li>
           </ul>
         </AntModal>
 

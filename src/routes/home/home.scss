@@ -10,11 +10,11 @@
   --cn-primary-dark: #007a93;
   --cn-primary-light: #00b4d8;
   --cn-secondary: #25b597;
-  --cn-accent: #03EA76;
+  --cn-accent: #059669;
   --cn-dark: #0a1628;
   --cn-dark-2: #111d35;
   --cn-text: #2d3748;
-  --cn-text-light: #718096;
+  --cn-text-light: #4a5568;
   --cn-glass-bg: rgba(255, 255, 255, 0.08);
   --cn-glass-border: rgba(255, 255, 255, 0.12);
   --cn-radius: 16px;
@@ -205,7 +205,8 @@
   border-radius: var(--cn-radius);
   padding: 36px 28px;
   text-align: center;
-  border: 1px solid #e8ecf1;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.04);
   transition: all 0.35s ease;
   position: relative;
   overflow: hidden;
@@ -259,8 +260,8 @@
 }
 
 .section-btn-outlined {
-  border-color: var(--cn-primary) !important;
-  color: var(--cn-primary) !important;
+  border-color: var(--cn-primary-dark) !important;
+  color: var(--cn-primary-dark) !important;
   font-family: 'Inter', sans-serif !important;
   font-weight: 600 !important;
   padding: 10px 28px !important;
@@ -473,7 +474,7 @@
 
 .footer-text {
   font-family: 'Inter', sans-serif !important;
-  color: rgba(255, 255, 255, 0.4) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
   font-size: 0.9rem !important;
 }
 

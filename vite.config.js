@@ -23,7 +23,7 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-        additionalData: `@import "./src/style/theme.scss"; @import "./src/style/mixins.scss";`,
+        additionalData: `@import "${path.resolve(__dirname, "src/style/theme.scss").replace(/\\/g, "/")}"; @import "${path.resolve(__dirname, "src/style/mixins.scss").replace(/\\/g, "/")}";`,
       },
     },
   },

@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@routes/Login/useCreateClient";
 import { ilacimNeredeLogo, curaicon } from "@assets";
 import styles from "./style.module.scss";
+import gsap from "gsap";
 
 // MUI Components
 import {
@@ -25,16 +26,36 @@ function Header() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+  const headerRef = useRef(null);
+  const logoRef = useRef(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
-  console.log("isLoggedIn:", isLoggedIn); // Debug log for visibility issue
 
   // Determine navbar color and logo based on route
   const isHomepage = location.pathname === "/home";
   const navbarColor = isHomepage ? "#0097b2" : "#25b597";
   const logo = isHomepage ? curaicon : ilacimNeredeLogo;
   const logoAlt = isHomepage ? "CuraNodus Logosu" : "İlacım Nerede Logosu";
-  console.log("isHomepage:", isHomepage, "navbarColor:", navbarColor); // Debug log for color issue
+
+  // GSAP Transition for Navbar Color and Logo
+  useEffect(() => {
+    if (headerRef.current) {
+      gsap.to(headerRef.current, {
+        backgroundColor: navbarColor,
+        duration: 0.6,
+        ease: "power2.inOut"
+      });
+    }
+  }, [navbarColor]);
+
+  useEffect(() => {
+    if (logoRef.current) {
+      gsap.fromTo(logoRef.current, 
+        { opacity: 0, scale: 0.8 },
+        { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }
+      );
+    }
+  }, [logo]);
 
   async function signOutUser() {
     try {
@@ -69,8 +90,17 @@ function Header() {
     setIsMenuOpen(false);
   };
 
+  const onNavLinkEnter = (e) => {
+    gsap.to(e.currentTarget, { scale: 1.1, duration: 0.3, ease: "power1.out" });
+  };
+
+  const onNavLinkLeave = (e) => {
+    gsap.to(e.currentTarget, { scale: 1, duration: 0.3, ease: "power1.in" });
+  };
+
   return (
     <AppBar
+      ref={headerRef}
       position="fixed"
       className={styles.header}
       sx={{
@@ -93,6 +123,7 @@ function Header() {
           sx={{ cursor: "pointer", display: "flex", alignItems: "center" }}
         >
           <img
+            ref={logoRef}
             src={logo || ilacimNeredeLogo} // Fallback to ilacimNeredeLogo
             alt={logoAlt}
             className={styles.logo}
@@ -128,10 +159,12 @@ function Header() {
             <NavLink
               key={link.to}
               to={link.to}
+              onMouseEnter={onNavLinkEnter}
+              onMouseLeave={onNavLinkLeave}
               className={({ isActive }) =>
                 isActive
-                  ? `${styles.navLink} ${styles.activeLink}`
-                  : `${styles.navLink} ${styles.inactiveLink}`
+                   ? `${styles.navLink} ${styles.activeLink}`
+                   : `${styles.navLink} ${styles.inactiveLink}`
               }
               onClick={handleNavClick}
             >

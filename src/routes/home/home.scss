@@ -25,13 +25,12 @@
 
 .hero-section {
   position: relative;
-  min-height: 100vh;
+  min-height: calc(100vh - 80px); /* Fill remaining height exactly */
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #ffffff 0%, #f0f7f9 40%, #e0f2f7 100%);
   overflow: hidden;
-  margin-top: 80px;
   padding: 60px 16px;
 }
 
@@ -70,10 +69,10 @@
   color: var(--cn-dark) !important;
   font-family: 'Inter', sans-serif !important;
   font-weight: 800 !important;
-  font-size: clamp(2.5rem, 6vw, 4.5rem) !important;
-  line-height: 1.1 !important;
-  letter-spacing: -0.02em !important;
-  margin-bottom: 24px !important;
+  font-size: clamp(2rem, 5.5vw, 3.8rem) !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.015em !important;
+  margin-bottom: 32px !important;
 }
 
 .hero-title-accent {
@@ -81,6 +80,7 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  white-space: nowrap;
 }
 
 .hero-description {
@@ -312,6 +312,10 @@
 .app-card-content {
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .app-chip {
@@ -322,12 +326,37 @@
   margin-bottom: 20px !important;
 }
 
+.logo-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  .logo-container {
+    width: 80px;
+    height: 80px;
+    background-color: var(--cn-secondary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 16px rgba(37, 181, 151, 0.2);
+
+    .header-logo {
+      width: 52px;
+      height: auto;
+    }
+  }
+}
+
 .app-title {
   font-family: 'Inter', sans-serif !important;
   font-weight: 800 !important;
   color: var(--cn-dark) !important;
   margin-bottom: 16px !important;
   font-size: clamp(1.8rem, 3vw, 2.2rem) !important;
+  text-align: center;
 }
 
 .app-description {
@@ -583,7 +612,7 @@
 
 @media (max-width: 480px) {
   .hero-section {
-    margin-top: 60px;
+    /* No margin top, handled by global wrapper */
   }
 
   .hero-title {

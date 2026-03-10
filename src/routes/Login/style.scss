@@ -1,283 +1,243 @@
-/* Main container */
-.app-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: rgba(245, 245, 245, 0.95);
-  padding: 20px;
-  margin-top: 80px;
-  min-height: calc(100vh - 80px);
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap');
+
+$primary: #25b597;
+$primary-hover: #1f9a80;
+$dark-slate: #1e293b;
+
+* {
   box-sizing: border-box;
-  overflow-y: auto;
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
 }
 
-/* Splash screen */
-.splash-screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  animation: fadeInOut 1.5s ease-in-out forwards;
-  overflow: hidden;
-}
-
-/* Fade-in and fade-out animation */
-@keyframes fadeInOut {
-  0% {
-    opacity: 0;
-  }
-  20% {
-    opacity: 1;
-  }
-  80% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
-/* Page title wrapper */
-.page-title-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  width: 100%;
-}
-
-/* Page title */
-.page-title {
-  color: #25B597;
-  font-size: 2rem;
+body {
   margin: 0;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  white-space: nowrap;
-  line-height: 1.2;
+  padding: 0;
+  font-family: 'Outfit', sans-serif;
+  overflow-x: hidden;
 }
 
-/* Auth form wrapper */
-.auth-wrapper {
+.login-page-container {
+  min-height: 100vh;
   width: 100%;
-  max-width: 400px;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box;
-  margin: 0 auto;
-}
-
-/* Input wrapper */
-.input-wrapper {
+  align-items: center;
+  justify-content: center;
+  background: #ffffff !important; 
   position: relative;
+  overflow: hidden;
+  padding: 24px;
+}
+
+.auth-card {
   width: 100%;
-}
-
-/* Input fields */
-.auth-input {
-  width: 100%;
-  padding: 10px 12px;
-  font-size: 0.95rem;
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  box-sizing: border-box;
-  outline: none;
-  transition: border-color 0.3s;
-
-  &:focus {
-    border-color: #25B597;
-  }
-
-  &::placeholder {
-    color: #bfbfbf;
-  }
-}
-
-/* Password toggle icon */
-.password-toggle {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  font-size: 1.2rem;
-  color: #666;
-}
-
-/* Buttons */
-.auth-button {
-  width: 100% !important;
-  padding: 12px 14px !important;
-  font-size: 1rem !important;
-  height: auto !important;
-  text-transform: uppercase !important;
-  box-sizing: border-box !important;
-  background-color: #25B597 !important;
-
-  &.ant-btn-primary:hover,
-  &.ant-btn-primary:focus {
-    background-color: #fff !important;
-    color: #25B597 !important;
-    border-color: #25B597 !important;
-  }
-
-  &.secondary-button {
-    background-color: transparent !important;
-    color: #25B597 !important;
-    border-color: #25B597 !important;
-
-    &:hover,
-    &:focus {
-      background-color: #25B597 !important;
-      color: #fff !important;
-      border-color: #25B597 !important;
-    }
-  }
-}
-
-/* Contact list in modal */
-.contact-list {
-  padding-left: 20px;
-  margin: 0;
-  font-size: 1rem;
-  color: #666;
-
-  li {
-    margin-bottom: 8px;
-  }
-
-  a {
-    color: #25B597;
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-}
-
-/* Info text */
-.info-text {
-  margin-top: 20px;
   max-width: 400px;
-  text-align: center;
-  color: #25B597;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  font-size: 1rem;
+  background: #ffffff !important; 
+  border: 1px solid #edf2f7;
+  border-radius: 28px;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 25px 50px -12px rgba(0, 0, 0, 0.1);
+  padding: 40px 32px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  position: relative;
 
-  a {
-    color: #25B597;
-    text-decoration: none;
+  @media (max-width: 400px) {
+    padding: 24px 20px;
+    border-radius: 16px;
+    gap: 16px;
+  }
 
-    &:hover {
-      text-decoration: underline;
+  .auth-header {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .logo-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+
+      .logo-container {
+        width: 80px;
+        height: 80px;
+        background-color: $primary;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+        box-shadow: 0 8px 16px rgba(37, 181, 151, 0.2);
+
+        .header-logo {
+          width: 52px;
+          height: auto;
+          /* Removed internal filter to show original logo detail */
+        }
+      }
+
+      .logo-text {
+        color: $dark-slate;
+        font-weight: 800;
+        letter-spacing: -0.8px;
+        font-size: 1.75rem;
+        margin: 0;
+      }
+    }
+
+    .subtitle {
+      color: #64748b;
+      font-weight: 500;
+      font-size: 0.85rem;
+      margin: 0;
     }
   }
-}
 
-/* Footer */
-.footer {
-  margin-top: 10px;
-  text-align: center;
-  color: #25B597;
-  font-size: 0.9rem;
-  max-width: 600px;
-  line-height: 1.2;
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 
-  a {
-    color: #25B597;
-    text-decoration: none;
+    .form-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
 
-    &:hover {
-      text-decoration: underline;
+    .MuiOutlinedInput-root {
+      border-radius: 10px;
+      background: #fcfdfe;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: #f8fafc;
+        & .MuiOutlinedInput-notchedOutline {
+          border-color: rgba(37, 181, 151, 0.4);
+        }
+      }
+
+      &.Mui-focused {
+        background: #ffffff;
+        & .MuiOutlinedInput-notchedOutline {
+          border-color: $primary;
+          border-width: 2px;
+        }
+      }
+    }
+
+    .MuiInputLabel-root {
+      font-size: 0.85rem;
+      &.Mui-focused {
+        color: $primary;
+      }
     }
   }
-}
 
-.footer p {
-  margin: 3px 0;
-}
-
-/* MUI Dialog styles */
-.MuiDialog-paper {
-  max-width: 95% !important;
-  margin: 10px !important;
-  padding: 10px;
-}
-
-/* Mobile responsiveness */
-@media (max-device-width: 480px), (max-device-height: 480px) {
-  .app-header {
-    padding: 10px;
-    max-width: 100%;
-    margin: 80px auto 0;
-  }
-
-  .auth-wrapper {
+  .submit-btn {
+    background: $primary;
+    color: white;
     padding: 12px;
-    max-width: 95%;
-    margin: 0 auto;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: none;
+    box-shadow: 0 4px 10px rgba(37, 181, 151, 0.2);
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: $primary-hover;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 15px rgba(37, 181, 151, 0.3);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
   }
 
-  .page-title {
-    font-size: 1.2rem;
-  }
+  .auth-links {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
 
-  .page-title-wrapper {
-    gap: 6px;
-  }
+    .link-text {
+      font-size: 0.9rem;
+      color: #64748b;
+      font-weight: 500;
+    }
 
-  .info-text {
-    font-size: 0.85rem;
-  }
+    .link-action {
+      font-size: 0.85rem;
+      color: $primary;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      padding: 6px 16px;
+      border-radius: 10px;
+      background: rgba(37, 181, 151, 0.05);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
 
-  .footer {
-    font-size: 0.75rem;
-    max-width: 95%;
-  }
-
-  .auth-input {
-    padding: 8px 10px;
-    font-size: 0.9rem;
-  }
-
-  .MuiDialog-paper {
-    width: 100%;
-    margin: 5px;
-  }
-
-  .MuiDialogTitle-root {
-    font-size: 1.1rem;
-  }
-
-  .MuiDialogContent-root {
-    font-size: 0.9rem;
+      &:hover {
+        background-color: rgba(37, 181, 151, 0.12);
+        color: $primary-hover;
+      }
+    }
   }
 }
 
-/* Ant Design wave effect'i tamamen devre dışı bırak */
-.ant-btn {
-  transition: none !important;
+.auth-footer {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 32px;
+  padding-bottom: 24px;
+
+  .footer-link {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: $primary;
+    }
+  }
+
+  .copyright {
+    font-size: 0.7rem;
+    color: #94a3b8;
+  }
 }
 
-.ant-wave,
-.ant-wave-container,
-.ant-btn::after {
-  display: none !important;
-  content: none !important;
+/* Animations */
+.fade-in {
+  animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* MUI Focus states override */
+.MuiTextField-root {
+  .MuiInputLabel-root.Mui-focused {
+    color: $primary !important;
+  }
 }

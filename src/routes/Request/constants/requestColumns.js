@@ -61,40 +61,63 @@ const formatTurkishDate = (dateString) => {
   return `${day} ${month} ${year} ${hours}:${minutes} (${relativeTime})`; // Örn: 27 Nisan 2025 02:10 (2 saat önce)
 };
 
-// Talep tablosu sütunları
+// Ana tablo sütunları
 const columns = [
   {
+    headerName: "Talep No",
     header: "Talep No",
+    field: "id",
     accessor: "id",
+    flex: 1,
   },
   {
+    headerName: "Oluşturulma Tarihi",
     header: "Oluşturulma Tarihi",
+    field: "create_date",
     accessor: "create_date",
-    Cell: ({ value }) => formatTurkishDate(value), // Türkçe tarih ve relatif zaman
+    flex: 2,
+    renderCell: (params) => formatTurkishDate(params.value), // Türkçe tarih ve relatif zaman
+    Cell: ({ value }) => formatTurkishDate(value),
   },
   {
+    headerName: "Yanıtlayan Eczane Sayısı",
     header: "Yanıtlayan Eczane Sayısı",
+    field: "response_count",
     accessor: "response_count",
-    Cell: ({ value }) => value || 0 // Null gelirse 0 göster
-  }
+    flex: 1,
+    renderCell: (params) => params.value || 0, // Null gelirse 0 göster
+    Cell: ({ value }) => value || 0,
+  },
 ];
 
 // Talep detay tablosu sütunları
 const columns_requestDetail = [
   {
+    headerName: "İlaç No",
     header: "İlaç No",
+    field: "medicine_id",
     accessor: "medicine_id",
+    flex: 1,
+    renderCell: (params) => params.value || "Bilinmeyen ID",
     Cell: ({ value }) => value || "Bilinmeyen ID",
   },
   {
+    headerName: "Miktar",
     header: "Miktar",
+    field: "medicine_qty",
     accessor: "medicine_qty",
+    flex: 1,
+    renderCell: (params) => params.value || "0",
     Cell: ({ value }) => value || "0",
   },
   {
+    headerName: "İlaç İsmi",
     header: "İlaç İsmi",
+    field: "medicineName",
     accessor: "medicine.name",
-    Cell: ({ value }) => value || "Bilinmeyen İlaç",
+    flex: 2,
+    valueGetter: (value, row) => row.medicine?.name || "Bilinmeyen İlaç",
+    Cell: ({ row }) => row.medicine?.name || "Bilinmeyen İlaç",
   },
 ];
 

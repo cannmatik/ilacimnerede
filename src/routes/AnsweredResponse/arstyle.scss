@@ -2,21 +2,18 @@
 
 /* Ana kapsayıcı */
 .answered-content {
-  margin-top: 80px; /* Örnek: Header altına boşluk */
+  padding-top: 100px; /* Header altına boşluk */
+  padding-left: 16px;
+  padding-right: 16px;
+  min-height: 100vh;
+  box-sizing: border-box;
   position: relative;
   z-index: 1;
 }
 
-/* Soldaki tablo alanı */
-.answered-table-container {
-  background: none !important;
-  box-shadow: none !important;
-}
 
 /* Sağdaki detay alanı */
 .answered-request-table {
-  background: none !important;
-  box-shadow: none !important;
   width: 100%;
 }
 
@@ -68,9 +65,9 @@
 
 /* Tablo stilleri */
 .MuiTable-root {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 6px 10px; /* Hücreler arası boşluk */
+  width: 100% !important;
+  border-collapse: collapse;
+  table-layout: fixed; /* Daha düzenli durması için fixed layout */
 }
 
 /* Başlık hücreleri */
@@ -88,14 +85,12 @@
   white-space: normal;
   word-break: break-word;
   text-overflow: clip;
-  max-width: 150px; /* Sabit maksimum genişlik, sol ve sağ tablo için aynı */
   overflow: hidden;
   text-overflow: ellipsis;
 
   @media (max-width: 768px) {
     font-size: 12px; /* Mobilde daha küçük font */
     padding: 6px 8px;
-    max-width: 100px; /* Mobilde daha dar */
   }
 
   &:hover {
@@ -104,14 +99,14 @@
   }
 
   &.left-corner {
-    border-top-left-radius: 15px;
-    border-bottom-left-radius: 15px;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
     border-left: 1px solid #dde1e7;
   }
 
   &.right-corner {
-    border-top-right-radius: 15px;
-    border-bottom-right-radius: 15px;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
     border-right: 1px solid #dde1e7;
   }
 
@@ -137,14 +132,12 @@
   color: #333; /* Firma metin rengi */
   white-space: normal;
   word-break: break-word;
-  max-width: 150px; /* Sabit maksimum genişlik, sol ve sağ tablo için aynı */
   overflow: hidden;
   text-overflow: ellipsis;
 
   @media (max-width: 768px) {
     font-size: 12px; /* Mobilde daha küçük font */
     padding: 6px 8px;
-    max-width: 100px; /* Mobilde daha dar */
   }
 
   /* Adet sütunu için ortalanmış metin */

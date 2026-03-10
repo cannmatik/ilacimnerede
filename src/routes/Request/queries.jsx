@@ -34,7 +34,8 @@ async function fetchRequests({ city_id, neighbourhood_id, district_id, pharmacy_
     .not("status", "eq", 2)
     .eq("city_id", city_id)
     .or(`neighbourhood_id.is.null,neighbourhood_id.eq.${neighbourhood_id}`)
-    .or(`district_id.is.null,district_id.eq.${district_id}`);
+    .or(`district_id.is.null,district_id.eq.${district_id}`)
+    .order("create_date", { ascending: false });
 
   if (error) {
     console.error("Talep getirme hatası:", error);
@@ -524,12 +525,11 @@ export const useHideRequest = () => {
     ({ request_id, pharmacy_id }) => hideRequest({ request_id, pharmacy_id }),
     {
       onSuccess: () => {
-        message.success({ content: "Talep başarıyla gizlendi!", key: "hideRequest" });
         queryClient.invalidateQueries(REQUEST_KEYS.ALL);
         queryClient.invalidateQueries(REQUEST_KEYS.HIDDEN);
       },
       onError: (error) => {
-        message.error({ content: "Talep gizlenirken hata oluştu: " + error.message, key: "hideRequest" });
+        console.error("Talep gizlenirken hata oluştu: " + error.message);
       },
     }
   );
@@ -544,11 +544,10 @@ export const useDeleteHiddenRequest = () => {
     ({ request_id, pharmacy_id }) => deleteHiddenRequest({ request_id, pharmacy_id }),
     {
       onSuccess: () => {
-        message.success({ content: "Gizlenmiş talep başarıyla silindi!", key: "deleteHiddenRequest" });
         queryClient.invalidateQueries(REQUEST_KEYS.HIDDEN);
       },
       onError: (error) => {
-        message.error({ content: "Gizlenmiş talep silinirken hata oluştu: " + error.message, key: "deleteHiddenRequest" });
+        console.error("Gizlenmiş talep silinirken hata oluştu: " + error.message);
       },
     }
   );
@@ -563,12 +562,11 @@ export const useResponseRequest = () => {
     ({ finalData, response }) => responseRequest(finalData, response),
     {
       onSuccess: () => {
-        message.success({ content: "Talep başarıyla yanıtlandı!", key: "responseRequest" });
         queryClient.invalidateQueries(REQUEST_KEYS.ALL);
         queryClient.invalidateQueries(REQUEST_KEYS.BUFFER);
       },
       onError: (error) => {
-        message.error({ content: "Talep yanıtlanırken hata oluştu: " + error.message, key: "responseRequest" });
+        console.error("Talep yanıtlanırken hata oluştu: " + error.message);
       },
     }
   );
@@ -583,11 +581,10 @@ export const useDeleteFromResponseBuffer = () => {
     ({ pharmacy_id, medicine_id }) => deleteFromResponseBuffer({ pharmacy_id, medicine_id }),
     {
       onSuccess: () => {
-        message.success({ content: "İlaç geçici stok listesinden kaldırıldı!", key: "deleteFromResponseBuffer" });
         queryClient.invalidateQueries(REQUEST_KEYS.BUFFER);
       },
       onError: (error) => {
-        message.error({ content: "İlaç kaldırılırken hata oluştu: " + error.message, key: "deleteFromResponseBuffer" });
+        console.error("İlaç kaldırılırken hata oluştu: " + error.message);
       },
     }
   );

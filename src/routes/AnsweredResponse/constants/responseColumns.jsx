@@ -32,12 +32,19 @@ const formatTurkishDate = (dateString) => {
 // Ana tablo sütunları
 const columns = [
   {
+    field: "request_id",
+    headerName: "Talep No",
     header: "Talep No",
     accessor: "request_id",
+    flex: 1,
   },
   {
+    field: "create_date",
+    headerName: "Oluşturulma Tarihi",
     header: "Oluşturulma Tarihi",
     accessor: "create_date",
+    flex: 2,
+    renderCell: (params) => formatTurkishDate(params.value),
     Cell: ({ value }) => formatTurkishDate(value), // Türkçe tarih formatı
   },
 ];
@@ -45,20 +52,57 @@ const columns = [
 // Detay tablo sütunları
 const columns_requestDetail = [
   {
+    field: "medicine_id",
+    headerName: "Barkod No",
     header: "Barkod No",
     accessor: "medicine_id",
+    flex: 1,
   },
   {
+    field: "medicine_qty",
+    headerName: "Adet",
     header: "Adet",
     accessor: "medicine_qty",
+    flex: 1,
   },
   {
+    field: "medicineName",
+    headerName: "İlaç İsmi",
     header: "İlaç İsmi",
     accessor: "medicine.name",
+    flex: 2,
+    valueGetter: (value, row) => row.medicine?.name || "Bilinmeyen İlaç",
+    Cell: ({ row }) => row.medicine?.name || "Bilinmeyen İlaç",
   },
   {
+    field: "status",
+    headerName: "Durum",
     header: "Durum",
     accessor: "status",
+    flex: 1,
+    renderCell: (params) => {
+      const currentStatus = params.row.status;
+      const icon = currentStatus === true ? (
+        <CheckCircle
+          sx={{
+            fontSize: { xs: 14, sm: 16 },
+            color: "#4caf50",
+            verticalAlign: "middle",
+          }}
+        />
+      ) : currentStatus === false ? (
+        <Cancel
+          sx={{
+            fontSize: { xs: 14, sm: 16 },
+            color: "#ff4d4f",
+            verticalAlign: "middle",
+          }}
+        />
+      ) : (
+        "Bilinmeyen Durum"
+      );
+      return icon;
+    },
     // TRUE -> yeşil tik (CheckCircle), FALSE -> kırmızı çarpı (Cancel)
     Cell: ({ row }) => {
       console.log("Durum sütunu - row:", row);

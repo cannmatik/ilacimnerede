@@ -19,7 +19,8 @@ const fetchAnsweredRequests = async ({ pharmacy_id }) => {
     .from("response")
     .select("id, request_id, pharmacy_id, create_date")
     .eq("status", 1)
-    .eq("pharmacy_id", pharmacy_id);
+    .eq("pharmacy_id", pharmacy_id)
+    .order("create_date", { ascending: false });
 
   if (error) {
     console.error("Yanıtlanmış talepler getirme hatası:", error);

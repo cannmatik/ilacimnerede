@@ -2,14 +2,41 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setSession, setUser } from "./slice";
 import { supabase } from "./useCreateClient";
+import { ilacimNeredeLogo } from "@assets";
 import "./style.scss";
 
-// Ant Design for buttons and modal
-import { Button as AntButton, Modal as AntModal } from "antd";
-import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
+// MUI Components
+import { 
+  Button, 
+  Dialog, 
+  DialogTitle, 
+  DialogContent, 
+  DialogActions,
+  TextField,
+  IconButton,
+  InputAdornment,
+  Typography,
+  Box,
+  Container,
+  Paper,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Link as MUILink
+} from "@mui/material";
 
-// MUI for dialogs
-import { Button as MUIButton, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+// MUI Icons
+import { 
+  Visibility, 
+  VisibilityOff, 
+  Email, 
+  WhatsApp,
+  Info,
+  LockOutlined,
+  LocalPharmacyRounded
+} from "@mui/icons-material";
 
 function Login() {
   const dispatch = useDispatch();
@@ -24,12 +51,13 @@ function Login() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogTitle, setDialogTitle] = useState("");
   const [dialogMessage, setDialogMessage] = useState("");
+  
   // Initialize infoPopupOpen based on localStorage
   const [infoPopupOpen, setInfoPopupOpen] = useState(
     !localStorage.getItem("hideInfoPopup")
   );
 
-  // Vercel Analytics koşullu yükleme
+  // Vercel Analytics conditional loading
   useEffect(() => {
     if (import.meta.env.PROD) {
       try {
@@ -40,7 +68,7 @@ function Login() {
           speedInsights.track();
         });
       } catch (error) {
-        console.warn('Analytics veya Speed Insights yüklenemedi:', error);
+        console.warn('Analytics and Speed Insights could not be loaded:', error);
       }
     }
   }, []);
@@ -100,7 +128,7 @@ function Login() {
             dispatch({ type: "CLEAR_STORE" });
           }
         } catch (error) {
-          console.error("Auth state change hatası:", error);
+          console.error("Auth state change error:", error);
           setDialogTitle("Hata");
           setDialogMessage("Oturum işlemi sırasında bir hata oluştu.");
           setDialogOpen(true);
@@ -114,12 +142,11 @@ function Login() {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         console.error("Supabase auth error:", error);
         throw error;
       }
-      console.log("Login successful:", data);
     } catch (error) {
       console.error("Login error:", error.message);
       let errorMessage = "Giriş başarısız: Bilinmeyen bir hata oluştu.";
@@ -169,7 +196,7 @@ function Login() {
 
   // Form submission handler
   const handleSubmit = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     authView === "sign_in" ? handleLogin() : handlePasswordReset();
   };
 
@@ -179,225 +206,245 @@ function Login() {
     setInfoPopupOpen(false);
   };
 
-  // Render
   return (
-    <>
-      <div className="app-header">
-        <div className="page-title-wrapper" style={{ marginBottom: '24px' }}>
-          <h1 className="page-title">İlacım Nerede</h1>
-          <h1 className="page-title">Eczacı Paneli</h1>
-        </div>
-        <form onSubmit={handleSubmit} className="auth-wrapper">
-          {authView === "sign_in" ? (
-            <>
-              <div className="input-wrapper">
-                <input
-                  type="email"
-                  placeholder="E-posta adresiniz"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onBlur={(e) => {
-                    if (!e.target.value.includes("@")) {
-                      setDialogTitle("Hata");
-                      setDialogMessage("Geçerli bir e-posta adresi girin.");
-                      setDialogOpen(true);
-                    }
-                  }}
-                  className="auth-input"
-                  required
-                />
-              </div>
-              <div className="input-wrapper">
-                <input
+    <Box className="login-page-container">
+      <Container maxWidth="xs" sx={{ position: 'relative', zIndex: 2 }}>
+        <Box className="auth-card fade-in">
+          <Box className="auth-header">
+            <Box className="logo-section">
+              <Box className="logo-container">
+                <img src={ilacimNeredeLogo} alt="Logo" className="header-logo" />
+              </Box>
+              <Typography variant="h3" className="logo-text">İlacım Nerede</Typography>
+            </Box>
+            <Typography variant="subtitle2" className="subtitle">Eczacı Kontrol Paneli</Typography>
+          </Box>
+
+          <form onSubmit={handleSubmit} className="auth-form">
+            <Box className="form-fields">
+              <TextField
+                fullWidth
+                label="E-posta Adresi"
+                variant="outlined"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="ornek@eczane.com"
+                required
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Email sx={{ color: '#25b597', opacity: 0.7, fontSize: 20 }} />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              {authView === "sign_in" && (
+                <TextField
+                  fullWidth
+                  label="Şifre"
+                  variant="outlined"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Şifreniz"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="auth-input"
+                  placeholder="••••••••"
                   required
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LockOutlined sx={{ color: '#25b597', opacity: 0.7, fontSize: 20 }} />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowPassword((v) => !v)}
+                          edge="end"
+                          size="small"
+                        >
+                          {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
-                <span
-                  className="password-toggle"
-                  onClick={() => setShowPassword((v) => !v)}
-                >
-                  {showPassword ? <EyeTwoTone /> : <EyeInvisibleOutlined />}
-                </span>
-              </div>
-              <AntButton
-                type="primary"
-                onClick={handleSubmit}
-                className="auth-button"
-                loading={loading}
-                block
+              )}
+            </Box>
+
+
+            <Box className="auth-actions">
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                className="submit-btn"
+                disabled={loading}
               >
-                {loading ? "Giriş Yapılıyor..." : "Giriş Yap"}
-              </AntButton>
-              <AntButton
-                type="primary"
-                className="auth-button"
-                onClick={() => setRegisterOpen(true)}
-                block
-              >
-                Eczacı Kaydı
-              </AntButton>
-              <AntButton
-                type="primary"
-                className="auth-button"
-                onClick={() => setAuthView("forgotten_password")}
-                block
-              >
-                Parolamı Unuttum
-              </AntButton>
-            </>
-          ) : (
-            <>
-              <div className="input-wrapper">
-                <input
-                  type="email"
-                  placeholder="E-posta adresiniz"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="auth-input"
-                  required
+                {loading ? <CircularProgress size={24} color="inherit" /> : (authView === "sign_in" ? "Giriş Yap" : "Şifremi Sıfırla")}
+              </Button>
+
+              <Box className="auth-links">
+                {authView === "sign_in" ? (
+                  <>
+                    <Typography 
+                      variant="body2" 
+                      className="link-text"
+                    >
+                      Henüz üye değil misiniz? <span className="link-action" onClick={() => setRegisterOpen(true)}>Yeni Kayıt</span>
+                    </Typography>
+                    <Typography 
+                      variant="body2" 
+                      className="link-action"
+                      onClick={() => setAuthView("forgotten_password")}
+                    >
+                      Şifremi Unuttum
+                    </Typography>
+                  </>
+                ) : (
+                  <Typography 
+                    variant="body2" 
+                    className="link-action"
+                    onClick={() => setAuthView("sign_in")}
+                  >
+                    Giriş Ekranına Dön
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+          </form>
+
+          <Box className="auth-footer">
+            <Typography variant="body2" className="footer-link" onClick={() => window.open("https://www.google.com/maps?saddr=My%20Location&daddr=41.080013336027,29.009160314659", "_blank")}>
+              Esentepe Mah. Talatpaşa Cad. No: 5/1 Şişli / İstanbul
+            </Typography>
+            <Typography variant="caption" className="copyright">
+              © 2025 CuraNodus Yazılım Teknoloji. Tüm Hakları Saklıdır.
+            </Typography>
+          </Box>
+        </Box>
+      </Container>
+
+      {/* Register Modal */}
+      <Dialog 
+        open={registerOpen} 
+        onClose={() => setRegisterOpen(false)}
+        PaperProps={{ 
+          sx: { 
+            borderRadius: '24px', 
+            p: 2,
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)'
+          } 
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, fontSize: '1.5rem', pb: 1, color: '#1e293b' }}>Eczane Kaydı</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" sx={{ color: '#64748b', lineHeight: 1.6, mb: 3 }}>
+            Eczacı kaydı güvenliğiniz için online olarak gerçekleştirilememektedir. Platformumuza katılmak ve panelinizi aktif etmek için lütfen ekibimizle iletişime geçin:
+          </Typography>
+          <List sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Paper variant="outlined" sx={{ borderRadius: '16px', borderColor: '#e2e8f0', p: 1 }}>
+              <ListItem>
+                <ListItemIcon sx={{ minWidth: 40 }}><Email sx={{ color: '#25b597' }} /></ListItemIcon>
+                <ListItemText 
+                  primary={<Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>E-posta</Typography>} 
+                  secondary={<MUILink href="mailto:ilacimnerede@curanodus.com" sx={{ color: '#25b597', fontWeight: 500 }}>ilacimnerede@curanodus.com</MUILink>} 
                 />
-              </div>
-              <AntButton
-                type="primary"
-                htmlType="submit"
-                className="auth-button"
-                loading={loading}
-                block
-              >
-                {loading ? "Gönderiliyor..." : "Şifre sıfırlama talimatları gönder"}
-              </AntButton>
-              <AntButton
-                type="default"
-                className="auth-button secondary-button"
-                onClick={() => setAuthView("sign_in")}
-                block
-              >
-                Giriş Ekranına Dön
-              </AntButton>
-            </>
-          )}
-        </form>
+              </ListItem>
+            </Paper>
+            <Paper variant="outlined" sx={{ borderRadius: '16px', borderColor: '#e2e8f0', p: 1 }}>
+              <ListItem>
+                <ListItemIcon sx={{ minWidth: 40 }}><WhatsApp sx={{ color: '#25b597' }} /></ListItemIcon>
+                <ListItemText 
+                  primary={<Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>WhatsApp Destek</Typography>} 
+                  secondary={<MUILink href="https://wa.me/908503042193" sx={{ color: '#25b597', fontWeight: 500 }}>+90 850 304 2193</MUILink>} 
+                />
+              </ListItem>
+            </Paper>
+          </List>
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button 
+            onClick={() => setRegisterOpen(false)} 
+            variant="contained" 
+            fullWidth 
+            sx={{ borderRadius: '14px', backgroundColor: '#25b597', py: 1.5, textTransform: 'none', fontWeight: 700 }}
+          >
+            Anladım
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-        {/* Eczacı kaydı modal */}
-        <AntModal
-          title="Eczane Kaydı"
-          open={registerOpen}
-          onCancel={() => setRegisterOpen(false)}
-          footer={[
-            <AntButton
-              key="close"
-              type="primary"
-              className="auth-button"
-              onClick={() => setRegisterOpen(false)}
-              block
-            >
-              Kapat
-            </AntButton>,
-          ]}
-          width={400}
-        >
-          <p>
-            Eczacı kaydı online olarak gerçekleştirilememektedir. Platformumuza
-            ücret ödemeden eczacı olarak katılmak için lütfen bizimle iletişime
-            geçin.
-          </p>
-          <ul className="contact-list">
-            <li>
-              E-posta:{" "}
-              <a href="mailto:ilacimnerede@curanodus.com">
-                ilacimnerede@curanodus.com
-              </a>
-            </li>
-            <li>
-              WhatsApp:{" "}
-                <a href="https://api.whatsapp.com/send/?phone=908503042193&text&type=phone_number&app_absent=0">
-                 +90 850 304 2193
-            </a>
-          </li>
-          </ul>
-        </AntModal>
+      {/* Info Modal */}
+      <Dialog 
+        open={infoPopupOpen} 
+        onClose={() => setInfoPopupOpen(false)}
+        PaperProps={{ 
+          sx: { 
+            borderRadius: '24px', 
+            p: 2,
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(10px)'
+          } 
+        }}
+      >
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1.5, fontWeight: 800, color: '#1e293b' }}>
+          <Info sx={{ color: '#25b597' }} /> Bilgilendirme
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" sx={{ color: '#64748b', lineHeight: 1.6, mb: 2 }}>
+            Bu panel <strong>sadece eczacılar</strong> ve yetkili personel içindir. İlaç arayan kullanıcılar lütfen mobil uygulamamızı kullanın.
+          </Typography>
+          <Typography variant="body2" sx={{ p: 2, backgroundColor: '#f0fdfa', borderRadius: '12px', color: '#134e4a', fontWeight: 500 }}>
+            Mobil uygulamamıza <MUILink href="https://www.ilacimnerede.com" target="_blank" sx={{ color: '#25b597', fontWeight: 700 }}>www.ilacimnerede.com</MUILink> adresinden ulaşabilirsiniz.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 3, flexDirection: 'column', gap: 1.5 }}>
+          <Button 
+            onClick={() => setInfoPopupOpen(false)} 
+            variant="contained" 
+            fullWidth 
+            sx={{ borderRadius: '14px', backgroundColor: '#25b597', py: 1.5, textTransform: 'none', fontWeight: 700 }}
+          >
+            Panele Devam Et
+          </Button>
+          <Button 
+            onClick={handleDontShowAgain} 
+            variant="text" 
+            size="small" 
+            sx={{ color: '#94a3b8', textTransform: 'none', '&:hover': { color: '#64748b' } }}
+          >
+            Bir daha gösterme
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-        {/* Info popup */}
-        <AntModal
-          title="Bilgilendirme"
-          open={infoPopupOpen}
-          onCancel={() => setInfoPopupOpen(false)}
-          footer={[
-            <AntButton
-              key="dont-show"
-              type="default"
-              className="auth-button secondary-button"
-              onClick={handleDontShowAgain}
-              block
-            >
-              Bir Daha Gösterme
-            </AntButton>,
-            <AntButton
-              key="ok"
-              type="primary"
-              className="auth-button"
-              onClick={() => setInfoPopupOpen(false)}
-              block
-            >
-              Tamam
-            </AntButton>,
-          ]}
-          width={400}
-        >
-          <p>
-            Bu panel sadece eczacılar içindir. İlaç arayan kullanıcılar lütfen
-            mobil uygulamamızı kullanın.{" "}
-            <a href="https://www.ilacimnerede.com">www.ilacimnerede.com</a> Web
-            sitesi üzerinden uygulamamız ile ilgili bilgi alıp uygulamamızı
-            indirebilirsiniz.
-          </p>
-        </AntModal>
-
-        {/* Error and password-reset feedback dialog */}
-        <Dialog
-          open={dialogOpen}
-          onClose={() => {
-            setDialogOpen(false);
-            if (dialogTitle === "E-posta Gönderildi") {
-              setAuthView("sign_in");
-            }
-          }}
-          aria-labelledby="dialog-title"
-        >
-          <DialogTitle id="dialog-title">{dialogTitle}</DialogTitle>
-          <DialogContent>{dialogMessage}</DialogContent>
-          <DialogActions>
-            <MUIButton
-              onClick={() => {
-                setDialogOpen(false);
-                if (dialogTitle === "E-posta Gönderildi") {
-                  setAuthView("sign_in");
-                }
-              }}
-            >
-              Tamam
-            </MUIButton>
-          </DialogActions>
-        </Dialog>
-
-        <footer className="footer">
-          <p>
-            <a href="https://www.google.com/maps?saddr=My%20Location&daddr=41.080013336027,29.009160314659">
-              Esentepe Mah. Talatpaşa Cad. No: 5/1 (Harman Sok. Girişi) Şişli /
-              İstanbul
-            </a>
-          </p>
-          <p>
-            ©2025, CuraNodus Yazılım Teknolojileri Limited Şirketi. Tüm Hakları
-            Saklıdır.
-          </p>
-        </footer>
-      </div>
-    </>
+      {/* Feedback Dialog */}
+      <Dialog 
+        open={dialogOpen} 
+        onClose={() => setDialogOpen(false)}
+        PaperProps={{ sx: { borderRadius: '24px', p: 1 } }}
+      >
+        <DialogTitle sx={{ fontWeight: 700 }}>{dialogTitle}</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ color: '#64748b' }}>{dialogMessage}</Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2.5 }}>
+          <Button 
+            onClick={() => {
+              setDialogOpen(false);
+              if (dialogTitle === "E-posta Gönderildi") setAuthView("sign_in");
+            }} 
+            variant="contained"
+            fullWidth
+            sx={{ borderRadius: '12px', backgroundColor: '#25b597', fontWeight: 600, textTransform: 'none' }}
+          >
+            Tamam
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 }
 

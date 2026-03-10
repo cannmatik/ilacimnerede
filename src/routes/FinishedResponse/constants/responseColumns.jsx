@@ -1,5 +1,5 @@
 // responseColumns.jsx
-import "../frstyle.scss";
+// Removed frstyle.scss import
 import { CheckCircle, Cancel } from "@mui/icons-material";
 
 // Türkçe aylar için dizi
@@ -10,12 +10,10 @@ const turkishMonths = [
 
 // Tarih formatlama fonksiyonu
 const formatTurkishDate = (dateString) => {
-  console.log("formatTurkishDate - Alınan dateString:", dateString);
   if (!dateString) return "Bilinmeyen Tarih";
   
   let date = new Date(dateString);
   if (isNaN(date.getTime())) {
-    console.error("Geçersiz tarih:", dateString);
     return "Bilinmeyen Tarih"; // Geçersiz tarih kontrolü
   }
 
@@ -25,46 +23,62 @@ const formatTurkishDate = (dateString) => {
   const hours = date.getHours().toString().padStart(2, "0");
   const minutes = date.getMinutes().toString().padStart(2, "0");
 
-  const formattedDate = `${day} ${month} ${year} ${hours}:${minutes}`; // Örn: 15 Ekim 2023 14:30
-  console.log("responseColumns.jsx - Formatlanmış tarih:", formattedDate);
-  return formattedDate;
+  return `${day} ${month} ${year} ${hours}:${minutes}`;
 };
 
 // Ana tablo sütunları
 const columns = [
   {
+    headerName: "Talep No",
     header: "Talep No",
+    field: "request_id",
     accessor: "request_id",
+    flex: 1,
   },
   {
+    headerName: "Oluşturulma Tarihi",
     header: "Oluşturulma Tarihi",
+    field: "create_date",
     accessor: "create_date",
-    Cell: ({ value }) => formatTurkishDate(value), // Türkçe tarih formatı
+    flex: 2,
+    renderCell: (params) => formatTurkishDate(params.value), // Türkçe tarih formatı
+    Cell: ({ value }) => formatTurkishDate(value),
   },
 ];
 
 // Detay tablo sütunları
 const columns_requestDetail = [
   {
+    headerName: "Barkod No",
     header: "Barkod No",
+    field: "medicine_id",
     accessor: "medicine_id",
+    flex: 1,
   },
   {
+    headerName: "Adet",
     header: "Adet",
+    field: "medicine_qty",
     accessor: "medicine_qty",
+    flex: 1,
   },
   {
+    headerName: "İlaç Adı",
     header: "İlaç Adı",
+    field: "medicineName",
     accessor: "medicine.name",
+    flex: 2,
+    valueGetter: (value, row) => row.medicine?.name || "Bilinmeyen İlaç",
+    Cell: ({ row }) => row.medicine?.name || "Bilinmeyen İlaç",
   },
   {
+    headerName: "Durum",
     header: "Durum",
+    field: "status",
     accessor: "status",
-    // TRUE -> yeşil tik (CheckCircle), FALSE -> kırmızı çarpı (Cancel)
-    Cell: ({ row }) => {
-      console.log("Durum sütunu - row:", row);
-      const currentStatus = row.status; // row.status doğrudan kullanılıyor
-      console.log("Durum sütunu - currentStatus:", currentStatus);
+    flex: 1,
+    renderCell: (params) => {
+      const currentStatus = params.row.status;
       const icon = currentStatus === true ? (
         <CheckCircle
           sx={{
@@ -82,12 +96,34 @@ const columns_requestDetail = [
           }}
         />
       ) : (
-        "Bilinmeyen Durum" // status undefined veya beklenmeyen bir değer ise
+        "Bilinmeyen Durum"
       );
-      console.log("Durum sütunu - render edilen ikon:", icon);
+      return icon;
+    },
+    Cell: ({ row }) => {
+      const currentStatus = row.status;
+      const icon = currentStatus === true ? (
+        <CheckCircle
+          sx={{
+            fontSize: { xs: 14, sm: 16 },
+            color: "#4caf50",
+            verticalAlign: "middle",
+          }}
+        />
+      ) : currentStatus === false ? (
+        <Cancel
+          sx={{
+            fontSize: { xs: 14, sm: 16 },
+            color: "#ff4d4f",
+            verticalAlign: "middle",
+          }}
+        />
+      ) : (
+        "Bilinmeyen Durum"
+      );
       return icon;
     },
   },
 ];
 
-export { columns, columns_requestDetail };
+export { columns, columns_requestDetail };

@@ -28,6 +28,7 @@ import {
   Speed,
   Verified,
 } from "@mui/icons-material";
+import { ilacimNeredeLogo } from "@assets";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import "./home.scss";
@@ -178,7 +179,7 @@ function Home() {
       <Box ref={heroRef} className="hero-section">
         <FloatingParticles />
         <Box className="hero-gradient-overlay" />
-        <Container maxWidth="md" className="hero-content">
+        <Container maxWidth="lg" className="hero-content">
           <Box className="hero-badge">
             <AutoAwesome sx={{ fontSize: 16 }} />
             <Typography variant="caption">Sağlık Teknolojisinde Yenilik</Typography>
@@ -189,9 +190,7 @@ function Home() {
             component="h1"
             className="hero-title"
           >
-            CuraNodus'a
-            <br />
-            <span className="hero-title-accent">Hoş Geldiniz</span>
+            CuraNodus'a <span className="hero-title-accent">Hoş Geldiniz</span>
           </Typography>
           <Typography ref={heroDescRef} className="hero-description">
             CuraNodus Yazılım Teknolojileri, 2025 yılında kurulan yenilikçi bir
@@ -269,9 +268,14 @@ function Home() {
                 label="İlk Uygulamamız"
                 className="app-chip"
               />
-              <Typography variant="h4" className="app-title">
-                İlacım Nerede
-              </Typography>
+              <Box className="logo-section">
+                <Box className="logo-container">
+                  <img src={ilacimNeredeLogo} alt="Logo" className="header-logo" />
+                </Box>
+                <Typography variant="h4" className="app-title">
+                  İlacım Nerede
+                </Typography>
+              </Box>
               <Typography className="app-description">
                 İlacım Nerede, eczaneleri tek tek aramak veya fiziksel olarak
                 ziyaret etmek yerine, kullanıcıların ilaç taleplerini hızlıca
